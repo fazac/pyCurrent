@@ -1,0 +1,30 @@
+server:
+  port: 9090
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/stock?useUnicode=true&characterEncoding=utf-8"
+    username: "root"
+    #    username: "fa"
+    password: "123456"
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 30
+      idle-timeout: 500000
+      max-lifetime: 540000
+      connection-timeout: 600000
+  sql:
+    init:
+      mode: always
+  main:
+    allow-circular-references: true
+  jpa:
+    open-in-view: true
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(-){faint} %clr([%t]){faint} %clr(%-40logger{39}){cyan}[%line]%clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    #    console: ""
+    file: "%m%n%wEx"
+  level:
+    root: INFO
+  file:
+    path: ./log
