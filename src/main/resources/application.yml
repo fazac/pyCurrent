@@ -21,8 +21,8 @@ spring:
     open-in-view: true
 logging:
   pattern:
-    console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(-){faint} %clr([%t]){faint} %clr(%-40logger{39}){cyan}[%line]%clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
-    #    console: ""
+    #     console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) %clr(-){faint} %clr([%t]){faint} %clr(%-40logger{39}){cyan}[%line]%clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}"
+    console: "%m%n%wEx"
     file: "%m%n%wEx"
   level:
     root: INFO
