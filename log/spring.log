@@ -680,3 +680,254 @@ size : 5546
 Closing JPA EntityManagerFactory for persistence unit 'default'
 HikariPool-1 - Shutdown initiated...
 HikariPool-1 - Shutdown completed.
+Starting PyCurrentApplication using Java 21.0.1 with PID 12156 (C:\Users\fa\Documents\workproject\pyCurrent\target\classes started by fa in C:\Users\fa\Documents\workproject\pyCurrent)
+No active profile set, falling back to 1 default profile: "default"
+Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+Finished Spring Data repository scanning in 45 ms. Found 1 JPA repository interfaces.
+HikariPool-1 - Starting...
+HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@17b016ac
+HikariPool-1 - Start completed.
+HHH000204: Processing PersistenceUnitInfo [name: default]
+HHH000412: Hibernate ORM core version 6.2.13.Final
+HHH000406: Using bytecode reflection optimizer
+No LoadTimeWeaver setup: ignoring JPA class transformer
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate is in classpath; If applicable, HQL parser will be used.
+Started PyCurrentApplication in 3.629 seconds (process running for 4.489)
+UnExist file! C:/Users/fa/Desktop/akshare_stock.py
+size : 5546
+Closing JPA EntityManagerFactory for persistence unit 'default'
+HikariPool-1 - Shutdown initiated...
+HikariPool-1 - Shutdown completed.
+Starting PyCurrentApplication using Java 21.0.1 with PID 7136 (C:\Users\fa\Documents\workproject\pyCurrent\target\classes started by fa in C:\Users\fa\Documents\workproject\pyCurrent)
+No active profile set, falling back to 1 default profile: "default"
+Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+Finished Spring Data repository scanning in 48 ms. Found 1 JPA repository interfaces.
+HikariPool-1 - Starting...
+HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@415ef4d8
+HikariPool-1 - Start completed.
+HHH000204: Processing PersistenceUnitInfo [name: default]
+HHH000412: Hibernate ORM core version 6.2.13.Final
+HHH000406: Using bytecode reflection optimizer
+No LoadTimeWeaver setup: ignoring JPA class transformer
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate is in classpath; If applicable, HQL parser will be used.
+Started PyCurrentApplication in 3.646 seconds (process running for 4.462)
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+size : 5546
+Closing JPA EntityManagerFactory for persistence unit 'default'
+HikariPool-1 - Shutdown initiated...
+HikariPool-1 - Shutdown completed.
+Starting PyCurrentApplication using Java 21.0.1 with PID 3624 (C:\Users\fa\Documents\workproject\pyCurrent\target\classes started by fa in C:\Users\fa\Documents\workproject\pyCurrent)
+No active profile set, falling back to 1 default profile: "default"
+Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+Finished Spring Data repository scanning in 57 ms. Found 2 JPA repository interfaces.
+HikariPool-1 - Starting...
+HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1b482cbf
+HikariPool-1 - Start completed.
+HHH000204: Processing PersistenceUnitInfo [name: default]
+HHH000412: Hibernate ORM core version 6.2.13.Final
+HHH000406: Using bytecode reflection optimizer
+No LoadTimeWeaver setup: ignoring JPA class transformer
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate is in classpath; If applicable, HQL parser will be used.
+Started PyCurrentApplication in 3.909 seconds (process running for 4.76)
+Unexpected error occurred in scheduled task
+
+java.lang.NullPointerException: null
+	at java.base/java.util.Objects.requireNonNull(Objects.java:233) ~[na:na]
+	at java.base/java.util.stream.Collectors.lambda$uniqKeysMapAccumulator$1(Collectors.java:180) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$3ReducingSink.accept(ReduceOps.java:169) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682) ~[na:na]
+	at com.stock.pycurrent.schedule.PullData.pullRealTimeData(PullData.java:38) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84) ~[spring-context-6.0.13.jar:6.0.13]
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54) ~[spring-context-6.0.13.jar:6.0.13]
+	at org.springframework.scheduling.concurrent.ReschedulingRunnable.run(ReschedulingRunnable.java:96) ~[spring-context-6.0.13.jar:6.0.13]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+Closing JPA EntityManagerFactory for persistence unit 'default'
+HikariPool-1 - Shutdown initiated...
+HikariPool-1 - Shutdown completed.
+Starting PyCurrentApplication using Java 21.0.1 with PID 8688 (C:\Users\fa\Documents\workproject\pyCurrent\target\classes started by fa in C:\Users\fa\Documents\workproject\pyCurrent)
+No active profile set, falling back to 1 default profile: "default"
+Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+Finished Spring Data repository scanning in 52 ms. Found 2 JPA repository interfaces.
+HikariPool-1 - Starting...
+HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@661fe025
+HikariPool-1 - Start completed.
+HHH000204: Processing PersistenceUnitInfo [name: default]
+HHH000412: Hibernate ORM core version 6.2.13.Final
+HHH000406: Using bytecode reflection optimizer
+No LoadTimeWeaver setup: ignoring JPA class transformer
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate is in classpath; If applicable, HQL parser will be used.
+Started PyCurrentApplication in 3.634 seconds (process running for 4.518)
+Unexpected error occurred in scheduled task
+
+java.lang.NullPointerException: Cannot invoke "String.isEmpty()" because the return value of "com.stock.pycurrent.entity.EmConstant.getCValue()" is null
+	at com.stock.pycurrent.schedule.PullData.lambda$pullRealTimeData$0(PullData.java:38) ~[classes/:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:178) ~[na:na]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682) ~[na:na]
+	at com.stock.pycurrent.schedule.PullData.pullRealTimeData(PullData.java:39) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84) ~[spring-context-6.0.13.jar:6.0.13]
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54) ~[spring-context-6.0.13.jar:6.0.13]
+	at org.springframework.scheduling.concurrent.ReschedulingRunnable.run(ReschedulingRunnable.java:96) ~[spring-context-6.0.13.jar:6.0.13]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+Closing JPA EntityManagerFactory for persistence unit 'default'
+HikariPool-1 - Shutdown initiated...
+HikariPool-1 - Shutdown completed.
+Starting PyCurrentApplication using Java 21.0.1 with PID 11720 (C:\Users\fa\Documents\workproject\pyCurrent\target\classes started by fa in C:\Users\fa\Documents\workproject\pyCurrent)
+No active profile set, falling back to 1 default profile: "default"
+Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+Finished Spring Data repository scanning in 51 ms. Found 2 JPA repository interfaces.
+HikariPool-1 - Starting...
+HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@661fe025
+HikariPool-1 - Start completed.
+HHH000204: Processing PersistenceUnitInfo [name: default]
+HHH000412: Hibernate ORM core version 6.2.13.Final
+HHH000406: Using bytecode reflection optimizer
+No LoadTimeWeaver setup: ignoring JPA class transformer
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate is in classpath; If applicable, HQL parser will be used.
+Started PyCurrentApplication in 3.685 seconds (process running for 4.528)
+Unexpected error occurred in scheduled task
+
+java.lang.NullPointerException: Cannot invoke "String.contains(java.lang.CharSequence)" because "concerns" is null
+	at com.stock.pycurrent.schedule.PullData.pullRealTimeData(PullData.java:47) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:84) ~[spring-context-6.0.13.jar:6.0.13]
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54) ~[spring-context-6.0.13.jar:6.0.13]
+	at org.springframework.scheduling.concurrent.ReschedulingRunnable.run(ReschedulingRunnable.java:96) ~[spring-context-6.0.13.jar:6.0.13]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:317) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+Closing JPA EntityManagerFactory for persistence unit 'default'
+HikariPool-1 - Shutdown initiated...
+HikariPool-1 - Shutdown completed.
+Starting PyCurrentApplication using Java 21.0.1 with PID 10052 (C:\Users\fa\Documents\workproject\pyCurrent\target\classes started by fa in C:\Users\fa\Documents\workproject\pyCurrent)
+No active profile set, falling back to 1 default profile: "default"
+Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+Finished Spring Data repository scanning in 54 ms. Found 2 JPA repository interfaces.
+HikariPool-1 - Starting...
+HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6f825516
+HikariPool-1 - Start completed.
+HHH000204: Processing PersistenceUnitInfo [name: default]
+HHH000412: Hibernate ORM core version 6.2.13.Final
+HHH000406: Using bytecode reflection optimizer
+No LoadTimeWeaver setup: ignoring JPA class transformer
+HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Initialized JPA EntityManagerFactory for persistence unit 'default'
+Hibernate is in classpath; If applicable, HQL parser will be used.
+Started PyCurrentApplication in 3.869 seconds (process running for 4.728)
+10:36 -1(F): 0184 h= 21.81 rt= 20.00
+10:36 -2(F): 0606 h= 18.46 rt= 16.40
+10:36 -1(F): 0184 h= 21.81 rt= 20.00
+10:36 -2(F): 0606 h= 18.46 rt= 16.40
+10:37 -1(F): 0184 h= 21.81 rt= 20.00
+10:37 -2(F): 0606 h= 18.46 rt= 16.40
+10:37 -1(F): 0184 h= 21.81 rt= 20.00
+10:37 -2(F): 0606 h= 18.46 rt= 16.40
+10:38 -1(F): 0184 h= 21.81 rt= 20.00
+10:38 -2(F): 0606 h= 18.46 rt= 16.40
+10:38 -1(F): 0184 h= 21.81 rt= 20.00
+10:38 -2(F): 0606 h= 18.46 rt= 16.40
+10:39 -1(F): 0184 h= 21.81 rt= 20.00
+10:39 -2(F): 0606 h= 18.46 rt= 16.40
+Closing JPA EntityManagerFactory for persistence unit 'default'
+HikariPool-1 - Shutdown initiated...
+HikariPool-1 - Shutdown completed.
