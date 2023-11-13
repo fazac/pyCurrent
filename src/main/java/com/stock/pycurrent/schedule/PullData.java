@@ -63,6 +63,7 @@ public class PullData {
                     );
                 }
             }
+            log.info("--------");
         }
     }
 
