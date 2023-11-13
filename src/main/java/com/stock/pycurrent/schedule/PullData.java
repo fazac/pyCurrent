@@ -50,12 +50,12 @@ public class PullData {
             for (EmRealTimeStock rt : stockList) {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
-                if (!rt.getName().contains("ST") && !rt.getName().contains("退")
-                        && (rt.getTsCode().startsWith("3") || concerned) && !noConcerned
+                if ((!rt.getName().contains("ST") && !rt.getName().contains("退")
+                        && rt.getTsCode().startsWith("3") && !noConcerned
                         && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
                         && rt.getPriHigh() != null
                         && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
-                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0) {
+                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0) || concerned) {
                     String remarks = "-" + index++ + (concerned ? "(C)" : "(F)");
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
