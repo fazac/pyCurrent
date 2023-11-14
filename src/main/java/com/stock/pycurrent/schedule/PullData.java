@@ -55,7 +55,8 @@ public class PullData {
                         && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
                         && rt.getPriHigh() != null
                         && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
-                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0) || concerned) {
+//                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0
+                ) || concerned) {
                     String remarks = "-" + index++ + (concerned ? "(C)" : "(F)");
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
