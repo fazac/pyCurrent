@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class PullData {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
+    private static final BigDecimal nOne = BigDecimal.ONE.negate();
 
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
@@ -36,9 +37,11 @@ public class PullData {
             List<EmConstant> emConstants = emConstantService.findAll();
             String noConcerns = "";
             String concerns = "";
+            String holdCodes = "";
+
             if (!emConstants.isEmpty()) {
                 Map<String, String> emConstantMap = emConstants.stream()
-                        .filter(x -> x.getCValue() != null && !x.getCValue().isEmpty())
+                        .filter(x -> x.getCValue() != null && !x.getCValue().isEmpty() && !x.getCValue().trim().isEmpty())
                         .collect(Collectors.toMap(EmConstant::getCKey, EmConstant::getCValue));
                 if (emConstantMap.containsKey("NO_CONCERN_CODES")) {
                     noConcerns = emConstantMap.get("NO_CONCERN_CODES");
@@ -46,27 +49,45 @@ public class PullData {
                 if (emConstantMap.containsKey("CONCERN_CODES")) {
                     concerns = emConstantMap.get("CONCERN_CODES");
                 }
+                if (emConstantMap.containsKey("HOLD_CODES")) {
+                    holdCodes = emConstantMap.get("HOLD_CODES");
+                }
             }
-            LocalDateTime n = LocalDateTime.now();
-            String nowClock = String.format("%02d", n.getHour()) + ":" + String.format("%02d", n.getMinute());
+            String nowClock;
             int index = 1;
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
             for (EmRealTimeStock rt : stockList) {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
+                boolean holds = holdCodes.contains(rt.getTsCode());
                 if ((!rt.getName().contains("ST") && !rt.getName().contains("退")
                         && rt.getTsCode().startsWith("3") && !noConcerned
                         && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
                         && rt.getPriHigh() != null
                         && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
 //                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0
-                ) || concerned) {
-                    String remarks = "-" + index++ + (concerned ? "(C)" : "(F)");
+                ) || concerned || holds) {
+                    nowClock = rt.getTradeDate().substring(11);
+                    String remarks = "-" + index++ + (concerned ? "(C)" : holds ? "(H)" : "(F)");
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
                             + " rt= " + rt.getPctChg()
                     );
-                    if (!concerned) {
+                    if (holds) {
+                        //低开超1%,涨超买入价回落卖出
+                        if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
+                                && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
+                                && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
+                            MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
+                        }
+                        //高开超1%且跌落买入价时卖出,或者非封板收盘卖
+                        if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0
+                                && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0
+                        ) {
+                            MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
+                        }
+                    }
+                    if (!concerned && !holds) {
                         if (codeCountMap.containsKey(rt.getTsCode())) {
                             if (rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) == 0) {
                                 // max count++;
@@ -79,16 +100,18 @@ public class PullData {
                                 //put greater one
                                 codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
                             }
-                            if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
+                            if (rt.getPctChg().compareTo(PCH_LIMIT) > 0
+                                    && codeCountMap.get(rt.getTsCode()) > 3
+                                    && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
                                 // info && reset count
-                                MessageUtil.sendMessage("deal one " + rt.getTsCode().substring(2, 6));
+                                MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
                                 codeCountMap.put(rt.getTsCode(), 0);
                             }
                         } else {
                             // info new
                             codeCountMap.put(rt.getTsCode(), 0);
                             codeMaxMap.put(rt.getTsCode(), rt.getPctChg());
-                            MessageUtil.sendMessage("new one " + rt.getTsCode().substring(2, 6));
+                            MessageUtil.sendNotificationMsg("NEW ONE ", rt.getTsCode().substring(2, 6));
                         }
                     }
                 }

@@ -4,6 +4,9 @@ import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary;
+import lombok.SneakyThrows;
+
+import java.awt.*;
 
 /**
  * @author fzc
@@ -31,6 +34,18 @@ public class MessageUtil {
         int MB_ICON_INFORMATION = 0x00000040;
 
         void MessageBoxA(Pointer hWnd, String text, String caption, int options);
+    }
+
+    @SneakyThrows
+    public static void sendNotificationMsg(String title, String code) {
+        sendMessage("New Message");
+        SystemTray tray = SystemTray.getSystemTray();
+        Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
+        TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
+        trayIcon.setImageAutoSize(true);
+        trayIcon.setToolTip("System tray icon demo");
+        tray.add(trayIcon);
+        trayIcon.displayMessage(title, code, TrayIcon.MessageType.INFO);
     }
 
 
