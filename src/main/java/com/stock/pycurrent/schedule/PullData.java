@@ -29,6 +29,8 @@ public class PullData {
     private EmConstantService emConstantService;
 
     public Map<String, Integer> codeCountMap = new HashMap<>();
+
+    public Map<String, Integer> codeOverLimitMap = new HashMap<>();
     public Map<String, BigDecimal> codeMaxMap = new HashMap<>();
 
     @Scheduled(cron = "28/30 * 9-16 * * ?")
@@ -100,8 +102,7 @@ public class PullData {
                                 //put greater one
                                 codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
                             }
-                            if (rt.getPctChg().compareTo(PCH_LIMIT) > 0
-                                    && codeCountMap.get(rt.getTsCode()) > 3
+                            if (codeCountMap.get(rt.getTsCode()) > 3
                                     && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
                                 // info && reset count
                                 MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
@@ -112,6 +113,13 @@ public class PullData {
                             codeCountMap.put(rt.getTsCode(), 0);
                             codeMaxMap.put(rt.getTsCode(), rt.getPctChg());
                             MessageUtil.sendNotificationMsg("NEW ONE ", rt.getTsCode().substring(2, 6));
+                        }
+                        if (rt.getPctChg().compareTo(PCH_LIMIT) > 0) {
+                            codeOverLimitMap.put(rt.getTsCode(), codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) + 1);
+                        }
+                        if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7) {
+                            MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
+                            codeOverLimitMap.put(rt.getTsCode(), 0);
                         }
                     }
                 }
