@@ -71,8 +71,10 @@ public class PullData {
                             if (rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) == 0) {
                                 codeCountMap.put(rt.getTsCode(), codeCountMap.get(rt.getTsCode()) + 1);
                             } else {
+                                if (codeMaxMap.get(rt.getTsCode()).compareTo(rt.getPctChg()) < 0) {
+                                    codeCountMap.put(rt.getTsCode(), 0);
+                                }
                                 codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
-                                codeCountMap.put(rt.getTsCode(), 0);
                             }
                             if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
                                 MessageUtil.sendMessage("deal one " + rt.getTsCode().substring(2, 6));
