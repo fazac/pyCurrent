@@ -4,6 +4,7 @@ import com.stock.pycurrent.entity.EmConstant;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.service.EmConstantService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
+import com.stock.pycurrent.util.MessageUtil;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +26,9 @@ public class PullData {
 
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
+
+    public Map<String, Integer> codeCountMap = new HashMap<>();
+    public Map<String, BigDecimal> codeMaxMap = new HashMap<>();
 
     @Scheduled(cron = "28/30 * 9-16 * * ?")
     public void pullRealTimeData() {
@@ -61,6 +66,22 @@ public class PullData {
                             + " h= " + rt.getChangeHand()
                             + " rt= " + rt.getPctChg()
                     );
+                    if (!concerned) {
+                        if (codeCountMap.containsKey(rt.getTsCode())) {
+                            if (rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) == 0) {
+                                codeCountMap.put(rt.getTsCode(), codeCountMap.get(rt.getTsCode()) + 1);
+                            } else {
+                                codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
+                            }
+                            if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
+                                MessageUtil.sendMessage("deal one");
+                            }
+                        } else {
+                            codeCountMap.put(rt.getTsCode(), 0);
+                            codeMaxMap.put(rt.getTsCode(), rt.getPctChg());
+                            MessageUtil.sendMessage("new one");
+                        }
+                    }
                 }
             }
             log.info("--------");
