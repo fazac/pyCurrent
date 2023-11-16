@@ -72,14 +72,15 @@ public class PullData {
                                 codeCountMap.put(rt.getTsCode(), codeCountMap.get(rt.getTsCode()) + 1);
                             } else {
                                 codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
+                                codeCountMap.put(rt.getTsCode(), 0);
                             }
                             if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
-                                MessageUtil.sendMessage("deal one");
+                                MessageUtil.sendMessage("deal one " + rt.getTsCode().substring(2, 6));
                             }
                         } else {
                             codeCountMap.put(rt.getTsCode(), 0);
                             codeMaxMap.put(rt.getTsCode(), rt.getPctChg());
-                            MessageUtil.sendMessage("new one");
+                            MessageUtil.sendMessage("new one " + rt.getTsCode().substring(2, 6));
                         }
                     }
                 }
