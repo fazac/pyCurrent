@@ -21,12 +21,11 @@ import java.util.stream.Collectors;
 public class PullData {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
-    private static final BigDecimal HAND_LIMIT = BigDecimal.valueOf(40);
 
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
 
-    @Scheduled(cron = "27/30 * 9-16 * * ?")
+    @Scheduled(cron = "28/30 * 9-16 * * ?")
     public void pullRealTimeData() {
         if (isTradeHour()) {
             List<EmConstant> emConstants = emConstantService.findAll();
