@@ -78,6 +78,7 @@ public class PullData {
                             }
                             if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
                                 MessageUtil.sendMessage("deal one " + rt.getTsCode().substring(2, 6));
+                                codeCountMap.put(rt.getTsCode(), 0);
                             }
                         } else {
                             codeCountMap.put(rt.getTsCode(), 0);
