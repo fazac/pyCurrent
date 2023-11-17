@@ -117,8 +117,9 @@ public class PullData {
                         if (rt.getPctChg().compareTo(PCH_LIMIT) > 0) {
                             codeOverLimitMap.put(rt.getTsCode(), codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) + 1);
                         }
-                        if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7) {
-                            MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
+                        if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7
+                                && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
+                            MessageUtil.sendNotificationMsg("BUY LONE ", rt.getTsCode().substring(2, 6));
                             codeOverLimitMap.put(rt.getTsCode(), 0);
                         }
                     }

@@ -5,6 +5,7 @@ import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary;
 import lombok.SneakyThrows;
+import lombok.extern.apachecommons.CommonsLog;
 
 import java.awt.*;
 
@@ -13,7 +14,7 @@ import java.awt.*;
  * @date 2023/11/16 12:01
  * @description
  */
-
+@CommonsLog
 public class MessageUtil {
     private MessageUtil() {
         throw new IllegalStateException("MessageUtil class");
@@ -46,6 +47,7 @@ public class MessageUtil {
         trayIcon.setToolTip("System tray icon demo");
         tray.add(trayIcon);
         trayIcon.displayMessage(title, code, TrayIcon.MessageType.INFO);
+        log.info(title + " " + code);
     }
 
 
