@@ -1013,3 +1013,5 @@ create table `em_constants`
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = Dynamic;
 
+alter table em_constants add column `buy_price` decimal(18, 3) ;
+

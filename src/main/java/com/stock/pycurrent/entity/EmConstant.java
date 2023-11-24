@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
@@ -23,6 +24,9 @@ public class EmConstant {
 
     @Column(name = "c_value", length = 256)
     private String cValue;
+    
+    @Column(name = "buy_price")
+    private BigDecimal buyPrice;
 
     @Override
     public boolean equals(Object o) {

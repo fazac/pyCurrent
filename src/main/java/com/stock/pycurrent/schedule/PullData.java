@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -40,19 +41,21 @@ public class PullData {
             String noConcerns = "";
             String concerns = "";
             String holdCodes = "";
+            BigDecimal buyPrice = BigDecimal.ZERO;
 
             if (!emConstants.isEmpty()) {
-                Map<String, String> emConstantMap = emConstants.stream()
+                Map<String, EmConstant> emConstantMap = emConstants.stream()
                         .filter(x -> x.getCValue() != null && !x.getCValue().isEmpty() && !x.getCValue().trim().isEmpty())
-                        .collect(Collectors.toMap(EmConstant::getCKey, EmConstant::getCValue));
+                        .collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
                 if (emConstantMap.containsKey("NO_CONCERN_CODES")) {
-                    noConcerns = emConstantMap.get("NO_CONCERN_CODES");
+                    noConcerns = emConstantMap.get("NO_CONCERN_CODES").getCValue();
                 }
                 if (emConstantMap.containsKey("CONCERN_CODES")) {
-                    concerns = emConstantMap.get("CONCERN_CODES");
+                    concerns = emConstantMap.get("CONCERN_CODES").getCValue();
                 }
                 if (emConstantMap.containsKey("HOLD_CODES")) {
-                    holdCodes = emConstantMap.get("HOLD_CODES");
+                    holdCodes = emConstantMap.get("HOLD_CODES").getCValue();
+                    buyPrice = emConstantMap.get("HOLD_CODES").getBuyPrice();
                 }
             }
             String nowClock;
@@ -74,6 +77,7 @@ public class PullData {
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
                             + " rt= " + rt.getPctChg()
+                            + (holds ? " rr= " + calRatio(rt.getCurrentPri(), buyPrice) : "")
                     );
                     if (holds) {
                         //低开超1%,涨超买入价回落卖出
