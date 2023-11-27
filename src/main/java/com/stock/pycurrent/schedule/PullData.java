@@ -79,7 +79,7 @@ public class PullData {
                             + " rt= " + rt.getPctChg()
                             + (holds ? " rr= " + calRatio(rt.getCurrentPri(), buyPrice) : "")
                     );
-                    if (holds) {
+                    if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null) {
                         //低开超1%,涨超买入价回落卖出
                         if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
                                 && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
