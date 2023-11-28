@@ -8,9 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 @CommonsLog
@@ -21,6 +19,8 @@ public class ExecutorUtils {
     }
 
     public static final ExecutorService SINGLE_TASK_POOL = Executors.newSingleThreadExecutor();
+    public static final Integer CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+    public static final ExecutorService MULTIPLE_TASK_POOL = new ThreadPoolExecutor(CORE_POOL_SIZE + 1, 2 * CORE_POOL_SIZE + 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     public static <T> T execThreadPY(@Nullable Supplier<T> supplier) {
         CountDownLatch countDownLatch = new CountDownLatch(1);

@@ -22,7 +22,7 @@ public class MessageUtil {
 
     public static void sendMessage(String text) {
         if (Platform.isWindows()) {
-            User32.INSTANCE.MessageBoxA(null, text, "Java Notification", User32.MB_OK | User32.MB_ICON_INFORMATION);
+            ExecutorUtils.MULTIPLE_TASK_POOL.submit(() -> User32.INSTANCE.MessageBoxA(null, text, "Java Notification", User32.MB_OK | User32.MB_ICON_INFORMATION));
         } else {
             System.out.println("This feature is only available on Windows.");
         }
