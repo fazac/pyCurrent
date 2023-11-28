@@ -77,7 +77,7 @@ public class PullData {
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
                             + " rt= " + rt.getPctChg()
-                            + (holds ? " rr= " + calRatio(rt.getCurrentPri(), buyPrice) : "")
+                            + (holds && rt.getCurrentPri() != null ? " rr= " + calRatio(rt.getCurrentPri(), buyPrice) : "")
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null) {
                         //低开超1%,涨超买入价回落卖出
