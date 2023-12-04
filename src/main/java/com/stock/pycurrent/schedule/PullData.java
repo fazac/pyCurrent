@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class PullData {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
+    private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
 
     private EmRealTimeStockService emRealTimeStockService;
@@ -81,11 +82,11 @@ public class PullData {
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null) {
                         //低开超1%,涨超买入价回落卖出
-                        if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
-                                && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
-                                && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                            MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
-                        }
+//                        if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
+//                                && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
+//                                && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
+//                            MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
+//                        }
                         //高开超1%且跌落买入价时卖出,或者非封板收盘卖
                         if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0
                                 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0
@@ -107,7 +108,7 @@ public class PullData {
                                 codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
                             }
                             if (codeCountMap.get(rt.getTsCode()) > 3
-                                    && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
+                                    && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) { // 触发涨停板
                                 // info && reset count
                                 MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
                                 codeCountMap.put(rt.getTsCode(), 0);
@@ -118,7 +119,7 @@ public class PullData {
                             codeMaxMap.put(rt.getTsCode(), rt.getPctChg());
                             MessageUtil.sendNotificationMsg("NEW ONE ", rt.getTsCode().substring(2, 6));
                         }
-                        if (rt.getPctChg().compareTo(PCH_LIMIT) > 0) {
+                        if (rt.getPctChg().compareTo(PCH_OVER_LIMIT) > 0) { // 17
                             codeOverLimitMap.put(rt.getTsCode(), codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) + 1);
                         }
                         if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7
