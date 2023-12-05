@@ -1,6 +1,7 @@
 package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.entity.EmConstant;
+import com.stock.pycurrent.entity.EmConstantValue;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.service.EmConstantService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ public class PullData {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
     private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
+    @SuppressWarnings("unused")
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
 
     private EmRealTimeStockService emRealTimeStockService;
@@ -43,6 +46,8 @@ public class PullData {
             String concerns = "";
             String holdCodes = "";
             BigDecimal buyPrice = BigDecimal.ZERO;
+            List<EmConstantValue> constantValues = new ArrayList<>();
+            Map<String, BigDecimal> constantValueMap = new HashMap<>();
 
             if (!emConstants.isEmpty()) {
                 Map<String, EmConstant> emConstantMap = emConstants.stream()
@@ -57,6 +62,10 @@ public class PullData {
                 if (emConstantMap.containsKey("HOLD_CODES")) {
                     holdCodes = emConstantMap.get("HOLD_CODES").getCValue();
                     buyPrice = emConstantMap.get("HOLD_CODES").getBuyPrice();
+                    if (emConstantMap.get("HOLD_CODES").getMultiValue() != null && !emConstantMap.get("HOLD_CODES").getMultiValue().isEmpty()) {
+                        constantValues = emConstantMap.get("HOLD_CODES").getMultiValue();
+                        constantValueMap = constantValues.stream().collect(Collectors.toMap(EmConstantValue::getTsCode, EmConstantValue::getPrice));
+                    }
                 }
             }
             String nowClock;
@@ -75,10 +84,13 @@ public class PullData {
                 ) || concerned || holds) {
                     nowClock = rt.getTradeDate().substring(11);
                     String remarks = "-" + index++ + (concerned ? "(C)" : holds ? "(H)" : "(F)");
+                    String holdRemark = (holds && rt.getCurrentPri() != null ? " rr= " +
+                            (!constantValues.isEmpty() ? calRatio(rt.getCurrentPri(), constantValueMap.get(rt.getTsCode())) : calRatio(rt.getCurrentPri(), buyPrice)) :
+                            "");
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
                             + " rt= " + rt.getPctChg()
-                            + (holds && rt.getCurrentPri() != null ? " rr= " + calRatio(rt.getCurrentPri(), buyPrice) : "")
+                            + holdRemark
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null) {
                         //低开超1%,涨超买入价回落卖出
@@ -138,7 +150,7 @@ public class PullData {
         LocalDateTime n = LocalDateTime.now();
         String res = String.format("%02d", n.getHour()) + String.format("%02d", n.getMinute());
         int tmp = Integer.parseInt(res);
-        return tmp >= 914 && tmp < 1130 || tmp >= 1259 && tmp <= 1510;
+        return tmp >= 914 && tmp < 1150 || tmp >= 1259 && tmp <= 1510;
     }
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
