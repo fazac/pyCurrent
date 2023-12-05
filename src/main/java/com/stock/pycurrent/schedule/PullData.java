@@ -150,7 +150,7 @@ public class PullData {
         LocalDateTime n = LocalDateTime.now();
         String res = String.format("%02d", n.getHour()) + String.format("%02d", n.getMinute());
         int tmp = Integer.parseInt(res);
-        return tmp >= 914 && tmp < 1150 || tmp >= 1259 && tmp <= 1510;
+        return tmp >= 914 && tmp < 1131 || tmp >= 1259 && tmp <= 1510;
     }
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
