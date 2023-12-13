@@ -110,11 +110,12 @@ public class PullData {
                     nowClock = rt.getTradeDate().substring(11);
                     String remarks = "-" + index++ + (concerned ? "(C)" : holds ? "(H)" : rangeOverLimit ? "(R)" : "(F)");
                     String holdRemark = (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode()) && constantValueMap.get(rt.getTsCode()).getPrice() != null
-                            ? " rr= " + (calRatio(rt.getCurrentPri(), constantValueMap.get(rt.getTsCode()).getPrice()))
+                            ? (" rr= " + fixLength((calRatio(rt.getCurrentPri(), constantValueMap.get(rt.getTsCode()).getPrice())), 5)
+                            + " am= " + fixLength(rt.getCurrentPri().subtract(constantValueMap.get(rt.getTsCode()).getPrice()).multiply(BigDecimal.valueOf(constantValueMap.get(rt.getTsCode()).getVol())), 10))
                             : "");
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
-                            + " h= " + rt.getChangeHand()
-                            + " rt= " + rt.getPctChg()
+                            + " h= " + fixLength(rt.getChangeHand(), 5)
+                            + " rt= " + fixLength(rt.getPctChg(), 5)
                             + holdRemark
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
@@ -172,6 +173,10 @@ public class PullData {
             log.info("--------");
 //            }
         }
+    }
+
+    private String fixLength(BigDecimal str, int length) {
+        return String.format("%" + length + "s", str);
     }
 
     private boolean calRange(Queue<BigDecimal> values) {
