@@ -16,6 +16,11 @@ public class EmRealTimeStockService {
         return emRealTimeStockRepo.findLast();
     }
 
+    public List<EmRealTimeStock> findAll() {
+        return emRealTimeStockRepo.findSps();
+    }
+
+
     public List<EmRealTimeStock> findEmCurrent() {
         return ExecutorUtils.execThreadPY(this::findLast);
     }

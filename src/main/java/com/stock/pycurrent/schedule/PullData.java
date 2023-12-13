@@ -5,7 +5,6 @@ import com.stock.pycurrent.entity.EmConstantValue;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.service.EmConstantService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
-import com.stock.pycurrent.util.JSONUtils;
 import com.stock.pycurrent.util.MessageUtil;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +36,8 @@ public class PullData {
     public Map<String, Integer> codeOverLimitMap = new HashMap<>();
     public Map<String, BigDecimal> codeMaxMap = new HashMap<>();
 
+    public Set<String> rangeOverLimitCodes = new HashSet<>();
+
     @Scheduled(cron = "28/30 * 9-16 * * ?")
     public void pullRealTimeData() {
         if (isTradeHour()) {
@@ -66,13 +67,22 @@ public class PullData {
             }
             String nowClock;
             int index = 1;
+//            List<EmRealTimeStock> allList = emRealTimeStockService.findAll();
+//            Map<String, List<EmRealTimeStock>> tmpMap = allList.stream().collect(Collectors.groupingBy(EmRealTimeStock::getTradeDate));
+//            List<String> keys = new ArrayList<>(tmpMap.keySet());
+//            Collections.sort(keys);
+//            for (String s : keys) {
+//                List<EmRealTimeStock> stockList = tmpMap.get(s);
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
             for (EmRealTimeStock rt : stockList) {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
                 boolean holds = holdCodes.contains(rt.getTsCode());
-                boolean rangeOverLimit = false;
-                if (rt.getPctChg() != null) {
+                boolean rangeOverLimit;
+                if (!rt.getName().contains("ST") && !rt.getName().contains("退")
+                        && rt.getTsCode().startsWith("3")
+                        && !noConcerned
+                        && rt.getPctChg() != null) {
                     if (codePctMap.containsKey(rt.getTsCode())) {
                         codePctMap.get(rt.getTsCode()).add(rt.getPctChg());
                     } else {
@@ -85,7 +95,11 @@ public class PullData {
                         fiveMinutesPch.poll();
                     }
                     rangeOverLimit = calRange(fiveMinutesPch);
+                    if (rangeOverLimit) {
+                        rangeOverLimitCodes.add(rt.getTsCode());
+                    }
                 }
+                rangeOverLimit = rangeOverLimitCodes.contains(rt.getTsCode());
                 if ((!rt.getName().contains("ST") && !rt.getName().contains("退")
                         && rt.getTsCode().startsWith("3") && !noConcerned
                         && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
@@ -156,6 +170,7 @@ public class PullData {
                 }
             }
             log.info("--------");
+//            }
         }
     }
 
