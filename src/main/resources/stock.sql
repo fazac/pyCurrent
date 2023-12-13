@@ -1015,3 +1015,5 @@ create table `em_constants`
 
 alter table em_constants add column `buy_price` decimal(18, 3) ;
 
+-- 20231213
+alter table em_constants drop column `buy_price`;

@@ -5,6 +5,7 @@ import com.stock.pycurrent.entity.EmConstantValue;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.service.EmConstantService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
+import com.stock.pycurrent.util.JSONUtils;
 import com.stock.pycurrent.util.MessageUtil;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,6 +25,7 @@ public class PullData {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
     private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
+    private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(6);
     @SuppressWarnings("unused")
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
 
@@ -45,9 +44,8 @@ public class PullData {
             String noConcerns = "";
             String concerns = "";
             String holdCodes = "";
-            BigDecimal buyPrice = BigDecimal.ZERO;
-            List<EmConstantValue> constantValues = new ArrayList<>();
-            Map<String, BigDecimal> constantValueMap = new HashMap<>();
+            Map<String, EmConstantValue> constantValueMap = new HashMap<>();
+            Map<String, Queue<BigDecimal>> codePctMap = new HashMap<>();
 
             if (!emConstants.isEmpty()) {
                 Map<String, EmConstant> emConstantMap = emConstants.stream()
@@ -61,10 +59,8 @@ public class PullData {
                 }
                 if (emConstantMap.containsKey("HOLD_CODES")) {
                     holdCodes = emConstantMap.get("HOLD_CODES").getCValue();
-                    buyPrice = emConstantMap.get("HOLD_CODES").getBuyPrice();
                     if (emConstantMap.get("HOLD_CODES").getMultiValue() != null && !emConstantMap.get("HOLD_CODES").getMultiValue().isEmpty()) {
-                        constantValues = emConstantMap.get("HOLD_CODES").getMultiValue();
-                        constantValueMap = constantValues.stream().collect(Collectors.toMap(EmConstantValue::getTsCode, EmConstantValue::getPrice));
+                        constantValueMap = emConstantMap.get("HOLD_CODES").getMultiValue().stream().collect(Collectors.toMap(EmConstantValue::getTsCode, Function.identity()));
                     }
                 }
             }
@@ -75,30 +71,47 @@ public class PullData {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
                 boolean holds = holdCodes.contains(rt.getTsCode());
+                boolean rangeOverLimit = false;
+                if (rt.getPctChg() != null) {
+                    if (codePctMap.containsKey(rt.getTsCode())) {
+                        codePctMap.get(rt.getTsCode()).add(rt.getPctChg());
+                    } else {
+                        Queue<BigDecimal> pchQueue = new LinkedList<>();
+                        pchQueue.add(rt.getPctChg());
+                        codePctMap.put(rt.getTsCode(), pchQueue);
+                    }
+                    Queue<BigDecimal> fiveMinutesPch = codePctMap.get(rt.getTsCode());
+                    if (fiveMinutesPch.size() > 10) {
+                        fiveMinutesPch.poll();
+                    }
+                    rangeOverLimit = calRange(fiveMinutesPch);
+                }
                 if ((!rt.getName().contains("ST") && !rt.getName().contains("退")
                         && rt.getTsCode().startsWith("3") && !noConcerned
                         && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
                         && rt.getPriHigh() != null
                         && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
 //                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0
-                ) || concerned || holds) {
+                ) || concerned || holds || rangeOverLimit) {
                     nowClock = rt.getTradeDate().substring(11);
-                    String remarks = "-" + index++ + (concerned ? "(C)" : holds ? "(H)" : "(F)");
-                    String holdRemark = (holds && rt.getCurrentPri() != null ? " rr= " +
-                            (!constantValues.isEmpty() ? calRatio(rt.getCurrentPri(), constantValueMap.get(rt.getTsCode())) : calRatio(rt.getCurrentPri(), buyPrice)) :
-                            "");
+                    String remarks = "-" + index++ + (concerned ? "(C)" : holds ? "(H)" : rangeOverLimit ? "(R)" : "(F)");
+                    String holdRemark = (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode()) && constantValueMap.get(rt.getTsCode()).getPrice() != null
+                            ? " rr= " + (calRatio(rt.getCurrentPri(), constantValueMap.get(rt.getTsCode()).getPrice()))
+                            : "");
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + rt.getChangeHand()
                             + " rt= " + rt.getPctChg()
                             + holdRemark
                     );
-                    if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null) {
+                    if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
+                            && constantValueMap.containsKey(rt.getTsCode()) && constantValueMap.get(rt.getTsCode()).isSellable()) {
                         //低开超1%,涨超买入价回落卖出
-//                        if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
-//                                && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
-//                                && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-//                            MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
-//                        }
+                        if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
+                                && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
+                                && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0
+                        ) {
+                            MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
+                        }
                         //高开超1%且跌落买入价时卖出,或者非封板收盘卖
                         if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0
                                 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0
@@ -144,6 +157,10 @@ public class PullData {
             }
             log.info("--------");
         }
+    }
+
+    private boolean calRange(Queue<BigDecimal> values) {
+        return Collections.max(values).subtract(Collections.min(values)).compareTo(RANGE_LIMIT) >= 0;
     }
 
     private boolean isTradeHour() {

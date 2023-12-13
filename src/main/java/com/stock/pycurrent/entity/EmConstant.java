@@ -27,8 +27,6 @@ public class EmConstant {
     @Column(name = "c_value", length = 256)
     private String cValue;
 
-    @Column(name = "buy_price")
-    private BigDecimal buyPrice;
 
     @Column(columnDefinition = "jsonb", name = "multi_value")
     @Type(JsonBinaryType.class)

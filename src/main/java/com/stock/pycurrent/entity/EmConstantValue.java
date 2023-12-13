@@ -14,4 +14,5 @@ import java.math.BigDecimal;
 public class EmConstantValue implements Serializable {
     private String tsCode;
     private BigDecimal price;
+    private boolean sellable;
 }
