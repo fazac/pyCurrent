@@ -109,10 +109,19 @@ public class PullData {
                 ) || concerned || holds || rangeOverLimit) {
                     nowClock = rt.getTradeDate().substring(11);
                     String remarks = "-" + index++ + (concerned ? "(C)" : holds ? "(H)" : rangeOverLimit ? "(R)" : "(F)");
-                    String holdRemark = (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode()) && constantValueMap.get(rt.getTsCode()).getPrice() != null
-                            ? (" rr= " + fixLength((calRatio(rt.getCurrentPri(), constantValueMap.get(rt.getTsCode()).getPrice())), 5)
-                            + " am= " + fixLength(rt.getCurrentPri().subtract(constantValueMap.get(rt.getTsCode()).getPrice()).multiply(BigDecimal.valueOf(constantValueMap.get(rt.getTsCode()).getVol())), 10))
-                            : "");
+                    String holdRemark = "";
+                    if (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode())) {
+                        EmConstantValue emConstantValue = constantValueMap.get(rt.getTsCode());
+                        BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
+                        BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice())
+                                .multiply(BigDecimal.valueOf(emConstantValue.getVol()));
+                        holdRemark = " rr= " + fixLength(realRatio, 5)
+                                + " am= " + fixLength(amount, 10);
+                        if (emConstantValue.getProfit() != null) {
+                            BigDecimal potentialBenefits = amount.subtract(emConstantValue.getProfit());
+                            holdRemark += " pb= " + fixLength(potentialBenefits, 10);
+                        }
+                    }
                     log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6)
                             + " h= " + fixLength(rt.getChangeHand(), 5)
                             + " rt= " + fixLength(rt.getPctChg(), 5)

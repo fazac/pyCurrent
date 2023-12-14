@@ -16,4 +16,5 @@ public class EmConstantValue implements Serializable {
     private BigDecimal price;
     private Long vol;
     private boolean sellable;
+    private BigDecimal profit;
 }
