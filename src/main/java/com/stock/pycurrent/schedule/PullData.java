@@ -115,16 +115,19 @@ public class PullData {
                         BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
                         BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice())
                                 .multiply(BigDecimal.valueOf(emConstantValue.getVol()));
-                        holdRemark = " rr= " + fixLength(realRatio, 5)
-                                + " am= " + fixLength(amount, 10);
+                        BigDecimal potentialBenefits;
+                        holdRemark = " rr= " + fixLength(realRatio, 5);
                         if (emConstantValue.getProfit() != null) {
-                            BigDecimal potentialBenefits = amount.subtract(emConstantValue.getProfit());
+                            potentialBenefits = amount.subtract(emConstantValue.getProfit());
+                            holdRemark += " am= " + fixLength("", 10);
                             holdRemark += " pb= " + fixLength(potentialBenefits, 10);
+                        } else {
+                            holdRemark += " am= " + fixLength(amount, 10);
                         }
                     }
-                    log.info(nowClock + " " + remarks + ": " + fixLength(rt.getTsCode().substring(2, 6) + "(" + rt.getName().substring(0, 2) + rt.getTsCode().charAt(0) + ")", 10)
+                    log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6) + fixLength("(" + ("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)) + rt.getTsCode().charAt(0) + ")", 7)
                             + " h= " + fixLength(rt.getChangeHand(), 5)
-                            + " rt= " + fixLength(rt.getPctChg(), 5)
+                            + " rt= " + fixLength(rt.getPctChg(), 6)
                             + holdRemark
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
@@ -186,6 +189,11 @@ public class PullData {
 
     private String fixLength(Object str, int length) {
         return String.format("%" + length + "s", str);
+    }
+
+    @SuppressWarnings("unused")
+    private String fixLengthNegative(Object str, int length) {
+        return String.format("%-" + length + "s", str);
     }
 
     private boolean calRange(Queue<BigDecimal> values) {
