@@ -122,7 +122,7 @@ public class PullData {
                             holdRemark += " pb= " + fixLength(potentialBenefits, 10);
                         }
                     }
-                    log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6) + "(" + rt.getName().substring(0, 2) + rt.getTsCode().charAt(0) + ")"
+                    log.info(nowClock + " " + remarks + ": " + fixLength(rt.getTsCode().substring(2, 6) + "(" + rt.getName().substring(0, 2) + rt.getTsCode().charAt(0) + ")", 10)
                             + " h= " + fixLength(rt.getChangeHand(), 5)
                             + " rt= " + fixLength(rt.getPctChg(), 5)
                             + holdRemark
@@ -184,7 +184,7 @@ public class PullData {
         }
     }
 
-    private String fixLength(BigDecimal str, int length) {
+    private String fixLength(Object str, int length) {
         return String.format("%" + length + "s", str);
     }
 
