@@ -196,23 +196,26 @@ public class PullData {
                     }
                 }
             }
-            log.info(fixLengthTitle("_ TIME ", 7) + fixLengthTitle("I", 1) + fixLengthTitle("_ TC名称 ", 7)
-                    + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR _", 5)
-                    + fixLengthTitle("__ AM __", 8) + fixLengthTitle("__ PB __", 8) + fixLengthTitle(" CP ", 4));
-//            log.info("--------------------------------------------------------------------------------------------");
+            log.info(" ____________________________________________________________________________________________");
+            String title = "|   TIME   |  I  |" + " T CODE 简称 |  "
+                    + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5)
+                    + fixLengthTitle("   AM   ", 8) + fixLengthTitle("   PB   ", 8) + fixLengthTitle(" CP ", 4);
+            log.info(title.substring(0, title.length() - 2));
+            log.info(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
             printMapInfo(logsMap, "F", nowClock);
             printMapInfo(logsMap, "R", nowClock);
             printMapInfo(logsMap, "C", nowClock);
             printMapInfo(logsMap, "H", nowClock);
-            log.info("----------------------------------------------------------------------------------------------");
+            log.info(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
 //            }
+
         }
     }
 
     private void printMapInfo(Map<String, List<String>> logsMap, String type, String nowClock) {
         if (!logsMap.get(type).isEmpty()) {
             for (int i = 0; i < logsMap.get(type).size(); i++) {
-                log.info(nowClock + " " + fixLength(i + 1, 2) + type + " " + logsMap.get(type).get(i));
+                log.info("| " + nowClock + fixLength(i + 1 + " ", 3) + type + " " + logsMap.get(type).get(i));
             }
         }
     }
@@ -222,7 +225,7 @@ public class PullData {
     }
 
     private String fixLengthTitle(Object str, int length) {
-        return String.format("%" + length + "s", str) + "__|__";
+        return String.format("%" + length + "s", str) + "  |  ";
     }
 
 
@@ -239,7 +242,7 @@ public class PullData {
         LocalDateTime n = LocalDateTime.now();
         String res = String.format("%02d", n.getHour()) + String.format("%02d", n.getMinute());
         int tmp = Integer.parseInt(res);
-        return tmp >= 914 && tmp < 1131 || tmp >= 1259 && tmp <= 1510;
+        return tmp >= 914 && tmp < 1131 || tmp >= 1259 && tmp <= 1531;
     }
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
