@@ -74,6 +74,9 @@ public class PullData {
 //            for (String s : keys) {
 //                List<EmRealTimeStock> stockList = tmpMap.get(s);
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
+            log.info(fixLength("t   ", 8) + fixLength("i", 3) + fixLength("code 名称", 9)
+                  + fixLength("h  ", 5) + fixLength("rt  ", 6) + fixLength("rr   ", 7)
+                    + fixLength("am    ", 10) + fixLength("pb    ", 10));
             for (EmRealTimeStock rt : stockList) {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
@@ -107,8 +110,8 @@ public class PullData {
                         && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
 //                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0
                 ) || concerned || holds || rangeOverLimit) {
-                    nowClock = rt.getTradeDate().substring(11);
-                    String remarks = "-" + fixLength(index++, 2) + (concerned ? "(C)" : holds ? "(H)" : rangeOverLimit ? "(R)" : "(F)");
+                    nowClock = fixLength(rt.getTradeDate().substring(11), 8);
+                    String remarks = fixLength(index++, 2) + (concerned ? "C" : holds ? "H" : rangeOverLimit ? "R" : "F");
                     String holdRemark = "";
                     if (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode())) {
                         EmConstantValue emConstantValue = constantValueMap.get(rt.getTsCode());
@@ -116,18 +119,18 @@ public class PullData {
                         BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice())
                                 .multiply(BigDecimal.valueOf(emConstantValue.getVol()));
                         BigDecimal potentialBenefits;
-                        holdRemark = " rr= " + fixLength(realRatio, 7);
+                        holdRemark = fixLength(realRatio, 7);
                         if (emConstantValue.getProfit() != null) {
                             potentialBenefits = amount.subtract(emConstantValue.getProfit());
-                            holdRemark += " am= " + fixLength("", 10);
-                            holdRemark += " pb= " + fixLength(potentialBenefits, 10);
+                            holdRemark += fixLength("", 10);
+                            holdRemark += fixLength(potentialBenefits, 10);
                         } else {
-                            holdRemark += " am= " + fixLength(amount, 10);
+                            holdRemark += fixLength(amount, 10);
                         }
                     }
-                    log.info(nowClock + " " + remarks + ": " + rt.getTsCode().substring(2, 6) + fixLength("(" + ("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)) + rt.getTsCode().charAt(0) + ")", 7)
-                            + " h= " + fixLength(rt.getChangeHand(), 5)
-                            + " rt= " + fixLength(rt.getPctChg(), 6)
+                    log.info(nowClock + " " + remarks + " " + rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
+                            + fixLength(rt.getChangeHand(), 5)
+                            + fixLength(rt.getPctChg(), 6)
                             + holdRemark
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
@@ -182,13 +185,13 @@ public class PullData {
                     }
                 }
             }
-            log.info("--------");
+            log.info("----------------------------------------------------------------------------------");
 //            }
         }
     }
 
     private String fixLength(Object str, int length) {
-        return String.format("%" + length + "s", str);
+        return String.format("%" + length + "s", str) + " | ";
     }
 
     @SuppressWarnings("unused")
