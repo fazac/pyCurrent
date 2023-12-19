@@ -108,7 +108,7 @@ public class PullData {
 //                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0
                 ) || concerned || holds || rangeOverLimit) {
                     nowClock = rt.getTradeDate().substring(11);
-                    String remarks = "-" + fixLength(index++, 3) + (concerned ? "(C)" : holds ? "(H)" : rangeOverLimit ? "(R)" : "(F)");
+                    String remarks = "-" + fixLength(index++, 2) + (concerned ? "(C)" : holds ? "(H)" : rangeOverLimit ? "(R)" : "(F)");
                     String holdRemark = "";
                     if (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode())) {
                         EmConstantValue emConstantValue = constantValueMap.get(rt.getTsCode());
