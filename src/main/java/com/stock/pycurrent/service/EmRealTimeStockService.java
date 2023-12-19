@@ -4,7 +4,6 @@ import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.repo.EmRealTimeStockRepo;
 import com.stock.pycurrent.util.ExecutorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
