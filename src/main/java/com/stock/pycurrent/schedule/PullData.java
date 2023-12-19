@@ -75,8 +75,8 @@ public class PullData {
 //                List<EmRealTimeStock> stockList = tmpMap.get(s);
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
             log.info(fixLength("t   ", 8) + fixLength("i", 3) + fixLength("code 名称", 9)
-                  + fixLength("h  ", 5) + fixLength("rt  ", 6) + fixLength("rr   ", 7)
-                    + fixLength("am    ", 10) + fixLength("pb    ", 10));
+                    + fixLength("h  ", 5) + fixLength("rt  ", 6) + fixLength("rr  ", 7)
+                    + fixLength("am    ", 10) + fixLength("pb    ", 10) + fixLength("pri    ", 10));
             for (EmRealTimeStock rt : stockList) {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
@@ -131,7 +131,7 @@ public class PullData {
                     log.info(nowClock + " " + remarks + " " + rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
                             + fixLength(rt.getChangeHand(), 5)
                             + fixLength(rt.getPctChg(), 6)
-                            + holdRemark
+                            + holdRemark + fixLength(rt.getCurrentPri(), 6)
                     );
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
                             && constantValueMap.containsKey(rt.getTsCode()) && constantValueMap.get(rt.getTsCode()).isSellable()) {
@@ -185,7 +185,7 @@ public class PullData {
                     }
                 }
             }
-            log.info("----------------------------------------------------------------------------------");
+            log.info("-----------------------------------------------------------------------------------");
 //            }
         }
     }
