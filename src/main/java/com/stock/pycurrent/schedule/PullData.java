@@ -47,6 +47,11 @@ public class PullData {
             String holdCodes = "";
             Map<String, EmConstantValue> constantValueMap = new HashMap<>();
             Map<String, Queue<BigDecimal>> codePctMap = new HashMap<>();
+            Map<String, List<String>> logsMap = new HashMap<>();
+            logsMap.put("F", new ArrayList<>());
+            logsMap.put("R", new ArrayList<>());
+            logsMap.put("C", new ArrayList<>());
+            logsMap.put("H", new ArrayList<>());
 
             if (!emConstants.isEmpty()) {
                 Map<String, EmConstant> emConstantMap = emConstants.stream()
@@ -65,8 +70,8 @@ public class PullData {
                     }
                 }
             }
-            String nowClock;
-            int index = 1;
+            String nowClock = "";
+            String type = "";
 //            List<EmRealTimeStock> allList = emRealTimeStockService.findAll();
 //            Map<String, List<EmRealTimeStock>> tmpMap = allList.stream().collect(Collectors.groupingBy(EmRealTimeStock::getTradeDate));
 //            List<String> keys = new ArrayList<>(tmpMap.keySet());
@@ -74,9 +79,6 @@ public class PullData {
 //            for (String s : keys) {
 //                List<EmRealTimeStock> stockList = tmpMap.get(s);
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
-            log.info(fixLength("t   ", 8) + fixLength("i", 3) + fixLength("T code 名称", 9)
-                    + fixLength("h  ", 5) + fixLength("rt  ", 6) + fixLength("rr  ", 7)
-                    + fixLength("am    ", 10) + fixLength("pb    ", 10) + fixLength("pri ", 6));
             for (EmRealTimeStock rt : stockList) {
                 boolean concerned = concerns.contains(rt.getTsCode());
                 boolean noConcerned = noConcerns.contains(rt.getTsCode());
@@ -110,8 +112,8 @@ public class PullData {
                         && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
 //                        && rt.getChangeHand().compareTo(HAND_LIMIT) < 0
                 ) || concerned || holds || rangeOverLimit) {
-                    nowClock = fixLength(rt.getTradeDate().substring(11), 8);
-                    String remarks = fixLength(index++, 2) + (concerned ? "C" : holds ? "H" : rangeOverLimit ? "R" : "F");
+                    nowClock = nowClock.isEmpty() ? fixLength(rt.getTradeDate().substring(11), 8) : nowClock;
+                    type = (concerned ? "C" : holds ? "H" : rangeOverLimit ? "R" : "F");
                     String holdRemark;
                     if (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode())) {
                         EmConstantValue emConstantValue = constantValueMap.get(rt.getTsCode());
@@ -133,11 +135,15 @@ public class PullData {
                         holdRemark += fixLength("", 10);
                         holdRemark += fixLength("", 10);
                     }
-                    log.info(nowClock + " " + remarks + " " + rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
-                            + fixLength(rt.getChangeHand(), 5)
+//                    log.info(nowClock + " " + type + " " + rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
+//                            + fixLength(rt.getChangeHand(), 5)
+//                            + fixLength(rt.getPctChg(), 6)
+//                            + holdRemark + fixLength(rt.getCurrentPri(), 6)
+//                    );
+                    logsMap.get(type).add(rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
                             + fixLength(rt.getPctChg(), 6)
-                            + holdRemark + fixLength(rt.getCurrentPri(), 6)
-                    );
+                            + fixLength(rt.getChangeHand(), 5)
+                            + holdRemark + fixLength(rt.getCurrentPri(), 6));
                     if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
                             && constantValueMap.containsKey(rt.getTsCode()) && constantValueMap.get(rt.getTsCode()).isSellable()) {
                         //低开超1%,涨超买入价回落卖出
@@ -190,14 +196,35 @@ public class PullData {
                     }
                 }
             }
-            log.info("--------------------------------------------------------------------------------------------");
+            log.info(fixLengthTitle("_ TIME ", 7) + fixLengthTitle("I", 1) + fixLengthTitle("_ TC名称 ", 7)
+                    + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR _", 5)
+                    + fixLengthTitle("__ AM __", 8) + fixLengthTitle("__ PB __", 8) + fixLengthTitle(" CP ", 4));
+//            log.info("--------------------------------------------------------------------------------------------");
+            printMapInfo(logsMap, "F", nowClock);
+            printMapInfo(logsMap, "R", nowClock);
+            printMapInfo(logsMap, "C", nowClock);
+            printMapInfo(logsMap, "H", nowClock);
+            log.info("----------------------------------------------------------------------------------------------");
 //            }
+        }
+    }
+
+    private void printMapInfo(Map<String, List<String>> logsMap, String type, String nowClock) {
+        if (!logsMap.get(type).isEmpty()) {
+            for (int i = 0; i < logsMap.get(type).size(); i++) {
+                log.info(nowClock + " " + fixLength(i + 1, 2) + type + " " + logsMap.get(type).get(i));
+            }
         }
     }
 
     private String fixLength(Object str, int length) {
         return String.format("%" + length + "s", str) + " | ";
     }
+
+    private String fixLengthTitle(Object str, int length) {
+        return String.format("%" + length + "s", str) + "__|__";
+    }
+
 
     @SuppressWarnings("unused")
     private String fixLengthNegative(Object str, int length) {
