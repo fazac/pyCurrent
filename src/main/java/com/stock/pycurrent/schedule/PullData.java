@@ -112,7 +112,7 @@ public class PullData {
                 ) || concerned || holds || rangeOverLimit) {
                     nowClock = fixLength(rt.getTradeDate().substring(11), 8);
                     String remarks = fixLength(index++, 2) + (concerned ? "C" : holds ? "H" : rangeOverLimit ? "R" : "F");
-                    String holdRemark = "";
+                    String holdRemark;
                     if (holds && rt.getCurrentPri() != null && constantValueMap.containsKey(rt.getTsCode())) {
                         EmConstantValue emConstantValue = constantValueMap.get(rt.getTsCode());
                         BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
