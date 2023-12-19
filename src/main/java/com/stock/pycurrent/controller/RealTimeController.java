@@ -20,7 +20,7 @@ public class RealTimeController {
 
     @GetMapping("pullTest")
     public void pullTest() {
-        pullData.pullRealTimeData();
+        pullData.pullTest();
     }
 
     @Autowired

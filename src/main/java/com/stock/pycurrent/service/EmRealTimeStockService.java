@@ -4,6 +4,7 @@ import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.repo.EmRealTimeStockRepo;
 import com.stock.pycurrent.util.ExecutorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,8 +17,12 @@ public class EmRealTimeStockService {
         return emRealTimeStockRepo.findLast();
     }
 
-    public List<EmRealTimeStock> findAll() {
-        return emRealTimeStockRepo.findSps();
+    public List<String> findTradeDates() {
+        return emRealTimeStockRepo.findTradeDates();
+    }
+
+    public List<EmRealTimeStock> findStockByDate(String tradeDate) {
+        return emRealTimeStockRepo.findStockByDate(tradeDate);
     }
 
 
