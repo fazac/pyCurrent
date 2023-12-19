@@ -71,7 +71,7 @@ public class PullData {
                 }
             }
             String nowClock = "";
-            String type = "";
+            String type;
 //            List<EmRealTimeStock> allList = emRealTimeStockService.findAll();
 //            Map<String, List<EmRealTimeStock>> tmpMap = allList.stream().collect(Collectors.groupingBy(EmRealTimeStock::getTradeDate));
 //            List<String> keys = new ArrayList<>(tmpMap.keySet());
