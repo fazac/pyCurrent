@@ -129,6 +129,7 @@ public class PullData {
             boolean concerned = !holds
                     && (codes[0].contains(rt.getTsCode()) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode())));
             boolean rangeOverLimit;
+            boolean highLimit;
             if (!rt.getName().contains("ST") && !rt.getName().contains("退")
                     && rt.getTsCode().startsWith("3")
                     && !noConcerned
@@ -152,13 +153,13 @@ public class PullData {
                 }
             }
             rangeOverLimit = rangeOverLimitCodes.contains(rt.getTsCode());
+            highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
             if ((!rt.getName().contains("ST") && !rt.getName().contains("退")
                     && rt.getTsCode().startsWith("3") && !noConcerned
                     && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
-                    && rt.getPriHigh() != null
-                    && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0
+                    && highLimit
             ) || concerned || holds || rangeOverLimit) {
-                type = (concerned ? "C" : holds ? "H" : rangeOverLimit ? "R" : "F");
+                type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : "R");
                 String holdRemark;
                 if ((holds || concerned)
                         && rt.getCurrentPri() != null

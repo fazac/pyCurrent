@@ -15,8 +15,8 @@ em_func = args.em_func
 em_table = args.em_table
 em_table_tmp = em_table + "_tmp"
 
-engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stock?charset=utf8")
-db = pymysql.connect(host='localhost', port=3306, user='root', passwd='123456', db='stock', charset='utf8')
+engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")
+db = pymysql.connect(host='localhost', port=3306, user='root', passwd='123456', db='stockrealtime', charset='utf8')
 sql1 = "drop table if exists " + em_table_tmp
 cursor = db.cursor()
 cursor.execute(sql1)
