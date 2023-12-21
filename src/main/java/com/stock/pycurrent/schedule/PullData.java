@@ -110,7 +110,7 @@ public class PullData {
             if (emConstantMap.containsKey("HOLD_CODES")
                     && emConstantMap.get("HOLD_CODES").getMultiValue() != null
                     && !emConstantMap.get("HOLD_CODES").getMultiValue().isEmpty()) {
-                Map<String, EmConstantValue> tmpMap = emConstantMap.get("HOLD_CODES").getMultiValue().stream().collect(Collectors.toMap(EmConstantValue::getTsCode, Function.identity()));
+                Map<String, EmConstantValue> tmpMap = emConstantMap.get("HOLD_CODES").getMultiValue().stream().filter(x -> x.getTsCode() != null && !x.getTsCode().isBlank()).collect(Collectors.toMap(EmConstantValue::getTsCode, Function.identity()));
                 constantValueMap.put("HOLD_CODES", tmpMap);
             }
         }
