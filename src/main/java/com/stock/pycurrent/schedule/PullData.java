@@ -163,8 +163,9 @@ public class PullData {
                 String holdRemark;
                 if ((holds || concerned)
                         && rt.getCurrentPri() != null
-                        && (stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) || stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode()))) {
-                    EmConstantValue emConstantValue = stockMap.get("HOLD_CODES").containsKey(rt.getTsCode())
+                        && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode())
+                        || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode()))) {
+                    EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode())
                             ? stockMap.get("HOLD_CODES").get(rt.getTsCode())
                             : stockMap.get("CONCERN_CODES").get(rt.getTsCode());
                     BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
