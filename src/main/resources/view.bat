@@ -1,1 +1,1 @@
-tail -f C:\Users\fa\log\spring.log
+tail -f C:\Users\fa\Desktop\log\current\spring.log
