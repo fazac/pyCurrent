@@ -27,7 +27,7 @@ logging:
   level:
     root: INFO
   file:
-    path: ./log
+    path: ./log/current
   logback:
     rollingpolicy:
       max-history: 30

@@ -40,7 +40,7 @@ public class ExecutorUtils {
 
     private static void execPythonFile(String params) {
         Runtime r = Runtime.getRuntime();
-        String pyScript = "C:/Users/fa/Desktop/akshare_stock.py";
+        String pyScript = "C:/Users/fa/Desktop/py/akshare_stock_realtime.py";
         File f = new File(pyScript);
         if (f.exists() && !f.isDirectory()) {
             try {
