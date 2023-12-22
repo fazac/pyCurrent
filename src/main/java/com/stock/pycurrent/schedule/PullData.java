@@ -154,11 +154,13 @@ public class PullData {
             }
             rangeOverLimit = rangeOverLimitCodes.contains(rt.getTsCode());
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
-            if ((!rt.getName().contains("ST") && !rt.getName().contains("退")
-                    && rt.getTsCode().startsWith("3") && !noConcerned
-                    && rt.getPctChg() != null && rt.getPctChg().compareTo(BigDecimal.ZERO) > 0
-                    && highLimit
-            ) || concerned || holds || rangeOverLimit) {
+            if (!noConcerned
+                    && !rt.getName().contains("ST")
+                    && !rt.getName().contains("退")
+                    && rt.getTsCode().startsWith("3")
+                    && rt.getPctChg() != null
+                    && (highLimit || concerned || holds || rangeOverLimit)
+            ) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : "R");
                 String holdRemark;
                 if ((holds || concerned)
