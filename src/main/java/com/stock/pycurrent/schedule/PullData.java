@@ -3,8 +3,10 @@ package com.stock.pycurrent.schedule;
 import com.stock.pycurrent.entity.EmConstant;
 import com.stock.pycurrent.entity.EmConstantValue;
 import com.stock.pycurrent.entity.EmRealTimeStock;
+import com.stock.pycurrent.entity.RangeOverCode;
 import com.stock.pycurrent.service.EmConstantService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
+import com.stock.pycurrent.service.RangeOverCodeService;
 import com.stock.pycurrent.util.MessageUtil;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
@@ -15,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -26,11 +29,12 @@ public class PullData {
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
     private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
     private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(6);
-    @SuppressWarnings("unused")
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
+    private RangeOverCodeService rangeOverCodeService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
@@ -84,8 +88,7 @@ public class PullData {
         String noConcernCodes = "";
         String holdCodes = "";
         if (!emConstants.isEmpty()) {
-            Map<String, EmConstant> emConstantMap = emConstants.stream()
-                    .collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
+            Map<String, EmConstant> emConstantMap = emConstants.stream().collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
             concernCodes = emConstantMap.containsKey("CONCERN_CODES") ? emConstantMap.get("CONCERN_CODES").getCValue() : "";
             concernCodes = concernCodes == null || concernCodes.isEmpty() ? "" : concernCodes;
             noConcernCodes = emConstantMap.containsKey("NO_CONCERN_CODES") ? emConstantMap.get("NO_CONCERN_CODES").getCValue() : "";
@@ -99,17 +102,12 @@ public class PullData {
     private Map<String, Map<String, EmConstantValue>> prepareConstantsMap(List<EmConstant> emConstants) {
         Map<String, Map<String, EmConstantValue>> constantValueMap = new HashMap<>();
         if (!emConstants.isEmpty()) {
-            Map<String, EmConstant> emConstantMap = emConstants.stream()
-                    .collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
-            if (emConstantMap.containsKey("CONCERN_CODES")
-                    && emConstantMap.get("CONCERN_CODES").getMultiValue() != null
-                    && !emConstantMap.get("CONCERN_CODES").getMultiValue().isEmpty()) {
+            Map<String, EmConstant> emConstantMap = emConstants.stream().collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
+            if (emConstantMap.containsKey("CONCERN_CODES") && emConstantMap.get("CONCERN_CODES").getMultiValue() != null && !emConstantMap.get("CONCERN_CODES").getMultiValue().isEmpty()) {
                 Map<String, EmConstantValue> tmpMap = emConstantMap.get("CONCERN_CODES").getMultiValue().stream().collect(Collectors.toMap(EmConstantValue::getTsCode, Function.identity()));
                 constantValueMap.put("CONCERN_CODES", tmpMap);
             }
-            if (emConstantMap.containsKey("HOLD_CODES")
-                    && emConstantMap.get("HOLD_CODES").getMultiValue() != null
-                    && !emConstantMap.get("HOLD_CODES").getMultiValue().isEmpty()) {
+            if (emConstantMap.containsKey("HOLD_CODES") && emConstantMap.get("HOLD_CODES").getMultiValue() != null && !emConstantMap.get("HOLD_CODES").getMultiValue().isEmpty()) {
                 Map<String, EmConstantValue> tmpMap = emConstantMap.get("HOLD_CODES").getMultiValue().stream().filter(x -> x.getTsCode() != null && !x.getTsCode().isBlank()).collect(Collectors.toMap(EmConstantValue::getTsCode, Function.identity()));
                 constantValueMap.put("HOLD_CODES", tmpMap);
             }
@@ -121,21 +119,22 @@ public class PullData {
         initLogsMap();
         String type;
         String nowClock = fixLength(stockList.get(0).getTradeDate().substring(11), 8);
-        boolean checkRangeOverLimit = Integer.parseInt(nowClock.trim().substring(0, 2)) > 9
-                || Integer.parseInt(nowClock.trim().substring(3, 5)) >= 30;
+        String nowDay = LocalDateTime.now().format(DATE_TIME_FORMAT);
+        boolean checkRangeOverLimit = Integer.parseInt(nowClock.trim().substring(0, 2)) > 9 || Integer.parseInt(nowClock.trim().substring(3, 5)) >= 30;
+        RangeOverCode rangeOverCode = rangeOverCodeService.findByDate(nowDay);
+        if (rangeOverCode != null && rangeOverCode.getTradeDate() != null && !rangeOverCode.getTradeDate().isBlank()) {
+            rangeOverLimitCodes.addAll(Arrays.asList(rangeOverCode.getCodes().split(",")));
+        } else {
+            rangeOverCode = new RangeOverCode();
+            rangeOverCode.setTradeDate(nowDay);
+        }
         for (EmRealTimeStock rt : stockList) {
             boolean noConcerned = codes[1].contains(rt.getTsCode());
             boolean holds = codes[2].contains(rt.getTsCode()) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()));
-            boolean concerned = !holds
-                    && (codes[0].contains(rt.getTsCode()) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode())));
+            boolean concerned = !holds && (codes[0].contains(rt.getTsCode()) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode())));
             boolean rangeOverLimit;
             boolean highLimit;
-            if (!rt.getName().contains("ST") && !rt.getName().contains("退")
-                    && rt.getTsCode().startsWith("3")
-                    && !noConcerned
-                    && rt.getPctChg() != null
-                    && checkRangeOverLimit
-            ) {
+            if (!rt.getName().contains("ST") && !rt.getName().contains("退") && rt.getTsCode().startsWith("3") && !noConcerned && rt.getPctChg() != null && checkRangeOverLimit) {
                 if (codePctMap.containsKey(rt.getTsCode())) {
                     codePctMap.get(rt.getTsCode()).add(rt.getPctChg());
                 } else {
@@ -154,25 +153,13 @@ public class PullData {
             }
             rangeOverLimit = rangeOverLimitCodes.contains(rt.getTsCode());
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
-            if (!noConcerned
-                    && !rt.getName().contains("ST")
-                    && !rt.getName().contains("退")
-                    && rt.getTsCode().startsWith("3")
-                    && rt.getPctChg() != null
-                    && (highLimit || concerned || holds || rangeOverLimit)
-            ) {
+            if (!noConcerned && !rt.getName().contains("ST") && !rt.getName().contains("退") && rt.getTsCode().startsWith("3") && rt.getPctChg() != null && (highLimit || concerned || holds || rangeOverLimit)) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : "R");
                 String holdRemark;
-                if ((holds || concerned)
-                        && rt.getCurrentPri() != null
-                        && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode())
-                        || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode()))) {
-                    EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode())
-                            ? stockMap.get("HOLD_CODES").get(rt.getTsCode())
-                            : stockMap.get("CONCERN_CODES").get(rt.getTsCode());
+                if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode()))) {
+                    EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) ? stockMap.get("HOLD_CODES").get(rt.getTsCode()) : stockMap.get("CONCERN_CODES").get(rt.getTsCode());
                     BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
-                    BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice())
-                            .multiply(BigDecimal.valueOf(emConstantValue.getVol()));
+                    BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice()).multiply(BigDecimal.valueOf(emConstantValue.getVol()));
                     BigDecimal potentialBenefits;
                     holdRemark = fixLength(realRatio, 7);
                     if (emConstantValue.getProfit() != null) {
@@ -188,24 +175,14 @@ public class PullData {
                     holdRemark += fixLength("", 10);
                     holdRemark += fixLength("", 10);
                 }
-                logsMap.get(type).add(rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
-                        + fixLength(rt.getPctChg(), 6)
-                        + fixLength(rt.getChangeHand(), 5)
-                        + holdRemark + fixLength(rt.getCurrentPri(), 6));
-                if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null
-                        && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode())
-                        && stockMap.get("HOLD_CODES").get(rt.getTsCode()).isSellable()) {
+                logsMap.get(type).add(rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6));
+                if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) && stockMap.get("HOLD_CODES").get(rt.getTsCode()).isSellable()) {
                     //低开超1%,涨超买入价回落卖出
-                    if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0
-                            && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0
-                            && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0
-                    ) {
+                    if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0 && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
                         MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
                     }
                     //高开超1%且跌落买入价时卖出,或者非封板收盘卖
-                    if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0
-                            && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0
-                    ) {
+                    if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
                         MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
                     }
                 }
@@ -222,8 +199,7 @@ public class PullData {
                             //put greater one
                             codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
                         }
-                        if (codeCountMap.get(rt.getTsCode()) > 3
-                                && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) { // 触发涨停板
+                        if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) { // 触发涨停板
                             // info && reset count
                             MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
                             codeCountMap.put(rt.getTsCode(), 0);
@@ -237,8 +213,7 @@ public class PullData {
                     if (rt.getPctChg().compareTo(PCH_OVER_LIMIT) > 0) { // 17
                         codeOverLimitMap.put(rt.getTsCode(), codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) + 1);
                     }
-                    if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7
-                            && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
+                    if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
                         MessageUtil.sendNotificationMsg("BUY LONE ", rt.getTsCode().substring(2, 6));
                         codeOverLimitMap.put(rt.getTsCode(), 0);
                     }
@@ -246,9 +221,7 @@ public class PullData {
             }
         }
         log.info(" ____________________________________________________________________________________________");
-        String title = "|   TIME   |  I  |" + " T CODE 简称 |  "
-                + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5)
-                + fixLengthTitle("   AM   ", 8) + fixLengthTitle("   PB   ", 8) + fixLengthTitle(" CP ", 4);
+        String title = "|   TIME   |  I  |" + " T CODE 简称 |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle("   AM   ", 8) + fixLengthTitle("   PB   ", 8) + fixLengthTitle(" CP ", 4);
         log.info(title.substring(0, title.length() - 2));
         log.info(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         printMapInfo(logsMap, "F", nowClock);
@@ -256,6 +229,8 @@ public class PullData {
         printMapInfo(logsMap, "C", nowClock);
         printMapInfo(logsMap, "H", nowClock);
         log.info(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        rangeOverCode.setCodes(String.join(",", rangeOverLimitCodes));
+        rangeOverCodeService.saveEntity(rangeOverCode);
     }
 
     private void printMapInfo(Map<String, List<String>> logsMap, String type, String nowClock) {
@@ -283,8 +258,7 @@ public class PullData {
     private boolean calRange(List<BigDecimal> values) {
         BigDecimal maxValue = Collections.max(values);
         BigDecimal minValue = Collections.min(values);
-        return maxValue.subtract(minValue).compareTo(RANGE_LIMIT) >= 0
-                && values.indexOf(maxValue) > values.indexOf(minValue);
+        return maxValue.subtract(minValue).compareTo(RANGE_LIMIT) >= 0 && values.indexOf(maxValue) > values.indexOf(minValue);
     }
 
     private boolean isTradeHour() {
@@ -306,5 +280,10 @@ public class PullData {
     @Autowired
     public void setEmConstantService(EmConstantService emConstantService) {
         this.emConstantService = emConstantService;
+    }
+
+    @Autowired
+    public void setRangeOverCodeService(RangeOverCodeService rangeOverCodeService) {
+        this.rangeOverCodeService = rangeOverCodeService;
     }
 }

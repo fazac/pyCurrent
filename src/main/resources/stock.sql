@@ -1,10 +1,10 @@
 CREATE
-DATABASE IF NOT EXISTS stockrealtime
-DEFAULT CHARSET=utf8mb4 
-COLLATE=utf8mb4_general_ci;
+    DATABASE IF NOT EXISTS stockrealtime
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_general_ci;
 
 use
-stockrealtime;
+    stockrealtime;
 
 
 CREATE TABLE `em_real_time_stock`
@@ -32,9 +32,12 @@ CREATE TABLE `em_real_time_stock`
     `five_minutes_increase_ratio`  decimal(18, 2)                                               DEFAULT NULL COMMENT '5分钟涨速',
     `sixty_minutes_increase_ratio` decimal(18, 2)                                               DEFAULT NULL COMMENT '60分钟涨速',
     `current_year_ratio`           decimal(18, 2)                                               DEFAULT NULL COMMENT '年初至今涨跌幅',
-    KEY                            `idx_sdl_code` (`ts_code`) USING BTREE,
-    KEY                            `idx_sdl_date` (`trade_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+    KEY `idx_sdl_code` (`ts_code`) USING BTREE,
+    KEY `idx_sdl_date` (`trade_date`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
 
 
 CREATE TABLE `em_constants`
@@ -43,11 +46,33 @@ CREATE TABLE `em_constants`
     `c_value`     varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
     `multi_value` json                                                          DEFAULT NULL COMMENT '多值',
     PRIMARY KEY (`c_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
 
 INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
 VALUES ('CONCERN_CODES', '', NULL);
 INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
-VALUES ('HOLD_CODES', '', '[{\"vol\": 2100, \"price\": 16.558, \"profit\": -1303.1, \"tsCode\": \"300729\", \"sellable\": false}]');
+VALUES ('HOLD_CODES', '', '[
+  {
+    \"vol\": 2100,
+    \"price\": 16.558,
+    \"profit\": -1303.1,
+    \"tsCode\": \"300729\",
+    \"sellable\": false
+  }
+]');
 INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
 VALUES ('NO_CONCERN_CODES', '', NULL);
+
+-- 20231222
+drop table if exists range_over_code;
+create table range_over_code
+(
+    `trade_date` varchar(8) primary key ,
+    `codes`      varchar(512)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
