@@ -29,6 +29,7 @@ public class PullData {
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
     private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
     private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(6);
+    private static final BigDecimal MAX_LIMIT = BigDecimal.valueOf(21);
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -199,7 +200,9 @@ public class PullData {
                             //put greater one
                             codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
                         }
-                        if (codeCountMap.get(rt.getTsCode()) > 3 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) { // 触发涨停板
+                        if (codeCountMap.get(rt.getTsCode()) > 3
+                                && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0
+                        ) { // 触发涨停板
                             // info && reset count
                             MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
                             codeCountMap.put(rt.getTsCode(), 0);
@@ -213,7 +216,9 @@ public class PullData {
                     if (rt.getPctChg().compareTo(PCH_OVER_LIMIT) > 0) { // 17
                         codeOverLimitMap.put(rt.getTsCode(), codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) + 1);
                     }
-                    if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0) {
+                    if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7
+                            && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0
+                            && rt.getPctChg().compareTo(MAX_LIMIT) < 0) {
                         MessageUtil.sendNotificationMsg("BUY LONE ", rt.getTsCode().substring(2, 6));
                         codeOverLimitMap.put(rt.getTsCode(), 0);
                     }
