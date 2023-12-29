@@ -88,6 +88,7 @@ public class PullData {
         String concernCodes = "";
         String noConcernCodes = "";
         String holdCodes = "";
+        String noBuyCodes = "";
         if (!emConstants.isEmpty()) {
             Map<String, EmConstant> emConstantMap = emConstants.stream().collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
             concernCodes = emConstantMap.containsKey("CONCERN_CODES") ? emConstantMap.get("CONCERN_CODES").getCValue() : "";
@@ -96,8 +97,10 @@ public class PullData {
             noConcernCodes = noConcernCodes == null || noConcernCodes.isEmpty() ? "" : noConcernCodes;
             holdCodes = emConstantMap.containsKey("HOLD_CODES") ? emConstantMap.get("HOLD_CODES").getCValue() : "";
             holdCodes = holdCodes == null || holdCodes.isEmpty() ? "" : holdCodes;
+            noBuyCodes = emConstantMap.containsKey("NO_BUY_CODES") ? emConstantMap.get("NO_BUY_CODES").getCValue() : "";
+            noBuyCodes = noBuyCodes == null || noBuyCodes.isEmpty() ? "" : noBuyCodes;
         }
-        return new String[]{concernCodes, noConcernCodes, holdCodes};
+        return new String[]{concernCodes, noConcernCodes, holdCodes, noBuyCodes};
     }
 
     private Map<String, Map<String, EmConstantValue>> prepareConstantsMap(List<EmConstant> emConstants) {
@@ -133,6 +136,7 @@ public class PullData {
             boolean noConcerned = codes[1].contains(rt.getTsCode());
             boolean holds = codes[2].contains(rt.getTsCode()) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()));
             boolean concerned = !holds && (codes[0].contains(rt.getTsCode()) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode())));
+            boolean noBuy = codes[3].contains(rt.getTsCode());
             boolean rangeOverLimit;
             boolean highLimit;
             if (!rt.getName().contains("ST") && !rt.getName().contains("退") && rt.getTsCode().startsWith("3") && !noConcerned && rt.getPctChg() != null && checkRangeOverLimit) {
@@ -166,7 +170,11 @@ public class PullData {
                     if (emConstantValue.getProfit() != null) {
                         potentialBenefits = amount.subtract(emConstantValue.getProfit());
                         holdRemark += fixLength("", 10);
-                        holdRemark += fixLength(potentialBenefits, 10);
+                        if (emConstantValue.isHold()) {
+                            holdRemark += fixLength(potentialBenefits + "(T)", 10);
+                        } else {
+                            holdRemark += fixLength(potentialBenefits + "(F)", 10);
+                        }
                     } else {
                         holdRemark += fixLength(amount, 10);
                         holdRemark += fixLength("", 10);
@@ -202,6 +210,7 @@ public class PullData {
                         }
                         if (codeCountMap.get(rt.getTsCode()) > 3
                                 && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0
+                                && !noBuy
                         ) { // 触发涨停板
                             // info && reset count
                             MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
@@ -218,7 +227,8 @@ public class PullData {
                     }
                     if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7
                             && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0
-                            && rt.getPctChg().compareTo(MAX_LIMIT) < 0) {
+                            && rt.getPctChg().compareTo(MAX_LIMIT) < 0
+                            && !noBuy) {
                         MessageUtil.sendNotificationMsg("BUY LONE ", rt.getTsCode().substring(2, 6));
                         codeOverLimitMap.put(rt.getTsCode(), 0);
                     }
