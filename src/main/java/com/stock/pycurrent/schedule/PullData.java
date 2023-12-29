@@ -171,9 +171,9 @@ public class PullData {
                         potentialBenefits = amount.subtract(emConstantValue.getProfit());
                         holdRemark += fixLength("", 10);
                         if (emConstantValue.isHold()) {
-                            holdRemark += fixLength(potentialBenefits + "(T)", 10);
+                            holdRemark += fixLength(potentialBenefits + "T", 10);
                         } else {
-                            holdRemark += fixLength(potentialBenefits + "(F)", 10);
+                            holdRemark += fixLength(potentialBenefits + "F", 10);
                         }
                     } else {
                         holdRemark += fixLength(amount, 10);
