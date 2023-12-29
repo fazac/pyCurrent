@@ -19,7 +19,7 @@ public interface EmRealTimeStockRepo extends JpaRepository<EmRealTimeStock, Basi
     List<EmRealTimeStock> findLast();
 
     @Query(value = """
-            select distinct trade_date from em_real_time_stock order by trade_date;
+            select distinct trade_date from em_real_time_stock where trade_date>curdate() order by trade_date;
             """, nativeQuery = true)
     List<String> findTradeDates();
 

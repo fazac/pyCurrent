@@ -66,12 +66,12 @@ VALUES ('HOLD_CODES', '', '[
 INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
 VALUES ('NO_CONCERN_CODES', '', NULL);
 
--- 20231222
+-- 20231229
 drop table if exists range_over_code;
 create table range_over_code
 (
-    `trade_date` varchar(8) primary key ,
-    `codes`      varchar(512)
+    `trade_date` varchar(8) primary key,
+    `code_value` json DEFAULT NULL COMMENT '多值'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci

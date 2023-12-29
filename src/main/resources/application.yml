@@ -17,6 +17,8 @@ spring:
       mode: always
   main:
     allow-circular-references: true
+    banner-mode: off
+    log-startup-info: false
   jpa:
     open-in-view: true
 logging:
@@ -25,9 +27,10 @@ logging:
     console: "%m%n%wEx"
     file: "%m%n%wEx"
   level:
-    root: INFO
+    root: info
   file:
     path: ./log/current
   logback:
     rollingpolicy:
       max-history: 30
+

@@ -39,14 +39,16 @@ public class MessageUtil {
 
     @SneakyThrows
     public static void sendNotificationMsg(String title, String code) {
-        sendMessage("New Message");
-        SystemTray tray = SystemTray.getSystemTray();
-        Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
-        TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
-        trayIcon.setImageAutoSize(true);
-        trayIcon.setToolTip("System tray icon demo");
-        tray.add(trayIcon);
-        trayIcon.displayMessage(title, code, TrayIcon.MessageType.INFO);
+        if (!PARAMS.BAK_MODE) {
+            sendMessage("New Message");
+            SystemTray tray = SystemTray.getSystemTray();
+            Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
+            TrayIcon trayIcon = new TrayIcon(image, "Tray Demo");
+            trayIcon.setImageAutoSize(true);
+            trayIcon.setToolTip("System tray icon demo");
+            tray.add(trayIcon);
+            trayIcon.displayMessage(title, code, TrayIcon.MessageType.INFO);
+        }
         log.info(title + " " + code);
     }
 
