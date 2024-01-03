@@ -49,7 +49,7 @@ public class MessageUtil {
             tray.add(trayIcon);
             trayIcon.displayMessage(title, code, TrayIcon.MessageType.INFO);
         }
-        log.info(title + " " + code);
+        log.warn(title + " " + code);
     }
 
 

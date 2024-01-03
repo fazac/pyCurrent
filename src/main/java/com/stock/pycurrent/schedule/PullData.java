@@ -30,9 +30,10 @@ public class PullData implements CommandLineRunner {
     private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(5);
     private static final BigDecimal MAX_LIMIT = BigDecimal.valueOf(21);
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
-
     private static final BigDecimal HUNDRED_MILLION = BigDecimal.valueOf(100000000);
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    private final String CODE_TYPE = "F,R,C,L,H";
 
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
@@ -53,10 +54,7 @@ public class PullData implements CommandLineRunner {
 
     private void initLogsMap() {
         logsMap.clear();
-        logsMap.put("F", new ArrayList<>());
-        logsMap.put("R", new ArrayList<>());
-        logsMap.put("C", new ArrayList<>());
-        logsMap.put("H", new ArrayList<>());
+        Arrays.stream(CODE_TYPE.split(",")).forEach(x -> logsMap.put(x, new ArrayList<>()));
     }
 
     @Override
@@ -97,6 +95,7 @@ public class PullData implements CommandLineRunner {
         String noConcernCodes = "";
         String holdCodes = "";
         String noBuyCodes = "";
+        String yesterdayCodes = "";
         if (!emConstants.isEmpty()) {
             Map<String, EmConstant> emConstantMap = emConstants.stream().collect(Collectors.toMap(EmConstant::getCKey, Function.identity()));
             concernCodes = emConstantMap.containsKey("CONCERN_CODES") ? emConstantMap.get("CONCERN_CODES").getCValue() : "";
@@ -107,8 +106,10 @@ public class PullData implements CommandLineRunner {
             holdCodes = holdCodes == null || holdCodes.isEmpty() ? "" : holdCodes;
             noBuyCodes = emConstantMap.containsKey("NO_BUY_CODES") ? emConstantMap.get("NO_BUY_CODES").getCValue() : "";
             noBuyCodes = noBuyCodes == null || noBuyCodes.isEmpty() ? "" : noBuyCodes;
+            yesterdayCodes = emConstantMap.containsKey("YESTERDAY_CODES") ? emConstantMap.get("YESTERDAY_CODES").getCValue() : "";
+            yesterdayCodes = yesterdayCodes == null || yesterdayCodes.isEmpty() ? "" : yesterdayCodes;
         }
-        return new String[]{concernCodes, noConcernCodes, holdCodes, noBuyCodes};
+        return new String[]{concernCodes, noConcernCodes, holdCodes, noBuyCodes, yesterdayCodes};
     }
 
     private Map<String, Map<String, EmConstantValue>> prepareConstantsMap(List<EmConstant> emConstants) {
@@ -151,6 +152,7 @@ public class PullData implements CommandLineRunner {
         boolean holds;
         boolean concerned;
         boolean noBuy;
+        boolean yesterdayHigh;
         StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
             holdRemark.setLength(0);
@@ -159,6 +161,7 @@ public class PullData implements CommandLineRunner {
             holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
             concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
             noBuy = codes[3].contains(tsCode);
+            yesterdayHigh = !holds && codes[4].contains(tsCode);
             if (!rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkRangeOverLimit) {
                 if (codePctMap.containsKey(tsCode)) {
                     codePctMap.get(tsCode).add(rt.getPctChg());
@@ -179,8 +182,8 @@ public class PullData implements CommandLineRunner {
             }
             rangeOverLimit = valueCodeCountMap.containsKey(tsCode) && convertTimeCount(nowClock) - valueCodeCountMap.get(tsCode) <= 40;
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
-            if (!noConcerned && !rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && rt.getPctChg() != null && (highLimit || concerned || holds || rangeOverLimit)) {
-                type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : "R");
+            if (!noConcerned && !rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && rt.getPctChg() != null && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh)) {
+                type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : !yesterdayHigh ? "R" : "L");
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
                     EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) ? stockMap.get("HOLD_CODES").get(tsCode) : stockMap.get("CONCERN_CODES").get(tsCode);
                     BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
@@ -190,11 +193,7 @@ public class PullData implements CommandLineRunner {
                     if (emConstantValue.getProfit() != null) {
                         potentialBenefits = amount.subtract(emConstantValue.getProfit());
                         holdRemark.append(fixLength("", 10));
-                        if (emConstantValue.isHold()) {
-                            holdRemark.append(fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP) + "T", 10));
-                        } else {
-                            holdRemark.append(fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP) + "F", 10));
-                        }
+                        holdRemark.append(fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP), 10));
                     } else {
                         holdRemark.append(fixLength(amount, 10));
                         holdRemark.append(fixLength("", 10));
@@ -212,10 +211,10 @@ public class PullData implements CommandLineRunner {
                         + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5)
                         + holdRemark
                         + fixLength(rt.getCurrentPri(), 6)
+                        + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
+                        + fixLength(volMap.containsKey(tsCode) ? rt.getVol() - volMap.get(tsCode) : rt.getVol(), 9)
                         + fixLength(rt.getPe(), 8)
                         + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
-                        + fixLength(volMap.containsKey(tsCode) ? rt.getVol() - volMap.get(tsCode) : rt.getVol(), 9)
-                        + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
                 );
                 if (rt.getVol() != null) {
                     volMap.put(tsCode, rt.getVol());
@@ -279,16 +278,13 @@ public class PullData implements CommandLineRunner {
                 + fixLengthTitle("   AM   ", 8)
                 + fixLengthTitle("   PB   ", 8)
                 + fixLengthTitle(" CP ", 4)
-                + fixLengthTitle(" PE ", 6)
-                + fixLengthTitle(" CM ", 6)
+                + fixLengthTitle("AVG", 7)
                 + fixLengthTitle("VOL", 7)
-                + fixLengthTitle("AVG", 7);
+                + fixLengthTitle(" PE ", 6)
+                + fixLengthTitle(" CM ", 6);
         log.warn(title.substring(0, title.length() - 2));
         log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
-        printMapInfo(logsMap, "F", nowClock);
-        printMapInfo(logsMap, "R", nowClock);
-        printMapInfo(logsMap, "C", nowClock);
-        printMapInfo(logsMap, "H", nowClock);
+        printMapInfo(logsMap, nowClock);
         log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
@@ -304,12 +300,14 @@ public class PullData implements CommandLineRunner {
                 - 1140;
     }
 
-    private void printMapInfo(Map<String, List<String>> logsMap, String type, String nowClock) {
-        if (!logsMap.get(type).isEmpty()) {
-            for (int i = 0; i < logsMap.get(type).size(); i++) {
-                log.warn("| " + nowClock + fixLength(i + 1 + " ", 3) + type + " " + logsMap.get(type).get(i));
+    private void printMapInfo(Map<String, List<String>> logsMap, String nowClock) {
+        Arrays.stream(CODE_TYPE.split(",")).forEach(x -> {
+            if (!logsMap.get(x).isEmpty()) {
+                for (int i = 0; i < logsMap.get(x).size(); i++) {
+                    log.warn("| " + nowClock + fixLength(i + 1 + " ", 3) + x + " " + logsMap.get(x).get(i));
+                }
             }
-        }
+        });
     }
 
     private String fixLength(Object str, int length) {
