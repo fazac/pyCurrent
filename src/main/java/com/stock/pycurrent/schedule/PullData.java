@@ -47,6 +47,8 @@ public class PullData implements CommandLineRunner {
 
     private final Map<String, List<String>> logsMap = new HashMap<>();
 
+    private final Map<String, Long> volMap = new HashMap<>();
+
 
     private void initLogsMap() {
         logsMap.clear();
@@ -199,7 +201,18 @@ public class PullData implements CommandLineRunner {
                     holdRemark += fixLength("", 10);
                     holdRemark += fixLength("", 10);
                 }
-                logsMap.get(type).add(rt.getTsCode().substring(2, 6) + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getPe(), 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8));
+                logsMap.get(type).add(rt.getTsCode().substring(2, 6)
+                        + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
+                        + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5)
+                        + holdRemark
+                        + fixLength(rt.getCurrentPri(), 6)
+                        + fixLength(rt.getPe(), 8)
+                        + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
+                        + fixLength(volMap.containsKey(rt.getTsCode()) ? rt.getVol() - volMap.get(rt.getTsCode()) : rt.getVol(), 9)
+                );
+                if (rt.getVol() != null) {
+                    volMap.put(rt.getTsCode(), rt.getVol());
+                }
                 if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) && stockMap.get("HOLD_CODES").get(rt.getTsCode()).isSellable()) {
                     //低开超1%,涨超买入价回落卖出
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0 && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
@@ -250,7 +263,7 @@ public class PullData implements CommandLineRunner {
                 }
             }
         }
-        log.warn(" __________________________________________________________________________________________________________________");
+        log.warn(" ______________________________________________________________________________________________________________________________");
         String title = "|   TIME   |  I  |" + " T CODE 简称 |  "
                 + fixLengthTitle(" RT ", 4)
                 + fixLengthTitle(" H ", 3)
@@ -259,14 +272,15 @@ public class PullData implements CommandLineRunner {
                 + fixLengthTitle("   PB   ", 8)
                 + fixLengthTitle(" CP ", 4)
                 + fixLengthTitle(" PE ", 6)
-                + fixLengthTitle(" CM ", 6);
+                + fixLengthTitle(" CM ", 6)
+                + fixLengthTitle("VOL", 7);
         log.warn(title.substring(0, title.length() - 2));
-        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         printMapInfo(logsMap, "F", nowClock);
         printMapInfo(logsMap, "R", nowClock);
         printMapInfo(logsMap, "C", nowClock);
         printMapInfo(logsMap, "H", nowClock);
-        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
             rangeOverCode.setCodeValue(valueList);
