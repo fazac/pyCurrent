@@ -48,6 +48,7 @@ public class PullData implements CommandLineRunner {
     private final Map<String, List<String>> logsMap = new HashMap<>();
 
     private final Map<String, Long> volMap = new HashMap<>();
+    private final Map<String, BigDecimal> amountMap = new HashMap<>();
 
 
     private void initLogsMap() {
@@ -150,120 +151,127 @@ public class PullData implements CommandLineRunner {
         boolean holds;
         boolean concerned;
         boolean noBuy;
+        StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
-            noConcerned = codes[1].contains(rt.getTsCode());
-            holds = codes[2].contains(rt.getTsCode()) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()));
-            concerned = !holds && (codes[0].contains(rt.getTsCode()) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode())));
-            noBuy = codes[3].contains(rt.getTsCode());
-            if (!rt.getName().contains("ST") && !rt.getName().contains("退") && rt.getTsCode().startsWith("3") && !noConcerned && rt.getPctChg() != null && checkRangeOverLimit) {
-                if (codePctMap.containsKey(rt.getTsCode())) {
-                    codePctMap.get(rt.getTsCode()).add(rt.getPctChg());
+            holdRemark.setLength(0);
+            String tsCode = rt.getTsCode();
+            noConcerned = codes[1].contains(tsCode);
+            holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
+            concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
+            noBuy = codes[3].contains(tsCode);
+            if (!rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkRangeOverLimit) {
+                if (codePctMap.containsKey(tsCode)) {
+                    codePctMap.get(tsCode).add(rt.getPctChg());
                 } else {
                     List<BigDecimal> pchQueue = new LinkedList<>();
                     pchQueue.add(rt.getPctChg());
-                    codePctMap.put(rt.getTsCode(), pchQueue);
+                    codePctMap.put(tsCode, pchQueue);
                 }
-                List<BigDecimal> fiveMinutesPch = codePctMap.get(rt.getTsCode());
+                List<BigDecimal> fiveMinutesPch = codePctMap.get(tsCode);
                 if (fiveMinutesPch.size() > 10) {
                     fiveMinutesPch.remove(0);
                 }
                 rangeOverLimit = calRange(fiveMinutesPch);
                 if (rangeOverLimit) {
-                    valueCodeCountMap.put(rt.getTsCode(), convertTimeCount(nowClock));
+                    valueCodeCountMap.put(tsCode, convertTimeCount(nowClock));
                     refreshRangeOverCode = true;
                 }
             }
-            rangeOverLimit = valueCodeCountMap.containsKey(rt.getTsCode()) && convertTimeCount(nowClock) - valueCodeCountMap.get(rt.getTsCode()) <= 40;
+            rangeOverLimit = valueCodeCountMap.containsKey(tsCode) && convertTimeCount(nowClock) - valueCodeCountMap.get(tsCode) <= 40;
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
-            if (!noConcerned && !rt.getName().contains("ST") && !rt.getName().contains("退") && rt.getTsCode().startsWith("3") && rt.getPctChg() != null && (highLimit || concerned || holds || rangeOverLimit)) {
+            if (!noConcerned && !rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && rt.getPctChg() != null && (highLimit || concerned || holds || rangeOverLimit)) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : "R");
-                String holdRemark;
-                if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(rt.getTsCode()))) {
-                    EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) ? stockMap.get("HOLD_CODES").get(rt.getTsCode()) : stockMap.get("CONCERN_CODES").get(rt.getTsCode());
+                if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
+                    EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) ? stockMap.get("HOLD_CODES").get(tsCode) : stockMap.get("CONCERN_CODES").get(tsCode);
                     BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
                     BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice()).multiply(BigDecimal.valueOf(emConstantValue.getVol()));
                     BigDecimal potentialBenefits;
-                    holdRemark = fixLength(realRatio, 7);
+                    holdRemark.append(fixLength(realRatio, 7));
                     if (emConstantValue.getProfit() != null) {
                         potentialBenefits = amount.subtract(emConstantValue.getProfit());
-                        holdRemark += fixLength("", 10);
+                        holdRemark.append(fixLength("", 10));
                         if (emConstantValue.isHold()) {
-                            holdRemark += fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP) + "T", 10);
+                            holdRemark.append(fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP) + "T", 10));
                         } else {
-                            holdRemark += fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP) + "F", 10);
+                            holdRemark.append(fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP) + "F", 10));
                         }
                     } else {
-                        holdRemark += fixLength(amount, 10);
-                        holdRemark += fixLength("", 10);
+                        holdRemark.append(fixLength(amount, 10));
+                        holdRemark.append(fixLength("", 10));
                     }
                 } else {
-                    holdRemark = fixLength("", 7);
-                    holdRemark += fixLength("", 10);
-                    holdRemark += fixLength("", 10);
+                    holdRemark.append(fixLength("", 7));
+                    holdRemark.append(fixLength("", 10));
+                    holdRemark.append(fixLength("", 10));
                 }
-                logsMap.get(type).add(rt.getTsCode().substring(2, 6)
+                BigDecimal avg = amountMap.containsKey(tsCode)
+                        ? amountMap.get(tsCode).compareTo(rt.getAmount()) == 0 ? BigDecimal.ZERO : rt.getAmount().subtract(amountMap.get(tsCode)).divide(BigDecimal.valueOf(rt.getVol() - volMap.get(tsCode)).multiply(HUNDRED), 3, RoundingMode.HALF_UP)
+                        : rt.getAmount().divide(BigDecimal.valueOf(rt.getVol()).multiply(HUNDRED), 3, RoundingMode.HALF_UP);
+                logsMap.get(type).add(tsCode.substring(2, 6)
                         + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
                         + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5)
                         + holdRemark
                         + fixLength(rt.getCurrentPri(), 6)
                         + fixLength(rt.getPe(), 8)
                         + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
-                        + fixLength(volMap.containsKey(rt.getTsCode()) ? rt.getVol() - volMap.get(rt.getTsCode()) : rt.getVol(), 9)
+                        + fixLength(volMap.containsKey(tsCode) ? rt.getVol() - volMap.get(tsCode) : rt.getVol(), 9)
+                        + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
                 );
                 if (rt.getVol() != null) {
-                    volMap.put(rt.getTsCode(), rt.getVol());
+                    volMap.put(tsCode, rt.getVol());
+                    amountMap.put(tsCode, rt.getAmount());
                 }
-                if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(rt.getTsCode()) && stockMap.get("HOLD_CODES").get(rt.getTsCode()).isSellable()) {
+                if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(tsCode) && stockMap.get("HOLD_CODES").get(tsCode).isSellable()) {
                     //低开超1%,涨超买入价回落卖出
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0 && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                        MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
+                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode.substring(2, 6));
                     }
                     //高开超1%且跌落买入价时卖出,或者非封板收盘卖
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                        MessageUtil.sendNotificationMsg("SELL ONE ", rt.getTsCode().substring(2, 6));
+                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode.substring(2, 6));
                     }
                 }
                 if (!concerned && !holds && rt.getPctChg() != null) {
-                    if (codeCountMap.containsKey(rt.getTsCode())) {
-                        if (rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) == 0) {
+                    if (codeCountMap.containsKey(tsCode)) {
+                        if (rt.getPctChg().compareTo(codeMaxMap.get(tsCode)) == 0) {
                             // max count++;
-                            codeCountMap.put(rt.getTsCode(), codeCountMap.get(rt.getTsCode()) + 1);
+                            codeCountMap.put(tsCode, codeCountMap.get(tsCode) + 1);
                         } else {
-                            if (codeMaxMap.get(rt.getTsCode()).compareTo(rt.getPctChg()) < 0) {
+                            if (codeMaxMap.get(tsCode).compareTo(rt.getPctChg()) < 0) {
                                 //reset count when meet greater one;
-                                codeCountMap.put(rt.getTsCode(), 0);
+                                codeCountMap.put(tsCode, 0);
                             }
                             //put greater one
-                            codeMaxMap.put(rt.getTsCode(), codeMaxMap.get(rt.getTsCode()).max(rt.getPctChg()));
+                            codeMaxMap.put(tsCode, codeMaxMap.get(tsCode).max(rt.getPctChg()));
                         }
-                        if (codeCountMap.get(rt.getTsCode()) > 3
-                                && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0
+                        if (codeCountMap.get(tsCode) > 3
+                                && rt.getPctChg().compareTo(codeMaxMap.get(tsCode)) < 0
                                 && !noBuy
                         ) { // 触发涨停板
                             // info && reset count
-                            MessageUtil.sendNotificationMsg("BUY ONE ", rt.getTsCode().substring(2, 6));
-                            codeCountMap.put(rt.getTsCode(), 0);
+                            MessageUtil.sendNotificationMsg("BUY ONE ", tsCode.substring(2, 6));
+                            codeCountMap.put(tsCode, 0);
                         }
                     } else {
                         // info new
-                        codeCountMap.put(rt.getTsCode(), 0);
-                        codeMaxMap.put(rt.getTsCode(), rt.getPctChg());
-                        MessageUtil.sendNotificationMsg("NEW ONE ", rt.getTsCode().substring(2, 6));
+                        codeCountMap.put(tsCode, 0);
+                        codeMaxMap.put(tsCode, rt.getPctChg());
+                        MessageUtil.sendNotificationMsg("NEW ONE ", tsCode.substring(2, 6));
                     }
                     if (rt.getPctChg().compareTo(PCH_OVER_LIMIT) > 0) { // 17
-                        codeOverLimitMap.put(rt.getTsCode(), codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) + 1);
+                        codeOverLimitMap.put(tsCode, codeOverLimitMap.getOrDefault(tsCode, 0) + 1);
                     }
-                    if (codeOverLimitMap.getOrDefault(rt.getTsCode(), 0) > 7
-                            && rt.getPctChg().compareTo(codeMaxMap.get(rt.getTsCode())) < 0
+                    if (codeOverLimitMap.getOrDefault(tsCode, 0) > 7
+                            && rt.getPctChg().compareTo(codeMaxMap.get(tsCode)) < 0
                             && rt.getPctChg().compareTo(MAX_LIMIT) < 0
                             && !noBuy) {
-                        MessageUtil.sendNotificationMsg("BUY LONE ", rt.getTsCode().substring(2, 6));
-                        codeOverLimitMap.put(rt.getTsCode(), 0);
+                        MessageUtil.sendNotificationMsg("BUY LONE ", tsCode.substring(2, 6));
+                        codeOverLimitMap.put(tsCode, 0);
                     }
                 }
             }
         }
-        log.warn(" ______________________________________________________________________________________________________________________________");
+        log.warn(" __________________________________________________________________________________________________________________________________________");
         String title = "|   TIME   |  I  |" + " T CODE 简称 |  "
                 + fixLengthTitle(" RT ", 4)
                 + fixLengthTitle(" H ", 3)
@@ -273,14 +281,15 @@ public class PullData implements CommandLineRunner {
                 + fixLengthTitle(" CP ", 4)
                 + fixLengthTitle(" PE ", 6)
                 + fixLengthTitle(" CM ", 6)
-                + fixLengthTitle("VOL", 7);
+                + fixLengthTitle("VOL", 7)
+                + fixLengthTitle("AVG", 7);
         log.warn(title.substring(0, title.length() - 2));
-        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         printMapInfo(logsMap, "F", nowClock);
         printMapInfo(logsMap, "R", nowClock);
         printMapInfo(logsMap, "C", nowClock);
         printMapInfo(logsMap, "H", nowClock);
-        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
             rangeOverCode.setCodeValue(valueList);
