@@ -204,7 +204,7 @@ public class PullData implements CommandLineRunner {
                     holdRemark.append(fixLength("", 10));
                 }
                 BigDecimal avg = amountMap.containsKey(tsCode)
-                        ? amountMap.get(tsCode).compareTo(rt.getAmount()) == 0 ? BigDecimal.ZERO : rt.getAmount().subtract(amountMap.get(tsCode)).divide(BigDecimal.valueOf(rt.getVol() - volMap.get(tsCode)).multiply(HUNDRED), 3, RoundingMode.HALF_UP)
+                        ? amountMap.get(tsCode).compareTo(rt.getAmount()) == 0 || rt.getVol() - volMap.get(tsCode) == 0 ? BigDecimal.ZERO : rt.getAmount().subtract(amountMap.get(tsCode)).divide(BigDecimal.valueOf(rt.getVol() - volMap.get(tsCode)).multiply(HUNDRED), 3, RoundingMode.HALF_UP)
                         : rt.getVol() == null ? BigDecimal.ZERO : rt.getAmount().divide(BigDecimal.valueOf(rt.getVol()).multiply(HUNDRED), 3, RoundingMode.HALF_UP);
                 logsMap.get(type).add(tsCode.substring(2, 6)
                         + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
