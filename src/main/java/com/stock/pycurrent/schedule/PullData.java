@@ -205,14 +205,14 @@ public class PullData implements CommandLineRunner {
                 }
                 BigDecimal avg = amountMap.containsKey(tsCode)
                         ? amountMap.get(tsCode).compareTo(rt.getAmount()) == 0 ? BigDecimal.ZERO : rt.getAmount().subtract(amountMap.get(tsCode)).divide(BigDecimal.valueOf(rt.getVol() - volMap.get(tsCode)).multiply(HUNDRED), 3, RoundingMode.HALF_UP)
-                        : rt.getAmount().divide(BigDecimal.valueOf(rt.getVol()).multiply(HUNDRED), 3, RoundingMode.HALF_UP);
+                        : rt.getVol() == null ? BigDecimal.ZERO : rt.getAmount().divide(BigDecimal.valueOf(rt.getVol()).multiply(HUNDRED), 3, RoundingMode.HALF_UP);
                 logsMap.get(type).add(tsCode.substring(2, 6)
                         + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
                         + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5)
                         + holdRemark
                         + fixLength(rt.getCurrentPri(), 6)
                         + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
-                        + fixLength(volMap.containsKey(tsCode) ? rt.getVol() - volMap.get(tsCode) : rt.getVol(), 9)
+                        + fixLength(volMap.containsKey(tsCode) && rt.getVol() != null ? Long.valueOf(rt.getVol() - volMap.get(tsCode)) : rt.getVol(), 9)
                         + fixLength(rt.getPe(), 8)
                         + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
                 );
@@ -335,7 +335,7 @@ public class PullData implements CommandLineRunner {
         LocalDateTime n = LocalDateTime.now();
         String res = String.format("%02d", n.getHour()) + String.format("%02d", n.getMinute());
         int tmp = Integer.parseInt(res);
-        return tmp >= 914 && tmp <= 1131 || tmp >= 1259 && tmp <= 1501;
+        return tmp >= 915 && tmp < 1131 || tmp >= 1300 && tmp < 1501;
     }
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
