@@ -1,4 +1,4 @@
-package com.stock.pycurrent.entity;
+package com.stock.pycurrent.entity.jsonvalue;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

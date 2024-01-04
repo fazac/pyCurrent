@@ -1,5 +1,6 @@
 package com.stock.pycurrent.entity;
 
+import com.stock.pycurrent.entity.jsonvalue.EmConstantValue;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
