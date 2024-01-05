@@ -24,6 +24,10 @@ public class EmRealTimeStockService {
         return emRealTimeStockRepo.findStockByDate(tradeDate);
     }
 
+    public List<EmRealTimeStock> findStocksByCode(String tsCode) {
+        return emRealTimeStockRepo.findStocksByCode(tsCode);
+    }
+
 
     public List<EmRealTimeStock> findEmCurrent() {
         return ExecutorUtils.execThreadPY(this::findLast);

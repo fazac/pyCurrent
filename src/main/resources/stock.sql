@@ -76,3 +76,24 @@ create table range_over_code
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
+
+-- 20240105
+drop table if exists real_bar;
+create table real_bar
+(
+    `trade_date`      varchar(32),
+    `ts_code`         varchar(6) comment 'code',
+    `cur_pri`         decimal(13, 4),
+    `short_sma_price` decimal(13, 4),
+    `long_sma_price`  decimal(13, 4),
+    `dif`             decimal(13, 4),
+    `dea`             decimal(13, 4),
+    `bar`             decimal(13,4),
+    KEY `idx_sdl_code` (`ts_code`) USING BTREE,
+    KEY `idx_sdl_date` (`trade_date`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
+
+select * from real_bar;

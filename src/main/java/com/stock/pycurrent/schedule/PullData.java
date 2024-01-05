@@ -6,6 +6,8 @@ import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.service.EmConstantService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
 import com.stock.pycurrent.service.RangeOverCodeService;
+import com.stock.pycurrent.service.RealBarService;
+import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.MessageUtil;
 import com.stock.pycurrent.util.PARAMS;
 import lombok.SneakyThrows;
@@ -33,13 +35,21 @@ public class PullData implements CommandLineRunner {
     private static final BigDecimal MAX_LIMIT = BigDecimal.valueOf(21);
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
     private static final BigDecimal HUNDRED_MILLION = BigDecimal.valueOf(100000000);
+
+    private static final int SHORT_PERIOD = 12;
+    private static final int LONG_PERIOD = 26;
+    private static final int MID_PERIOD = 9;
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    private static final String NOW_DAY = LocalDateTime.now().format(DATE_TIME_FORMAT);
 
     private final String CODE_TYPE = "F,R,C,L,H";
 
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
     private RangeOverCodeService rangeOverCodeService;
+
+    private RealBarService realBarService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
@@ -135,10 +145,9 @@ public class PullData implements CommandLineRunner {
         initLogsMap();
         String type;
         String nowClock = fixLength(stockList.get(0).getTradeDate().substring(11), 8);
-        String nowDay = LocalDateTime.now().format(DATE_TIME_FORMAT);
         boolean checkRangeOverLimit = Integer.parseInt(nowClock.trim().substring(0, 2)) > 9 || Integer.parseInt(nowClock.trim().substring(3, 5)) >= 30;
         Map<String, Integer> valueCodeCountMap = new HashMap<>();
-        RangeOverCode rangeOverCode = rangeOverCodeService.findByDate(nowDay);
+        RangeOverCode rangeOverCode = rangeOverCodeService.findByDate(NOW_DAY);
         boolean refreshRangeOverCode = false;
         if (rangeOverCode != null && rangeOverCode.getTradeDate() != null && !rangeOverCode.getTradeDate().isBlank()) {
             List<RangeOverCodeValue> codeValueList = rangeOverCode.getCodeValue();
@@ -147,7 +156,7 @@ public class PullData implements CommandLineRunner {
             }
         } else {
             rangeOverCode = new RangeOverCode();
-            rangeOverCode.setTradeDate(nowDay);
+            rangeOverCode.setTradeDate(NOW_DAY);
         }
         boolean rangeOverLimit;
         boolean highLimit;
@@ -230,6 +239,7 @@ public class PullData implements CommandLineRunner {
                         + fixLength(rt.getCurrentPri(), 6)
                         + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
                         + fixLength(volStr, 11)
+                        + fixLength(calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()), 8)
                         + fixLength(rt.getPe(), 8)
                         + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
                 );
@@ -298,6 +308,7 @@ public class PullData implements CommandLineRunner {
                 + fixLengthTitle(" CP ", 4)
                 + fixLengthTitle("AVG", 7)
                 + fixLengthTitle("VOL", 9)
+                + fixLengthTitle("BAR", 6)
                 + fixLengthTitle(" PE ", 6)
                 + fixLengthTitle(" CM ", 6);
         log.warn(title.substring(0, title.length() - 2));
@@ -369,6 +380,60 @@ public class PullData implements CommandLineRunner {
                 .divide(BigDecimal.valueOf(doorValue), 1, RoundingMode.HALF_UP);
     }
 
+    private BigDecimal calBar(String tsCode, String tradeDate, BigDecimal curPri) {
+        RealBar newBar = new RealBar();
+        RealBar lastOne = realBarService.findOne(tradeDate, tsCode);
+        if (curPri == null || lastOne == null) {
+            List<EmRealTimeStock> emRealTimeStocks = emRealTimeStockService.findStocksByCode(tsCode);
+            List<BigDecimal> priceList = emRealTimeStocks.stream().map(EmRealTimeStock::getCurrentPri).filter(Objects::nonNull).toList();
+            List<BigDecimal> shortSmaPriceList = calSMA(priceList, SHORT_PERIOD);
+            List<BigDecimal> longSmaPriceList = calSMA(priceList, LONG_PERIOD);
+            List<BigDecimal> difList = getDifList(shortSmaPriceList, longSmaPriceList);
+            List<BigDecimal> deaList = calSMA(difList, MID_PERIOD);
+            BigDecimal bar = difList.getLast().subtract(deaList.getLast()).multiply(BigDecimal.TWO);
+            newBar.setShortSmaPrice(shortSmaPriceList.getLast());
+            newBar.setLongSmaPrice(longSmaPriceList.getLast());
+            newBar.setDif(difList.getLast());
+            newBar.setDea(deaList.getLast());
+            newBar.setBar(bar);
+        } else {
+            BigDecimal shortSmaPrice = calSMA(curPri, lastOne.getShortSmaPrice(), SHORT_PERIOD);
+            BigDecimal longSmaPrice = calSMA(curPri, lastOne.getShortSmaPrice(), LONG_PERIOD);
+            BigDecimal dif = shortSmaPrice.subtract(longSmaPrice);
+            BigDecimal dea = calSMA(dif, lastOne.getDea(), MID_PERIOD);
+            BigDecimal bar = dif.subtract(dea).multiply(BigDecimal.TWO);
+            newBar.setShortSmaPrice(shortSmaPrice);
+            newBar.setLongSmaPrice(longSmaPrice);
+            newBar.setDif(dif);
+            newBar.setDea(dea);
+            newBar.setBar(bar);
+        }
+        newBar.setTradeDate(tradeDate);
+        newBar.setTsCode(tsCode);
+        return realBarService.save(newBar).getBar();
+    }
+
+    private static List<BigDecimal> getDifList(List<BigDecimal> shortSmaPriceList, List<BigDecimal> longSmaPriceList) {
+        int minSize = Math.min(shortSmaPriceList.size(), longSmaPriceList.size());
+        int shortListSize = shortSmaPriceList.size();
+        int longListSize = longSmaPriceList.size();
+        List<BigDecimal> difList = new ArrayList<>();
+        for (int i = minSize; i >= 0; i--) {
+            BigDecimal dif = shortSmaPriceList.get(shortListSize - minSize)
+                    .subtract(longSmaPriceList.get(longListSize - minSize));
+            difList.add(dif);
+        }
+        return difList;
+    }
+
+    private List<BigDecimal> calSMA(List<BigDecimal> values, int n) {
+        return CalculateUtils.calSMA(values, n, 2);
+    }
+
+    private BigDecimal calSMA(BigDecimal curValue, BigDecimal oldValue, int n) {
+        return CalculateUtils.calSMANext(curValue, oldValue, n, 2);
+    }
+
     @Autowired
     public void setEmRealTimeStockService(EmRealTimeStockService emRealTimeStockService) {
         this.emRealTimeStockService = emRealTimeStockService;
@@ -382,5 +447,10 @@ public class PullData implements CommandLineRunner {
     @Autowired
     public void setRangeOverCodeService(RangeOverCodeService rangeOverCodeService) {
         this.rangeOverCodeService = rangeOverCodeService;
+    }
+
+    @Autowired
+    public void setRealBarService(RealBarService realBarService) {
+        this.realBarService = realBarService;
     }
 }
