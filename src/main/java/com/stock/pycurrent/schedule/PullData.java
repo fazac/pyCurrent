@@ -51,6 +51,7 @@ public class PullData implements CommandLineRunner {
     private final Map<String, List<String>> logsMap = new HashMap<>();
 
     private final Map<String, Long> volMap = new HashMap<>();
+    private final Map<String, Long> volStepMap = new HashMap<>();
     private final Map<String, BigDecimal> amountMap = new HashMap<>();
 
 
@@ -208,19 +209,34 @@ public class PullData implements CommandLineRunner {
                 BigDecimal avg = amountMap.containsKey(tsCode)
                         ? amountMap.get(tsCode).compareTo(rt.getAmount()) == 0 || rt.getVol() - volMap.get(tsCode) == 0 ? BigDecimal.ZERO : rt.getAmount().subtract(amountMap.get(tsCode)).divide(BigDecimal.valueOf(rt.getVol() - volMap.get(tsCode)).multiply(HUNDRED), 3, RoundingMode.HALF_UP)
                         : rt.getVol() == null ? BigDecimal.ZERO : rt.getAmount().divide(BigDecimal.valueOf(rt.getVol()).multiply(HUNDRED), 3, RoundingMode.HALF_UP);
+                long volStep = 0L;
+                String volStr = "";
+                if (rt.getVol() != null) {
+                    if (volMap.containsKey(tsCode)) {
+                        volStep = rt.getVol() - volMap.get(tsCode);
+                        volStr = fixPositiveLength(volStep, 5);
+                        if (volStepMap.get(rt.getTsCode()) != 0) {
+                            volStr = fixPositiveLength("(" + calRatio(volStep, volStepMap.get(rt.getTsCode())) + ")", 5) + volStr;
+                        }
+                    } else {
+                        volStep = rt.getVol();
+                        volStr = fixPositiveLength(volStep, 10);
+                    }
+                }
                 logsMap.get(type).add(tsCode.substring(2, 6)
                         + fixLength(("N,C".contains(String.valueOf(rt.getName().charAt(0))) ? rt.getName().substring(1, 3) : rt.getName().substring(0, 2)), 3)
                         + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5)
                         + holdRemark
                         + fixLength(rt.getCurrentPri(), 6)
                         + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
-                        + fixLength(volMap.containsKey(tsCode) && rt.getVol() != null ? Long.valueOf(rt.getVol() - volMap.get(tsCode)) : rt.getVol(), 9)
+                        + fixLength(volStr, 11)
                         + fixLength(rt.getPe(), 8)
                         + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
                 );
                 if (rt.getVol() != null) {
                     volMap.put(tsCode, rt.getVol());
                     amountMap.put(tsCode, rt.getAmount());
+                    volStepMap.put(rt.getTsCode(), volStep);
                 }
                 if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(tsCode) && stockMap.get("HOLD_CODES").get(tsCode).isSellable()) {
                     //低开超1%,涨超买入价回落卖出
@@ -272,7 +288,7 @@ public class PullData implements CommandLineRunner {
                 }
             }
         }
-        log.warn(" __________________________________________________________________________________________________________________________________________");
+        log.warn(" ____________________________________________________________________________________________________________________________________________");
         String title = "|   TIME   |  I  |" + " T CODE 简称 |  "
                 + fixLengthTitle(" RT ", 4)
                 + fixLengthTitle(" H ", 3)
@@ -281,13 +297,13 @@ public class PullData implements CommandLineRunner {
                 + fixLengthTitle("   PB   ", 8)
                 + fixLengthTitle(" CP ", 4)
                 + fixLengthTitle("AVG", 7)
-                + fixLengthTitle("VOL", 7)
+                + fixLengthTitle("VOL", 9)
                 + fixLengthTitle(" PE ", 6)
                 + fixLengthTitle(" CM ", 6);
         log.warn(title.substring(0, title.length() - 2));
-        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         printMapInfo(logsMap, nowClock);
-        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+        log.warn(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
             rangeOverCode.setCodeValue(valueList);
@@ -326,6 +342,10 @@ public class PullData implements CommandLineRunner {
         return String.format("%-" + length + "s", str);
     }
 
+    private String fixPositiveLength(Object str, int length) {
+        return String.format("%" + length + "s", str);
+    }
+
     private boolean calRange(List<BigDecimal> values) {
 //        BigDecimal maxValue = Collections.max(values);
         BigDecimal maxValue = values.get(values.size() - 1);
@@ -342,6 +362,11 @@ public class PullData implements CommandLineRunner {
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
         return curClosePri.subtract(doorPri).multiply(HUNDRED).divide(doorPri, 2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calRatio(Long curValue, Long doorValue) {
+        return BigDecimal.valueOf(curValue)
+                .divide(BigDecimal.valueOf(doorValue), 1, RoundingMode.HALF_UP);
     }
 
     @Autowired
