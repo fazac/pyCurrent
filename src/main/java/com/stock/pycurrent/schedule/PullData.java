@@ -408,6 +408,7 @@ public class PullData implements CommandLineRunner {
             newBar.setDea(dea);
             newBar.setBar(bar);
         }
+        newBar.setCurPri(curPri);
         newBar.setTradeDate(tradeDate);
         newBar.setTsCode(tsCode);
         return realBarService.save(newBar).getBar();
