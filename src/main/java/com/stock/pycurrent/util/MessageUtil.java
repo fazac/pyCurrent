@@ -47,7 +47,7 @@ public class MessageUtil {
             trayIcon.setImageAutoSize(true);
             trayIcon.setToolTip("System tray icon demo");
             tray.add(trayIcon);
-            trayIcon.displayMessage(title, code, TrayIcon.MessageType.INFO);
+            trayIcon.displayMessage(title, code.substring(2, 6), TrayIcon.MessageType.INFO);
         }
         log.warn(title + " " + code);
     }

@@ -1,5 +1,7 @@
 package com.stock.pycurrent.util;
 
+import com.stock.pycurrent.entity.EmRealTimeStock;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -12,6 +14,11 @@ import java.util.List;
  */
 
 public class CalculateUtils {
+
+    private static final BigDecimal TEN_LIMIT = BigDecimal.valueOf(1.1);
+
+    private static final BigDecimal TWENTY_LIMIT = BigDecimal.valueOf(1.2);
+
     /**
      * 计算SMA
      *
@@ -21,6 +28,7 @@ public class CalculateUtils {
      * @return SMA集
      */
     @SuppressWarnings("unused")
+
     public static List<BigDecimal> calSMA(List<BigDecimal> values, int n, int weight) {
         List<BigDecimal> res = new ArrayList<>();
         if (values.size() > n) {
@@ -30,6 +38,8 @@ public class CalculateUtils {
             for (int i = n; i < values.size(); i++) {
                 res.add(calSMANext(values.get(i), res.get(res.size() - 1), n, weight));
             }
+        } else {
+            res.add(values.stream().reduce(BigDecimal.ZERO, BigDecimal::add).divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP));
         }
         return res;
     }
@@ -60,6 +70,19 @@ public class CalculateUtils {
      * @return SMA
      */
     public static BigDecimal calSMANext(BigDecimal curValue, BigDecimal lastSMA, int n, int weight) {
-        return curValue.multiply(BigDecimal.valueOf(weight)).add(lastSMA.multiply(BigDecimal.valueOf((long) n + 1 - weight))).divide(BigDecimal.valueOf(n + 1), 3, RoundingMode.HALF_UP);
+        return curValue.multiply(BigDecimal.valueOf(weight)).add(lastSMA.multiply(BigDecimal.valueOf((long) n - weight))).divide(BigDecimal.valueOf(n), 3, RoundingMode.HALF_UP);
+    }
+
+    public static boolean reachTenLimit(EmRealTimeStock emRealTimeStock) {
+        return reachLimit(emRealTimeStock, TEN_LIMIT);
+    }
+
+    public static boolean reachTwentyLimit(EmRealTimeStock emRealTimeStock) {
+        return reachLimit(emRealTimeStock, TWENTY_LIMIT);
+    }
+
+    private static boolean reachLimit(EmRealTimeStock emRealTimeStock, BigDecimal limit) {
+        return emRealTimeStock.getCurrentPri()
+                .compareTo(emRealTimeStock.getPriClosePre().multiply(limit).setScale(2, RoundingMode.HALF_UP)) == 0;
     }
 }

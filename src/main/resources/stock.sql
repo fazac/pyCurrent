@@ -97,3 +97,13 @@ create table real_bar
   ROW_FORMAT = DYNAMIC;
 
 select * from real_bar;
+
+drop table if exists limit_code;
+create table limit_code
+(
+    `trade_date` varchar(8) primary key,
+    `code_value` json DEFAULT NULL COMMENT '多值'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;

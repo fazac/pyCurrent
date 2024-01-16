@@ -24,8 +24,8 @@ public class EmRealTimeStockService {
         return emRealTimeStockRepo.findStockByDate(tradeDate);
     }
 
-    public List<EmRealTimeStock> findStocksByCode(String tsCode) {
-        return emRealTimeStockRepo.findStocksByCode(tsCode);
+    public List<EmRealTimeStock> findStocksByCodeDate(String tsCode, String tradeDate) {
+        return emRealTimeStockRepo.findStocksByCodeDate(tsCode, tradeDate);
     }
 
 

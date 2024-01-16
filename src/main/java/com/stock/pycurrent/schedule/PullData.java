@@ -2,11 +2,9 @@ package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.entity.*;
 import com.stock.pycurrent.entity.jsonvalue.EmConstantValue;
+import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
-import com.stock.pycurrent.service.EmConstantService;
-import com.stock.pycurrent.service.EmRealTimeStockService;
-import com.stock.pycurrent.service.RangeOverCodeService;
-import com.stock.pycurrent.service.RealBarService;
+import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.MessageUtil;
 import com.stock.pycurrent.util.PARAMS;
@@ -32,7 +30,6 @@ public class PullData implements CommandLineRunner {
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
     private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
     private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(5);
-    private static final BigDecimal MAX_LIMIT = BigDecimal.valueOf(21);
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
     private static final BigDecimal HUNDRED_MILLION = BigDecimal.valueOf(100000000);
 
@@ -51,10 +48,11 @@ public class PullData implements CommandLineRunner {
 
     private RealBarService realBarService;
 
+    private LimitCodeService limitCodeService;
+
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
     private final Map<String, Integer> codeOverLimitMap = new HashMap<>();
-    private final Map<String, BigDecimal> codeMaxMap = new HashMap<>();
 
     private final Map<String, List<BigDecimal>> codePctMap = new HashMap<>();
 
@@ -145,7 +143,9 @@ public class PullData implements CommandLineRunner {
         initLogsMap();
         String type;
         String nowClock = fixLength(stockList.get(0).getTradeDate().substring(11), 8);
-        boolean checkRangeOverLimit = Integer.parseInt(nowClock.trim().substring(0, 2)) > 9 || Integer.parseInt(nowClock.trim().substring(3, 5)) >= 30;
+
+        boolean checkOverLimit = Integer.parseInt(nowClock.trim().substring(0, 2)) > 9 || Integer.parseInt(nowClock.trim().substring(3, 5)) >= 30;
+
         Map<String, Integer> valueCodeCountMap = new HashMap<>();
         RangeOverCode rangeOverCode = rangeOverCodeService.findByDate(NOW_DAY);
         boolean refreshRangeOverCode = false;
@@ -154,10 +154,25 @@ public class PullData implements CommandLineRunner {
             if (codeValueList != null && !codeValueList.isEmpty()) {
                 valueCodeCountMap = codeValueList.stream().collect(Collectors.toMap(RangeOverCodeValue::getCode, RangeOverCodeValue::getCount));
             }
-        } else {
+        } else if (checkOverLimit) {
             rangeOverCode = new RangeOverCode();
             rangeOverCode.setTradeDate(NOW_DAY);
         }
+
+        Map<String, LimitCodeValue> limitCodeMap = new HashMap<>();
+        LimitCode limitCode = limitCodeService.findByDate(NOW_DAY);
+        boolean refreshLimitCode = false;
+        if (limitCode != null && limitCode.getTradeDate() != null && !limitCode.getTradeDate().isBlank()) {
+            List<LimitCodeValue> codeValueList = limitCode.getCodeValue();
+            if (codeValueList != null && !codeValueList.isEmpty()) {
+                limitCodeMap = codeValueList.stream().collect(Collectors.toMap(LimitCodeValue::getCode, Function.identity()));
+            }
+        } else if (checkOverLimit) {
+            limitCode = new LimitCode();
+            limitCode.setTradeDate(NOW_DAY);
+        }
+
+
         boolean rangeOverLimit;
         boolean highLimit;
         boolean noConcerned;
@@ -167,14 +182,22 @@ public class PullData implements CommandLineRunner {
         boolean yesterdayHigh;
         StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
-            holdRemark.setLength(0);
             String tsCode = rt.getTsCode();
+            holdRemark.setLength(0);
             noConcerned = codes[1].contains(tsCode);
             holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
             concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
             noBuy = codes[3].contains(tsCode);
             yesterdayHigh = !holds && codes[4].contains(tsCode);
-            if (!rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkRangeOverLimit) {
+            if (checkOverLimit && rt.getCurrentPri() != null && rt.getVol() != null
+                    && (tsCode.startsWith("0") || tsCode.startsWith("60"))
+                    && !rt.getName().contains("ST")
+                    && !rt.getName().contains("退")
+                    && tsCode.startsWith("3") && !noConcerned
+            ) {
+
+            }
+            if (!rt.getName().contains("ST") && !rt.getName().contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkOverLimit) {
                 if (codePctMap.containsKey(tsCode)) {
                     codePctMap.get(tsCode).add(rt.getPctChg());
                 } else {
@@ -239,7 +262,7 @@ public class PullData implements CommandLineRunner {
                         + fixLength(rt.getCurrentPri(), 6)
                         + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9)
                         + fixLength(volStr, 11)
-                        + fixLength(calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()), 8)
+                        + fixLength("301337".equals(rt.getTsCode()) && rt.getVol() != null ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()) : "", 8)
                         + fixLength(rt.getPe(), 8)
                         + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8)
                 );
@@ -251,48 +274,35 @@ public class PullData implements CommandLineRunner {
                 if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(tsCode) && stockMap.get("HOLD_CODES").get(tsCode).isSellable()) {
                     //低开超1%,涨超买入价回落卖出
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0 && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode.substring(2, 6));
+                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode);
                     }
                     //高开超1%且跌落买入价时卖出,或者非封板收盘卖
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode.substring(2, 6));
+                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode);
                     }
                 }
                 if (!concerned && !holds && rt.getPctChg() != null) {
-                    if (codeCountMap.containsKey(tsCode)) {
-                        if (rt.getPctChg().compareTo(codeMaxMap.get(tsCode)) == 0) {
-                            // max count++;
-                            codeCountMap.put(tsCode, codeCountMap.get(tsCode) + 1);
-                        } else {
-                            if (codeMaxMap.get(tsCode).compareTo(rt.getPctChg()) < 0) {
-                                //reset count when meet greater one;
-                                codeCountMap.put(tsCode, 0);
-                            }
-                            //put greater one
-                            codeMaxMap.put(tsCode, codeMaxMap.get(tsCode).max(rt.getPctChg()));
-                        }
-                        if (codeCountMap.get(tsCode) > 3
-                                && rt.getPctChg().compareTo(codeMaxMap.get(tsCode)) < 0
-                                && !noBuy
-                        ) { // 触发涨停板
-                            // info && reset count
-                            MessageUtil.sendNotificationMsg("BUY ONE ", tsCode.substring(2, 6));
-                            codeCountMap.put(tsCode, 0);
-                        }
-                    } else {
-                        // info new
-                        codeCountMap.put(tsCode, 0);
-                        codeMaxMap.put(tsCode, rt.getPctChg());
-                        MessageUtil.sendNotificationMsg("NEW ONE ", tsCode.substring(2, 6));
+                    if (CalculateUtils.reachTwentyLimit(rt)) {
+                        // max count++;
+                        codeCountMap.put(tsCode, codeCountMap.get(tsCode) + 1);
+                        MessageUtil.sendNotificationMsg("LIMIT ONE ", tsCode);
                     }
+                    if (codeCountMap.containsKey(tsCode) && codeCountMap.get(tsCode) > 3
+                            && !CalculateUtils.reachTwentyLimit(rt)
+                            && !noBuy
+                    ) { // 触发涨停板
+                        // info && reset count
+                        MessageUtil.sendNotificationMsg("BUY ONE ", tsCode);
+                        codeCountMap.put(tsCode, 0);
+                    }
+
                     if (rt.getPctChg().compareTo(PCH_OVER_LIMIT) > 0) { // 17
                         codeOverLimitMap.put(tsCode, codeOverLimitMap.getOrDefault(tsCode, 0) + 1);
                     }
                     if (codeOverLimitMap.getOrDefault(tsCode, 0) > 7
-                            && rt.getPctChg().compareTo(codeMaxMap.get(tsCode)) < 0
-                            && rt.getPctChg().compareTo(MAX_LIMIT) < 0
+                            && !CalculateUtils.reachTwentyLimit(rt)
                             && !noBuy) {
-                        MessageUtil.sendNotificationMsg("BUY LONE ", tsCode.substring(2, 6));
+                        MessageUtil.sendNotificationMsg("BUY LONE ", tsCode);
                         codeOverLimitMap.put(tsCode, 0);
                     }
                 }
@@ -321,6 +331,7 @@ public class PullData implements CommandLineRunner {
             rangeOverCodeService.saveEntity(rangeOverCode);
         }
     }
+
 
     private int convertTimeCount(String nowClock) {
         return Integer.parseInt(nowClock.substring(0, 2)) * 60 * 2
@@ -384,8 +395,8 @@ public class PullData implements CommandLineRunner {
         RealBar newBar = new RealBar();
         RealBar lastOne = realBarService.findOne(tradeDate, tsCode);
         if (curPri == null || lastOne == null) {
-            List<EmRealTimeStock> emRealTimeStocks = emRealTimeStockService.findStocksByCode(tsCode);
-            List<BigDecimal> priceList = emRealTimeStocks.stream().map(EmRealTimeStock::getCurrentPri).filter(Objects::nonNull).toList();
+            List<EmRealTimeStock> emRealTimeStocks = emRealTimeStockService.findStocksByCodeDate(tsCode, tradeDate);
+            List<BigDecimal> priceList = emRealTimeStocks.stream().filter(x -> x.getVol() != null).map(EmRealTimeStock::getCurrentPri).toList();
             List<BigDecimal> shortSmaPriceList = calSMA(priceList, SHORT_PERIOD);
             List<BigDecimal> longSmaPriceList = calSMA(priceList, LONG_PERIOD);
             List<BigDecimal> difList = getDifList(shortSmaPriceList, longSmaPriceList);
@@ -419,7 +430,7 @@ public class PullData implements CommandLineRunner {
         int shortListSize = shortSmaPriceList.size();
         int longListSize = longSmaPriceList.size();
         List<BigDecimal> difList = new ArrayList<>();
-        for (int i = minSize; i >= 0; i--) {
+        for (int i = minSize; i > 0; i--) {
             BigDecimal dif = shortSmaPriceList.get(shortListSize - minSize)
                     .subtract(longSmaPriceList.get(longListSize - minSize));
             difList.add(dif);
@@ -453,5 +464,10 @@ public class PullData implements CommandLineRunner {
     @Autowired
     public void setRealBarService(RealBarService realBarService) {
         this.realBarService = realBarService;
+    }
+
+    @Autowired
+    public void setLimitCodeService(LimitCodeService limitCodeService) {
+        this.limitCodeService = limitCodeService;
     }
 }
