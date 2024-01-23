@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RealBarRepo extends JpaRepository<RealBar, BasicStockPK> {
     @Query(value = """
-            select * from real_bar where trade_date <:tradeDate and ts_code= :tsCode order by trade_date desc limit 1
+            select * from real_bar where trade_date <:tradeDate and trade_date>curdate() and ts_code= :tsCode order by trade_date desc limit 1
             """, nativeQuery = true)
     RealBar findOne(@Param("tradeDate") String tradeDate, @Param("tsCode") String tsCode);
 }

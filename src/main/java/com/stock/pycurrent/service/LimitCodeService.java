@@ -15,12 +15,17 @@ import org.springframework.stereotype.Service;
 public class LimitCodeService {
     private LimitCodeRepo limitCodeRepo;
 
+    @SuppressWarnings("unused")
     public LimitCode findByDate(String tradeDate) {
         return limitCodeRepo.findByDate(tradeDate);
     }
 
     public LimitCode findLastOne(String tradeDate) {
         return limitCodeRepo.findLastOne(tradeDate);
+    }
+
+    public void save(LimitCode limitCode) {
+        limitCodeRepo.saveAndFlush(limitCode);
     }
 
     @Autowired

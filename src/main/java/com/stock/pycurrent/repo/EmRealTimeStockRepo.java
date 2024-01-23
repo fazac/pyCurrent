@@ -29,7 +29,7 @@ public interface EmRealTimeStockRepo extends JpaRepository<EmRealTimeStock, Basi
     List<EmRealTimeStock> findStockByDate(@Param("tradeDate") String tradeDate);
 
     @Query(value = """
-            select * from em_real_time_stock where ts_code = :tsCode and trade_date >curdate() and trade_date <=:tradeDate order by trade_date;
+            select * from em_real_time_stock where ts_code = :tsCode and trade_date >concat(curdate(), ' 09:29:50') and trade_date <=:tradeDate order by trade_date;
             """, nativeQuery = true)
     List<EmRealTimeStock> findStocksByCodeDate(@Param("tsCode") String tsCode, @Param("tradeDate") String tradeDate);
 

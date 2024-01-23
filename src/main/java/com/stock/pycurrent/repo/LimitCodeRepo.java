@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LimitCodeRepo extends JpaRepository<LimitCode, String> {
-    @Query("from RangeOverCode where tradeDate = :tradeDate")
+    @Query("from LimitCode where tradeDate = :tradeDate")
     LimitCode findByDate(@Param("tradeDate") String tradeDate);
 
-    @Query("from RangeOverCode where tradeDate < :tradeDate order by tradeDate desc limit 1")
+    @Query("from LimitCode where tradeDate < :tradeDate order by tradeDate desc limit 1")
     LimitCode findLastOne(@Param("tradeDate") String tradeDate);
 }

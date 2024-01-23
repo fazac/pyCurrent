@@ -17,6 +17,4 @@ import java.io.Serializable;
 public class LimitCodeValue implements Serializable {
     private String code;
     private int count;
-    private boolean stayed;
-    private boolean broken;
 }
