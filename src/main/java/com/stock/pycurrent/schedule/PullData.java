@@ -29,8 +29,8 @@ public class PullData implements CommandLineRunner {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal THOUSAND = BigDecimal.valueOf(1000);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(18);
-    private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(17);
-    private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(5);
+    private static final BigDecimal PCH_OVER_LIMIT = BigDecimal.valueOf(13);
+    private static final BigDecimal RANGE_LIMIT = BigDecimal.valueOf(6);
     private static final BigDecimal nOne = BigDecimal.ONE.negate();
     private static final BigDecimal HUNDRED_MILLION = BigDecimal.valueOf(100000000);
 
@@ -73,7 +73,7 @@ public class PullData implements CommandLineRunner {
         }
     }
 
-    @Scheduled(cron = "28/30 * 9-16 * * ?")
+    @Scheduled(cron = "58 * 9-16 * * ?")
     public void pullRealTimeData() {
         if (isTradeHour()) {
             List<EmConstant> emConstants = emConstantService.findAll();
@@ -270,7 +270,7 @@ public class PullData implements CommandLineRunner {
                         volStr = fixPositiveLength(volStep, 10);
                     }
                 }
-                logsMap.get(type).add(tsCode.substring(2, 6) + fixLength(nameFirst, 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9) + fixLength(volStr, 11) + fixLength(rt.getVol() != null && checkOverLimit && "301187".equals(tsCode) ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getPe(), 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8));
+                logsMap.get(type).add(tsCode.substring(2, 6) + fixLength(nameFirst, 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(avg.compareTo(BigDecimal.ZERO) == 0 ? "" : avg, 9) + fixLength(volStr, 11) + fixLength(rt.getVol() != null && checkOverLimit ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getPe(), 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8));
                 if (rt.getVol() != null) {
                     volMap.put(tsCode, rt.getVol());
                     amountMap.put(tsCode, rt.getAmount());
@@ -389,7 +389,7 @@ public class PullData implements CommandLineRunner {
 //            List<EmRealTimeStock> emRealTimeStocks = emRealTimeStockService.findStocksByCodeDate(tsCode, tradeDate);
 //            if (emRealTimeStocks != null && !emRealTimeStocks.isEmpty()) {
 //                EmRealTimeStock firstOne = emRealTimeStocks.getFirst();
-//                BigDecimal firstPrice = firstOne.getCurrentPri();
+//                BigDecimal firstPrice = firstOne.getCurrentPri()   ;
 //                newBar.setShortSmaPrice(firstPrice);
 //                newBar.setLongSmaPrice(firstPrice);
 //                newBar.setDif(BigDecimal.ZERO);
