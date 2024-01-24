@@ -23,7 +23,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findStockByDate(String tradeDate) {
         return emRealTimeStockRepo.findStockByDate(tradeDate);
     }
-
+    @SuppressWarnings("unused")
     public List<EmRealTimeStock> findStocksByCodeDate(String tsCode, String tradeDate) {
         return emRealTimeStockRepo.findStocksByCodeDate(tsCode, tradeDate);
     }
