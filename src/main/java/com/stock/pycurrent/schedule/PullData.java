@@ -417,17 +417,19 @@ public class PullData implements CommandLineRunner {
     }
 
     private String getPeekDesc(EmRealTimeStock rt) {
-        BigDecimal highRatio = calRatio(rt.getPriHigh(), rt.getPriClosePre());
-        if (CalculateUtils.reachTwentyLimit(rt)) {
-            return "P";
-        } else if (highRatio.compareTo(NINETEEN) >= 0) {
-            return "9";
-        } else if (highRatio.compareTo(EIGHTEEN) >= 0) {
-            return "8";
-        } else if (highRatio.compareTo(SEVENTEEN) >= 0) {
-            return "7";
-        } else if (highRatio.compareTo(SIXTEEN) >= 0) {
-            return "6";
+        if (rt.getPriHigh() != null) {
+            BigDecimal highRatio = calRatio(rt.getPriHigh(), rt.getPriClosePre());
+            if (CalculateUtils.reachTwentyLimit(rt)) {
+                return "P";
+            } else if (highRatio.compareTo(NINETEEN) >= 0) {
+                return "9";
+            } else if (highRatio.compareTo(EIGHTEEN) >= 0) {
+                return "8";
+            } else if (highRatio.compareTo(SEVENTEEN) >= 0) {
+                return "7";
+            } else if (highRatio.compareTo(SIXTEEN) >= 0) {
+                return "6";
+            }
         }
         return " ";
     }
