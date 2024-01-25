@@ -29,6 +29,7 @@ public class PullData implements CommandLineRunner {
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal THOUSAND = BigDecimal.valueOf(1000);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(15);
+    private static final BigDecimal FIFTEEN = BigDecimal.valueOf(15);
     private static final BigDecimal SIXTEEN = BigDecimal.valueOf(16);
     private static final BigDecimal SEVENTEEN = BigDecimal.valueOf(17);
     private static final BigDecimal EIGHTEEN = BigDecimal.valueOf(18);
@@ -427,6 +428,8 @@ public class PullData implements CommandLineRunner {
                 return "7";
             } else if (highRatio.compareTo(SIXTEEN) >= 0) {
                 return "6";
+            } else if (highRatio.compareTo(FIFTEEN) >= 0) {
+                return "5";
             }
         }
         return " ";
