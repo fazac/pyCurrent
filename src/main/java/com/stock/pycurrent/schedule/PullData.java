@@ -54,6 +54,8 @@ public class PullData implements CommandLineRunner {
 
     private LimitCodeService limitCodeService;
 
+    private CurCountService curCountService;
+
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
     private final Map<String, Integer> codeOverLimitMap = new HashMap<>();
@@ -331,6 +333,41 @@ public class PullData implements CommandLineRunner {
             newLimitCodeOne.setCodeValue(newLimitCodeValues);
             limitCodeService.save(newLimitCodeOne);
         }
+
+        if (nowMinute % 10 == 5 || nowMinute % 10 == 0) {
+            CurCount curCount = statisticsCurCount(stockList);
+            curCountService.saveOne(curCount);
+        }
+    }
+
+    private static CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
+        int c00u = 0;
+        int c00a = 0;
+        int c30u = 0;
+        int c30a = 0;
+        int c60u = 0;
+        int c60a = 0;
+        for (EmRealTimeStock em : stockList) {
+            if (em.getPctChg() != null) {
+                if (em.getTsCode().startsWith("00")) {
+                    c00a++;
+                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
+                        c00u++;
+                    }
+                } else if (em.getTsCode().startsWith("30")) {
+                    c30a++;
+                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
+                        c30u++;
+                    }
+                } else if (em.getTsCode().startsWith("60")) {
+                    c60a++;
+                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
+                        c60u++;
+                    }
+                }
+            }
+        }
+        return new CurCount(stockList.get(0).getTradeDate(), c30u, c30a, c60u, c60a, c00u, c00a);
     }
 
 
@@ -459,5 +496,10 @@ public class PullData implements CommandLineRunner {
     @Autowired
     public void setLimitCodeService(LimitCodeService limitCodeService) {
         this.limitCodeService = limitCodeService;
+    }
+
+    @Autowired
+    public void setCurCountService(CurCountService curCountService) {
+        this.curCountService = curCountService;
     }
 }

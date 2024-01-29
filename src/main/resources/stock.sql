@@ -107,3 +107,19 @@ create table limit_code
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
+
+-- 20240129
+drop table if exists cur_count;
+create table cur_count
+(
+    `trade_date` varchar(32) primary key,
+    `c_30u`      int,
+    `c_30a`      int,
+    `c_60u`      int,
+    `c_60a`      int,
+    `c_00u`      int,
+    `c_00a`      int
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
