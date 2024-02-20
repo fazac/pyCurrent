@@ -1,8 +1,10 @@
 package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.EmRealTimeStock;
+import com.stock.pycurrent.entity.emum.PyFuncEnum;
+import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.repo.EmRealTimeStockRepo;
-import com.stock.pycurrent.util.ExecutorUtils;
+import com.stock.pycurrent.util.PythonScriptUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +25,14 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findStockByDate(String tradeDate) {
         return emRealTimeStockRepo.findStockByDate(tradeDate);
     }
+
     @SuppressWarnings("unused")
     public List<EmRealTimeStock> findStocksByCodeDate(String tsCode, String tradeDate) {
         return emRealTimeStockRepo.findStocksByCodeDate(tsCode, tradeDate);
     }
 
-
     public List<EmRealTimeStock> findEmCurrent() {
-        return ExecutorUtils.execThreadPY(this::findLast);
+        return PythonScriptUtils.execThreadPY(Constants.AKSHARE_EM_REALTIME, PyFuncEnum.EM_CURRENT.toString(), this::findLast);
     }
 
     @Autowired

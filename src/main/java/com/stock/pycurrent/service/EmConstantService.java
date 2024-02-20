@@ -20,6 +20,10 @@ public class EmConstantService {
         return emConstantRepo.findAll();
     }
 
+    public EmConstant findOneByKey() {
+        return emConstantRepo.findByKey("NOTIFICATION");
+    }
+
     @Autowired
     public void setEmConstantRepo(EmConstantRepo emConstantRepo) {
         this.emConstantRepo = emConstantRepo;

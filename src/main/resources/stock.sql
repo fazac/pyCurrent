@@ -88,7 +88,7 @@ create table real_bar
     `long_sma_price`  decimal(13, 4),
     `dif`             decimal(13, 4),
     `dea`             decimal(13, 4),
-    `bar`             decimal(13,4),
+    `bar`             decimal(13, 4),
     KEY `idx_sdl_code` (`ts_code`) USING BTREE,
     KEY `idx_sdl_date` (`trade_date`) USING BTREE
 ) ENGINE = InnoDB
@@ -96,7 +96,8 @@ create table real_bar
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
 
-select * from real_bar;
+select *
+from real_bar;
 
 drop table if exists limit_code;
 create table limit_code
@@ -123,3 +124,133 @@ create table cur_count
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
+
+-- 20240218
+CREATE TABLE `em_d_n_stock`
+(
+    `ts_code`     varchar(10) CHARACTER SET UTF8MB4 COLLATE UTF8MB4_general_ci NULL DEFAULT NULL COMMENT '股票代码',
+    `trade_date`  varchar(8) CHARACTER SET UTF8MB4 COLLATE UTF8MB4_general_ci  NULL DEFAULT NULL COMMENT '交易日期',
+    `pri_open`    decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '开盘价',
+    `pri_close`   decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '收盘价',
+    `pri_high`    decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '最高价',
+    `pri_low`     decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '最低价',
+    `vol`         int                                                          NULL DEFAULT NULL COMMENT '成交量（手）',
+    `amount`      decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '成交额（千元）',
+    `amplitude`   decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '振幅',
+    `pct_chg`     decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '涨跌幅',
+    `am_chg`      decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '涨跌额',
+    `change_hand` decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '换手率',
+    INDEX `idx_sdl_code` (`ts_code`) USING BTREE,
+    INDEX `idx_sdl_date` (`trade_date`) USING BTREE
+) ENGINE = InnoDB
+  CHARACTER SET = UTF8MB4
+  COLLATE = UTF8MB4_general_ci
+  ROW_FORMAT = Dynamic;
+
+
+CREATE TABLE `em_d_a_stock`
+(
+    `ts_code`     varchar(10) CHARACTER SET UTF8MB4 COLLATE UTF8MB4_general_ci NULL DEFAULT NULL COMMENT '股票代码',
+    `trade_date`  varchar(8) CHARACTER SET UTF8MB4 COLLATE UTF8MB4_general_ci  NULL DEFAULT NULL COMMENT '交易日期',
+    `pri_open`    decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '开盘价',
+    `pri_close`   decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '收盘价',
+    `pri_high`    decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '最高价',
+    `pri_low`     decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '最低价',
+    `vol`         int                                                          NULL DEFAULT NULL COMMENT '成交量（手）',
+    `amount`      decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '成交额',
+    `amplitude`   decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '振幅',
+    `pct_chg`     decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '涨跌幅',
+    `am_chg`      decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '涨跌额',
+    `change_hand` decimal(18, 2)                                               NULL DEFAULT NULL COMMENT '换手率',
+    INDEX `idx_sdl_code` (`ts_code`) USING BTREE,
+    INDEX `idx_sdl_date` (`trade_date`) USING BTREE
+) ENGINE = InnoDB
+  CHARACTER SET = UTF8MB4
+  COLLATE = UTF8MB4_general_ci
+  ROW_FORMAT = Dynamic;
+
+create table roc_model
+(
+    `sn`              int primary key auto_increment,
+    `create_time`     datetime,
+    `count`           int,
+    `ratio`           decimal(18, 2),
+    `cur_close_pri`   decimal(18, 2),
+    `door_pri`        decimal(18, 2),
+    `start_date`      varchar(8),
+    `end_date`        varchar(8),
+    `ts_code`         varchar(6),
+    `concept_symbol`  varchar(512),
+    `industry_symbol` varchar(32),
+    `cap_info`        varchar(32),
+    `params`          varchar(256)
+) ENGINE = InnoDB
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = Dynamic;
+
+alter table roc_model
+    add index r_idx (`ts_code`, `create_time`);
+alter table roc_model
+    add index r_pa_idx (`ts_code`, `params`);
+alter table `roc_model`
+    add index i_roc_param (`params`);
+alter table roc_model
+    add index idx_roc_ct (`create_time`);
+
+create table `board_concept_con`
+(
+    `trade_date`    varchar(32)    null comment '交易日期',
+    `symbol`        varchar(32) comment '板块名称',
+    `ts_code`       varchar(32) comment '代码',
+    `name`          varchar(32) comment '名称',
+    `current_pri`   decimal(18, 2) comment '最新价',
+    `pct_chg`       decimal(18, 2) null comment '涨跌幅',
+    `am_chg`        decimal(18, 2) null comment '涨跌额',
+    `vol`           bigint         null comment '成交量（手）',
+    `amount`        decimal(18, 2) null comment '成交额',
+    `amplitude`     decimal(18, 2) null comment '振幅',
+    `pri_high`      decimal(18, 2) null comment '最高价',
+    `pri_low`       decimal(18, 2) null comment '最低价',
+    `pri_open`      decimal(18, 2) null comment '开盘价',
+    `pri_close_pre` decimal(18, 2) null comment '昨日收盘价',
+    `change_hand`   decimal(18, 2) null comment '换手率',
+    `pe`            decimal(18, 2) null comment '市盈率(动)',
+    `pb`            decimal(18, 2) null comment '市净率'
+) charset = utf8mb4;
+create index board_concept_cons_trade_date
+    on board_concept_con (trade_date);
+create index board_concept_cons_symbol
+    on board_concept_con (symbol);
+create index board_concept_cons_name
+    on board_concept_con (name);
+
+
+create table `board_industry_con`
+(
+    `trade_date`    varchar(32)    null comment '交易日期',
+    `symbol`        varchar(32) comment '板块名称',
+    `ts_code`       varchar(32) comment '代码',
+    `name`          varchar(32) comment '名称',
+    `current_pri`   decimal(18, 2) comment '最新价',
+    `pct_chg`       decimal(18, 2) null comment '涨跌幅',
+    `am_chg`        decimal(18, 2) null comment '涨跌额',
+    `vol`           bigint         null comment '成交量（手）',
+    `amount`        decimal(18, 2) null comment '成交额',
+    `amplitude`     decimal(18, 2) null comment '振幅',
+    `pri_high`      decimal(18, 2) null comment '最高价',
+    `pri_low`       decimal(18, 2) null comment '最低价',
+    `pri_open`      decimal(18, 2) null comment '开盘价',
+    `pri_close_pre` decimal(18, 2) null comment '昨日收盘价',
+    `change_hand`   decimal(18, 2) null comment '换手率',
+    `pe`            decimal(18, 2) null comment '市盈率(动)',
+    `pb`            decimal(18, 2) null comment '市净率'
+) charset = utf8mb4;
+create index idx_trade_date
+    on board_industry_con (trade_date);
+create index idx_symbol
+    on board_industry_con (symbol);
+create index idx_name
+    on board_industry_con (name);
+create index idx_ts_code
+    on board_industry_con (ts_code);

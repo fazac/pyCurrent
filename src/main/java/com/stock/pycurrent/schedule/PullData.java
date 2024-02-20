@@ -189,6 +189,10 @@ public class PullData implements CommandLineRunner {
         boolean concerned;
         boolean noBuy;
         boolean yesterdayHigh;
+
+        EmConstant emConstant = emConstantService.findOneByKey();
+        boolean notification = "TRUE".equals(emConstant.getCValue());
+
         StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
             String tsCode = rt.getTsCode();
@@ -287,11 +291,11 @@ public class PullData implements CommandLineRunner {
                 if (holds && rt.getPriOpen() != null && rt.getPriHigh() != null && stockMap.get("HOLD_CODES").containsKey(tsCode) && stockMap.get("HOLD_CODES").get(tsCode).isSellable()) {
                     //低开超1%,涨超买入价回落卖出
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(nOne) < 0 && rt.getPriHigh().compareTo(rt.getPriClosePre()) >= 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode);
+                        sendNotificationMsg("SELL ONE ", tsCode, notification);
                     }
                     //高开超1%且跌落买入价时卖出,或者非封板收盘卖
                     if (calRatio(rt.getPriOpen(), rt.getPriClosePre()).compareTo(BigDecimal.ONE) > 0 && rt.getPctChg().compareTo(BigDecimal.ZERO) < 0) {
-                        MessageUtil.sendNotificationMsg("SELL ONE ", tsCode);
+                        sendNotificationMsg("SELL ONE ", tsCode, notification);
                     }
                 }
                 if (!concerned && !holds && rt.getPctChg() != null) {
@@ -299,12 +303,12 @@ public class PullData implements CommandLineRunner {
                         // max count++;
                         codeCountMap.put(tsCode, codeCountMap.getOrDefault(tsCode, 0) + 1);
                         if (codeCountMap.get(tsCode) < 2) {
-                            MessageUtil.sendNotificationMsg("LIMIT ONE ", tsCode);
+                            sendNotificationMsg("LIMIT ONE ", tsCode, notification);
                         }
                     }
                     if (codeCountMap.containsKey(tsCode) && codeCountMap.get(tsCode) > 3 && !CalculateUtils.reachTwentyLimit(rt) && !noBuy) { // 触发涨停板
                         // info && reset count
-                        MessageUtil.sendNotificationMsg("BUY ONE ", tsCode);
+                        sendNotificationMsg("BUY ONE ", tsCode, notification);
                         codeCountMap.put(tsCode, 0);
                     }
 
@@ -312,7 +316,7 @@ public class PullData implements CommandLineRunner {
                         codeOverLimitMap.put(tsCode, codeOverLimitMap.getOrDefault(tsCode, 0) + 1);
                     }
                     if (codeOverLimitMap.getOrDefault(tsCode, 0) > 10 && !CalculateUtils.reachTwentyLimit(rt) && !noBuy) {
-                        MessageUtil.sendNotificationMsg("BUY LONE ", tsCode);
+                        sendNotificationMsg("BUY LONE ", tsCode, notification);
                         codeOverLimitMap.put(tsCode, 0);
                     }
                 }
@@ -383,6 +387,14 @@ public class PullData implements CommandLineRunner {
                 }
             }
         });
+    }
+
+    private void sendNotificationMsg(String title, String code, Boolean notification) {
+        if (notification) {
+            MessageUtil.sendNotificationMsg(title, code);
+        } else {
+            log.warn(title + " " + code);
+        }
     }
 
     private String fixLength(Object str, int length) {

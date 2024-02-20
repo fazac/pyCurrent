@@ -27,7 +27,7 @@ logging:
     console: "%m%n%wEx"
     file: "%m%n%wEx"
   level:
-    root: warn
+    root: info
   file:
     path: ./log/current
   logback:
