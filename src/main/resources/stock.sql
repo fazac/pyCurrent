@@ -7,7 +7,7 @@ CREATE
 use
     stockrealtime;
 
-
+drop table if exists `em_real_time_stock`;
 CREATE TABLE `em_real_time_stock`
 (
     `trade_date`                   varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '交易日期',
@@ -40,7 +40,7 @@ CREATE TABLE `em_real_time_stock`
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
 
-
+drop table if exists `em_constants`;
 CREATE TABLE `em_constants`
 (
     `c_key`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -103,9 +103,6 @@ create table real_bar
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
 
-select *
-from real_bar;
-
 drop table if exists limit_code;
 create table limit_code
 (
@@ -133,6 +130,7 @@ create table cur_count
   ROW_FORMAT = DYNAMIC;
 
 -- 20240218
+drop table if exists `em_d_n_stock`;
 CREATE TABLE `em_d_n_stock`
 (
     `ts_code`     varchar(10) CHARACTER SET UTF8MB4 COLLATE UTF8MB4_general_ci NULL DEFAULT NULL COMMENT '股票代码',
@@ -154,7 +152,7 @@ CREATE TABLE `em_d_n_stock`
   COLLATE = UTF8MB4_general_ci
   ROW_FORMAT = Dynamic;
 
-
+drop table if exists `em_d_a_stock`;
 CREATE TABLE `em_d_a_stock`
 (
     `ts_code`     varchar(10) CHARACTER SET UTF8MB4 COLLATE UTF8MB4_general_ci NULL DEFAULT NULL COMMENT '股票代码',
@@ -176,6 +174,7 @@ CREATE TABLE `em_d_a_stock`
   COLLATE = UTF8MB4_general_ci
   ROW_FORMAT = Dynamic;
 
+drop table if exists `roc_model`;
 create table roc_model
 (
     `sn`              int primary key auto_increment,
@@ -205,6 +204,7 @@ alter table `roc_model`
 alter table roc_model
     add index idx_roc_ct (`create_time`);
 
+drop table if exists `board_concept_con`;
 create table `board_concept_con`
 (
     `trade_date`    varchar(32)    null comment '交易日期',
@@ -234,7 +234,7 @@ create index board_concept_cons_name
 create index board_concept_cons_code
     on board_concept_con (ts_code);
 
-
+drop table if exists `board_industry_con`;
 create table `board_industry_con`
 (
     `trade_date`    varchar(32)    null comment '交易日期',
