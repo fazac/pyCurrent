@@ -38,9 +38,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findStockByDate(String tradeDate) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * from " + tableName + " where trade_date = :tradeDate order by ts_code;";
-        return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
-                .setParameter("tradeDate", tradeDate)
-                .getResultList();
+        return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).setParameter("tradeDate", tradeDate).getResultList();
     }
 
     public List<EmRealTimeStock> findEmCurrent() {
@@ -92,6 +90,8 @@ public class EmRealTimeStockService {
         }
         if (nativeQuery > 0) {
             log.warn("创建成功，表名称：" + tableName);
+        } else {
+            log.warn("已存在该表,无需新建");
         }
     }
 }
