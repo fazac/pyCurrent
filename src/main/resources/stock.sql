@@ -66,6 +66,12 @@ VALUES ('HOLD_CODES', '', '[
 ]');
 INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
 VALUES ('NO_CONCERN_CODES', '', NULL);
+INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
+VALUES ('NO_BUY_CODES', '', NULL);
+INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
+VALUES ('YESTERDAY_CODES', '', NULL);
+INSERT INTO `em_constants` (`c_key`, `c_value`, `multi_value`)
+VALUES ('NOTIFICATION', 'TRUE', NULL);
 
 -- 20231229
 drop table if exists range_over_code;
