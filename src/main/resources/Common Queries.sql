@@ -7,6 +7,7 @@ DROP PROCEDURE IF EXISTS `industryy`;
 DROP PROCEDURE IF EXISTS `conceptt`;
 DROP PROCEDURE IF EXISTS `hiscode`;
 DROP PROCEDURE IF EXISTS `rocc`;
+DROP PROCEDURE IF EXISTS `rbar`;
 
 DELIMITER $$
 create procedure reall(in queryCodes varchar(512))
@@ -198,6 +199,21 @@ BEGIN
     call rocc(queryCodes);
 end
 $$
+
+CREATE PROCEDURE rbar(in queryCodes varchar(512))
+BEGIN
+    DECLARE queryCondition VARCHAR(512);
+    if queryCodes like '%,%' then
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+    else
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+    end if;
+    SET @sql = CONCAT('select trade_date,ts_code,bar from real_bar where ts_code in (', queryCondition,
+                      ') and trade_date > curdate() order by ts_code, trade_date desc;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end $$
 
 DELIMITER ;
 
