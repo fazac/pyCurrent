@@ -114,12 +114,16 @@ public class StockService {
         newLimitCodeOne.setTradeDate(nowDay);
         List<LimitCodeValue> newLimitCodeValues = new ArrayList<>();
         for (EmDNStock rt : emDNStockList) {
-            int i = checkReachLimit(rt, 0);
-            if (i > 0) {
-                LimitCodeValue limitCodeValue = new LimitCodeValue();
-                limitCodeValue.setCode(rt.getTsCode());
-                limitCodeValue.setCount(i);
-                newLimitCodeValues.add(limitCodeValue);
+            String tsCode = rt.getTsCode();
+            if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && rt.getPctChg().compareTo(Constants.EIGHT) > 0
+                || tsCode.startsWith("3") && rt.getPctChg().compareTo(Constants.EIGHTEEN) > 0) {
+                int i = checkReachLimit(rt, 0);
+                if (i > 0) {
+                    LimitCodeValue limitCodeValue = new LimitCodeValue();
+                    limitCodeValue.setCode(tsCode);
+                    limitCodeValue.setCount(i);
+                    newLimitCodeValues.add(limitCodeValue);
+                }
             }
         }
         newLimitCodeOne.setCodeValue(newLimitCodeValues);
