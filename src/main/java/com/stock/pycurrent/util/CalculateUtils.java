@@ -1,5 +1,6 @@
 package com.stock.pycurrent.util;
 
+import com.stock.pycurrent.entity.EmDNStock;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 
 import java.math.BigDecimal;
@@ -90,8 +91,7 @@ public class CalculateUtils {
      * @return EMA
      */
     public static BigDecimal calShortEMANext(BigDecimal curValue, BigDecimal lastEMA) {
-        return curValue.multiply(BigDecimal.TWO).add(lastEMA.multiply(SHORT_N_M1))
-                .divide(SHORT_N_P1, 4, RoundingMode.HALF_UP);
+        return curValue.multiply(BigDecimal.TWO).add(lastEMA.multiply(SHORT_N_M1)).divide(SHORT_N_P1, 4, RoundingMode.HALF_UP);
     }
 
     /**
@@ -102,8 +102,7 @@ public class CalculateUtils {
      * @return EMA
      */
     public static BigDecimal calLongEMANext(BigDecimal curValue, BigDecimal lastEMA) {
-        return curValue.multiply(BigDecimal.TWO).add(lastEMA.multiply(LONG_N_M1))
-                .divide(LONG_N_P1, 4, RoundingMode.HALF_UP);
+        return curValue.multiply(BigDecimal.TWO).add(lastEMA.multiply(LONG_N_M1)).divide(LONG_N_P1, 4, RoundingMode.HALF_UP);
     }
 
     /**
@@ -114,8 +113,7 @@ public class CalculateUtils {
      * @return EMA
      */
     public static BigDecimal calMidEMANext(BigDecimal curValue, BigDecimal lastEMA) {
-        return curValue.multiply(BigDecimal.TWO).add(lastEMA.multiply(MID_N_M1))
-                .divide(MID_N_P1, 4, RoundingMode.HALF_UP);
+        return curValue.multiply(BigDecimal.TWO).add(lastEMA.multiply(MID_N_M1)).divide(MID_N_P1, 4, RoundingMode.HALF_UP);
     }
 
 
@@ -128,6 +126,18 @@ public class CalculateUtils {
     }
 
     private static boolean reachLimit(EmRealTimeStock emRealTimeStock, BigDecimal limit) {
-        return emRealTimeStock.getCurrentPri().compareTo(emRealTimeStock.getPriClosePre().multiply(limit).setScale(2, RoundingMode.HALF_UP)) == 0;
+        return reachLimit(emRealTimeStock.getCurrentPri(), emRealTimeStock.getPriClosePre(), limit);
+    }
+
+    public static boolean reachTenLimit(EmDNStock curOne, EmDNStock preOne) {
+        return reachLimit(curOne.getPriClose(), preOne.getPriClose(), TEN_LIMIT);
+    }
+
+    public static boolean reachTwentyLimit(EmDNStock curOne, EmDNStock preOne) {
+        return reachLimit(curOne.getPriClose(), preOne.getPriClose(), TWENTY_LIMIT);
+    }
+
+    private static boolean reachLimit(BigDecimal curPrice, BigDecimal prePrice, BigDecimal limit) {
+        return curPrice.compareTo(prePrice.multiply(limit).setScale(2, RoundingMode.HALF_UP)) == 0;
     }
 }

@@ -1,3 +1,4 @@
+drop database stockrealtime;
 CREATE
     DATABASE IF NOT EXISTS stockrealtime
     DEFAULT CHARSET = utf8mb4

@@ -174,14 +174,6 @@ public class PullData implements CommandLineRunner {
                 limitCodeMap = codeValueList.stream().collect(Collectors.toMap(LimitCodeValue::getCode, Function.identity()));
             }
         }
-        LimitCode newLimitCodeOne = null;
-        List<LimitCodeValue> newLimitCodeValues = null;
-        boolean createLimitCode = nowHour >= 15 && nowMinute > 0;
-        if (createLimitCode) {
-            newLimitCodeOne = new LimitCode();
-            newLimitCodeOne.setTradeDate(NOW_DAY);
-            newLimitCodeValues = new ArrayList<>();
-        }
         boolean rangeOverLimit;
         boolean highLimit;
         boolean noConcerned;
@@ -207,20 +199,6 @@ public class PullData implements CommandLineRunner {
             concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
             noBuy = codes[3].contains(tsCode);
             yesterdayHigh = limitCodeMap.containsKey(tsCode);
-            if (createLimitCode && rt.getCurrentPri() != null && rt.getVol() != null && !tsName.contains("退") && !noConcerned
-                    && ((tsCode.startsWith("0") || tsCode.startsWith("60")) && CalculateUtils.reachTenLimit(rt) ||
-                    tsCode.startsWith("3") && CalculateUtils.reachTwentyLimit(rt))) {
-                if (!limitCodeMap.containsKey(tsCode)) {
-                    LimitCodeValue limitCodeValue = new LimitCodeValue();
-                    limitCodeValue.setCode(tsCode);
-                    limitCodeValue.setCount(1);
-                    newLimitCodeValues.add(limitCodeValue);
-                } else {
-                    LimitCodeValue old = limitCodeMap.get(tsCode);
-                    old.setCount(old.getCount() + 1);
-                    newLimitCodeValues.add(old);
-                }
-            }
 
             String nameFirst = "N,C".contains(String.valueOf(tsName.charAt(0))) ? tsName.substring(1, 3) : tsName.substring(0, 2);
             if (rt.getCurrentPri() != null && rt.getVol() != null && (tsCode.startsWith("0") || tsCode.startsWith("60")) && !tsName.contains("退") && !noConcerned && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() > 2 || (limitCodeMap.get(tsCode).getCount() == 2 && CalculateUtils.reachTenLimit(rt))))) {
@@ -333,10 +311,6 @@ public class PullData implements CommandLineRunner {
             rangeOverCode.setCodeValue(valueList);
             rangeOverCodeService.saveEntity(rangeOverCode);
         }
-        if (createLimitCode) {
-            newLimitCodeOne.setCodeValue(newLimitCodeValues);
-            limitCodeService.save(newLimitCodeOne);
-        }
 
         if (nowMinute % 10 == 5 || nowMinute % 10 == 0) {
             CurCount curCount = statisticsCurCount(stockList);
@@ -344,7 +318,8 @@ public class PullData implements CommandLineRunner {
         }
     }
 
-    private static CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
+
+    private CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
         int c00u = 0;
         int c00a = 0;
         int c30u = 0;

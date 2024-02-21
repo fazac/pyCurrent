@@ -12,7 +12,7 @@ parser.add_argument('--em_table', type=str, default='em_real_time_stock')
 args = parser.parse_args()
 
 em_func = args.em_func
-em_table = args.em_table
+em_table = args.em_table + "_" + datetime.datetime.now().strftime('%Y%m%d')
 em_table_tmp = em_table + "_tmp"
 
 engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")

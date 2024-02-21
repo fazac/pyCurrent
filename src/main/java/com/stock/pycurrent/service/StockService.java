@@ -1,12 +1,17 @@
 package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.EmDAStock;
+import com.stock.pycurrent.entity.EmDNStock;
+import com.stock.pycurrent.entity.LimitCode;
 import com.stock.pycurrent.entity.RocModel;
 import com.stock.pycurrent.entity.emum.PyFuncEnum;
+import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.repo.EmDAStockRepo;
 import com.stock.pycurrent.repo.EmDNStockRepo;
+import com.stock.pycurrent.repo.LimitCodeRepo;
 import com.stock.pycurrent.repo.RocModelRepo;
+import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.ExecutorUtils;
 import com.stock.pycurrent.util.StockUtils;
@@ -17,10 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -36,6 +38,8 @@ public class StockService {
     private EmDNStockRepo emDNStockRepo;
 
     private RocModelRepo rocModelRepo;
+
+    private LimitCodeRepo limitCodeRepo;
 
 
     public void initEMDailyData() {
@@ -95,6 +99,40 @@ public class StockService {
         return Collections.emptyList();
     }
 
+    public void createLimitCode() {
+        String nowDay = DateUtils.now();
+        List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(nowDay);
+        if (emDNStockList == null || emDNStockList.isEmpty()) {
+            return;
+        }
+        emDNStockList.sort(Comparator.comparing(EmDNStock::getTsCode));
+        LimitCode newLimitCodeOne = new LimitCode();
+        newLimitCodeOne.setTradeDate(nowDay);
+        List<LimitCodeValue> newLimitCodeValues = new ArrayList<>();
+        for (EmDNStock rt : emDNStockList) {
+            int i = checkReachLimit(rt, 0);
+            if (i > 0) {
+                LimitCodeValue limitCodeValue = new LimitCodeValue();
+                limitCodeValue.setCode(rt.getTsCode());
+                limitCodeValue.setCount(i);
+                newLimitCodeValues.add(limitCodeValue);
+            }
+        }
+        newLimitCodeOne.setCodeValue(newLimitCodeValues);
+        limitCodeRepo.saveAndFlush(newLimitCodeOne);
+    }
+
+    private int checkReachLimit(EmDNStock emDNStock, int i) {
+        EmDNStock leftOne = emDNStockRepo.findLeftOne(emDNStock.getTsCode(), emDNStock.getTradeDate());
+        String tsCode = emDNStock.getTsCode();
+        if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && CalculateUtils.reachTenLimit(emDNStock, leftOne) ||
+            tsCode.startsWith("3") && CalculateUtils.reachTwentyLimit(emDNStock, leftOne)) {
+            i++;
+            return checkReachLimit(leftOne, i);
+        }
+        return i;
+    }
+
     @Autowired
     public void setEmDAStockRepo(EmDAStockRepo emDAStockRepo) {
         this.emDAStockRepo = emDAStockRepo;
@@ -108,5 +146,10 @@ public class StockService {
     @Autowired
     public void setRocModelRepo(RocModelRepo rocModelRepo) {
         this.rocModelRepo = rocModelRepo;
+    }
+
+    @Autowired
+    public void setLimitCodeRepo(LimitCodeRepo limitCodeRepo) {
+        this.limitCodeRepo = limitCodeRepo;
     }
 }

@@ -2,9 +2,9 @@ package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.service.BoardConceptConService;
 import com.stock.pycurrent.service.BoardIndustryConService;
+import com.stock.pycurrent.service.EmRealTimeStockService;
 import com.stock.pycurrent.service.StockService;
 import com.stock.pycurrent.util.PARAMS;
-import com.stock.pycurrent.util.StockUtils;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +26,12 @@ public class PrepareData implements CommandLineRunner {
     private BoardConceptConService boardConceptConService;
     private BoardIndustryConService boardIndustryConService;
 
+    private EmRealTimeStockService emRealTimeStockService;
+
     @Override
     public void run(String... args) {
-        if (!StockUtils.inStartTimePeriod()) {
-            if (!PARAMS.BAK_MODE) {
-                pullAll();
-            }
-        }
+        createTable();
+        pullAll();
         rocCal();
     }
 
@@ -51,6 +50,9 @@ public class PrepareData implements CommandLineRunner {
             boardIndustryConService.findBoardIndustryConCurrent();
             log.warn("pullData-EMBI-OVER");
             log.warn("PULL-ALL-OVER");
+            log.warn("createLimitCode-ENTER");
+            stockService.createLimitCode();
+            log.warn("createLimitCode-OVER");
         }
     }
 
@@ -60,6 +62,13 @@ public class PrepareData implements CommandLineRunner {
         log.warn("ROC-ENTER");
         stockService.initRocModel();
         log.warn("ROC-OVER");
+    }
+
+    @Scheduled(cron = " 0 0 9 * * ? ")
+    public void createTable() {
+        log.warn("createTable-ENTER");
+        emRealTimeStockService.createTable();
+        log.warn("createTable-OVER");
     }
 
     @Autowired
@@ -75,5 +84,10 @@ public class PrepareData implements CommandLineRunner {
     @Autowired
     public void setBoardIndustryConService(BoardIndustryConService boardIndustryConService) {
         this.boardIndustryConService = boardIndustryConService;
+    }
+
+    @Autowired
+    public void setEmRealTimeStockService(EmRealTimeStockService emRealTimeStockService) {
+        this.emRealTimeStockService = emRealTimeStockService;
     }
 }
