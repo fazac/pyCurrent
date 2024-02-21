@@ -224,6 +224,8 @@ create index board_concept_cons_symbol
     on board_concept_con (symbol);
 create index board_concept_cons_name
     on board_concept_con (name);
+create index board_concept_cons_code
+    on board_concept_con (ts_code);
 
 
 create table `board_industry_con`
