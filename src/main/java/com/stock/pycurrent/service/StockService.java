@@ -15,9 +15,12 @@ import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -69,26 +72,19 @@ public class StockService {
 
     @SneakyThrows
     public void initRocModel() {
-        List<List<EmDAStock>> tmpDas = findEmCodeDataList();
-        String start = DateUtils.getDateAtOffset(DateUtils.now(), 1, ChronoUnit.DAYS);
-        List<RocModel> rocModelRes = createRocModel(start, tmpDas);
-        rocModelRepo.saveAll(rocModelRes);
-    }
-
-    @SneakyThrows
-    public List<RocModel> createRocModel(String params, List<List<EmDAStock>> allDatas) {
-        if (rocModelRepo.checkExistParam(params) > 0) {
-            return new ArrayList<>();
+        String start = LocalDateTime.now().getHour() < 16 ? DateUtils.now() : DateUtils.getDateAtOffset(DateUtils.now(), 1, ChronoUnit.DAYS);
+        if (rocModelRepo.checkExistParam(start) > 0) {
+            return;
         }
-        List<RocModel> res = new ArrayList<>();
-        CountDownLatch countDownLatch = new CountDownLatch(allDatas.size());
+        List<String> codes = new ArrayList<>(emDAStockRepo.findCodes().stream().filter(StockUtils::availableCode).toList());
+        Collections.sort(codes);
         Date now = new Date();
-        allDatas.forEach(x -> ExecutorUtils.addGuavaComplexTask(() -> {
-            res.addAll(innerCreateRocModel(x, params, now));
+        CountDownLatch countDownLatch = new CountDownLatch(codes.size());
+        codes.forEach(x -> ExecutorUtils.addGuavaComplexTask(() -> {
+            rocModelRepo.saveAll(innerCreateRocModel(emDAStockRepo.findByCode(x), start, now));
             countDownLatch.countDown();
         }));
         countDownLatch.await();
-        return res;
     }
 
     @SneakyThrows
@@ -97,22 +93,6 @@ public class StockService {
             return StockUtils.findPeekPoint(datas, params, now);
         }
         return Collections.emptyList();
-    }
-
-    public List<List<EmDAStock>> findEmCodeDataList() {
-        List<List<EmDAStock>> res = new ArrayList<>();
-        List<String> codes = emDAStockRepo.findCodes();
-        Collections.sort(codes);
-        for (String x : codes) {
-            if (StockUtils.availableCode(x)) {
-                List<EmDAStock> emDAStocks = emDAStockRepo.findByCode(x);
-                if (emDAStocks.stream().noneMatch(y -> y.getPriClose().compareTo(BigDecimal.ZERO) < 0)) {
-                    emDAStocks.sort(Comparator.comparing(EmDAStock::getTradeDate));
-                    res.add(emDAStocks);
-                }
-            }
-        }
-        return res;
     }
 
     @Autowired

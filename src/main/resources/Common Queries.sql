@@ -2,7 +2,11 @@ DROP PROCEDURE IF EXISTS `reall`;
 DROP PROCEDURE IF EXISTS `realName`;
 DROP PROCEDURE IF EXISTS `realDay`;
 DROP PROCEDURE IF EXISTS `openn`;
-
+DROP PROCEDURE IF EXISTS `staticss`;
+DROP PROCEDURE IF EXISTS `industryy`;
+DROP PROCEDURE IF EXISTS `conceptt`;
+DROP PROCEDURE IF EXISTS `hiscode`;
+DROP PROCEDURE IF EXISTS `rocc`;
 
 DELIMITER $$
 create procedure reall(in queryCodes varchar(512))
@@ -85,6 +89,107 @@ BEGIN
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
+end
+$$
+
+CREATE PROCEDURE hiscode(in queryCodes varchar(512), in startDate varchar(8))
+BEGIN
+    DECLARE queryCondition VARCHAR(512);
+    if queryCodes like '%,%' then
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+    else
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+    end if;
+    SET @sql = CONCAT('select ts_code,
+           trade_date,
+           pct_chg,
+           change_hand,
+           pri_close,
+           pri_high,
+           pri_low,
+           pri_open,
+           amount / vol / 100
+    from em_d_n_stock
+    where ts_code in (', queryCondition,
+                      ') and trade_date >', startDate, '
+    order by ts_code, trade_date;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END $$
+
+CREATE PROCEDURE conceptt(in queryCodes varchar(512))
+BEGIN
+    DECLARE queryCondition VARCHAR(512);
+    if queryCodes like '%,%' then
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+    else
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+    end if;
+    SET @sql = CONCAT('select ts_code,group_concat(distinct symbol)
+    from board_concept_con
+    where ts_code in (', queryCondition,
+                      ') and trade_date = (select max(trade_date) from board_concept_con) group by ts_code order by ts_code;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end $$
+
+CREATE PROCEDURE industryy(in queryCodes varchar(512))
+BEGIN
+    DECLARE queryCondition VARCHAR(512);
+    if queryCodes like '%,%' then
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+    else
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+    end if;
+    SET @sql = CONCAT(' select ts_code,group_concat(distinct symbol)
+    from board_industry_con
+    where ts_code in (', queryCondition,
+                      ') and trade_date = (select max(trade_date) from board_industry_con) group by ts_code order by ts_code ;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end $$
+
+create procedure rocc(in queryCodes varchar(512))
+BEGIN
+    DECLARE queryCondition VARCHAR(512);
+    if queryCodes like '%,%' then
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+    else
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+    end if;
+    SET @sql = CONCAT(' select *
+    from roc_model
+    where params=(select max(params) from roc_model) and ts_code in (', queryCondition,
+                      ')  order by ts_code ;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end
+$$
+
+CREATE PROCEDURE staticss(in queryCodes varchar(512))
+BEGIN
+    DECLARE queryCondition VARCHAR(512);
+    declare startDate varchar(8);
+
+    select replace(if(day(now()) > 18, DATE_ADD(LAST_DAY(NOW() - INTERVAL 2 MONTH), INTERVAL 1 DAY),
+                      DATE_ADD(LAST_DAY(DATE_SUB(Now(), INTERVAL 1 MONTH)), INTERVAL -45 DAY)), '-', '')
+    into startDate;
+
+    if queryCodes like '%,%' then
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+    else
+        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+    end if;
+
+    call openn(queryCodes);
+    call industryy(queryCodes);
+    call conceptt(queryCodes);
+    call hiscode(queryCodes, startDate);
+    call rocc(queryCodes);
 end
 $$
 

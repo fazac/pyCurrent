@@ -33,6 +33,7 @@ public class PrepareData implements CommandLineRunner {
                 pullAll();
             }
         }
+        rocCal();
     }
 
     @SneakyThrows

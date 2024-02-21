@@ -14,7 +14,7 @@ public interface EmDAStockRepo extends JpaRepository<EmDAStock, BasicStockPK> {
     @Query(value = "select max(c.trade_date) from em_d_a_stock c", nativeQuery = true)
     String findMaxTradeDate();
 
-    @Query("from EmDAStock where tsCode =?1 ")
+    @Query("from EmDAStock where tsCode =?1 order by tradeDate")
     List<EmDAStock> findByCode(String code);
 
     @Query(value = "select distinct c.ts_code from em_d_a_stock c order by c.ts_code ", nativeQuery = true)
