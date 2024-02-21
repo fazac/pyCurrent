@@ -101,6 +101,10 @@ public class StockService {
 
     public void createLimitCode() {
         String nowDay = DateUtils.now();
+        LimitCode nowDayOne = limitCodeRepo.findByDate(nowDay);
+        if (nowDayOne != null && nowDayOne.getTradeDate() != null) {
+            return;
+        }
         List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(nowDay);
         if (emDNStockList == null || emDNStockList.isEmpty()) {
             return;
@@ -125,8 +129,7 @@ public class StockService {
     private int checkReachLimit(EmDNStock emDNStock, int i) {
         EmDNStock leftOne = emDNStockRepo.findLeftOne(emDNStock.getTsCode(), emDNStock.getTradeDate());
         String tsCode = emDNStock.getTsCode();
-        if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && CalculateUtils.reachTenLimit(emDNStock, leftOne) ||
-            tsCode.startsWith("3") && CalculateUtils.reachTwentyLimit(emDNStock, leftOne)) {
+        if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && CalculateUtils.reachTenLimit(emDNStock, leftOne) || tsCode.startsWith("3") && CalculateUtils.reachTwentyLimit(emDNStock, leftOne)) {
             i++;
             return checkReachLimit(leftOne, i);
         }
