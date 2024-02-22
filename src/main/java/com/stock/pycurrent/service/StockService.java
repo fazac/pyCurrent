@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * @author fzc
@@ -83,12 +82,7 @@ public class StockService {
         List<String> codes = new ArrayList<>(emDAStockRepo.findCodes().stream().filter(StockUtils::availableCode).toList());
         Collections.sort(codes);
         Date now = new Date();
-        CountDownLatch countDownLatch = new CountDownLatch(codes.size());
-        codes.forEach(x -> ExecutorUtils.addGuavaComplexTask(() -> {
-            rocModelRepo.saveAll(innerCreateRocModel(emDAStockRepo.findByCode(x), start, now));
-            countDownLatch.countDown();
-        }));
-        countDownLatch.await();
+        codes.forEach(x -> ExecutorUtils.addGuavaComplexTask(() -> rocModelRepo.saveAll(innerCreateRocModel(emDAStockRepo.findByCode(x), start, now))));
     }
 
     @SneakyThrows
