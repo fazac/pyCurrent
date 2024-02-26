@@ -8,6 +8,7 @@ import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.MessageUtil;
 import com.stock.pycurrent.util.PARAMS;
+import com.stock.pycurrent.util.StockUtils;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class PullData implements CommandLineRunner {
 
     @Scheduled(cron = "58 * 9-16 * * ?")
     public void pullRealTimeData() {
-        if (isTradeHour()) {
+        if (isTradeHour() && StockUtils.isNotRest()) {
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
             List<EmConstant> emConstants = emConstantService.findAll();
             String[] codes = prepareConstantsCodes(emConstants);

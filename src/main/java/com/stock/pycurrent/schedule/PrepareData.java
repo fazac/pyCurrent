@@ -5,12 +5,16 @@ import com.stock.pycurrent.service.BoardIndustryConService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
 import com.stock.pycurrent.service.StockService;
 import com.stock.pycurrent.util.PARAMS;
+import com.stock.pycurrent.util.StockUtils;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
+
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 
 /**
  * @author fzc
@@ -30,15 +34,21 @@ public class PrepareData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        createTable();
-        pullAll();
-        rocCal();
+        if (StockUtils.isNotRest()) {
+            createTable();
+        }
+        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY
+            && StockUtils.isNotRest()) {
+            pullAll();
+            rocCal();
+        }
     }
 
     @SneakyThrows
     @Scheduled(cron = " 0 15 16 * * ? ")
     public void pullAll() {
-        if (!PARAMS.BAK_MODE) {
+        if (!PARAMS.BAK_MODE
+            && StockUtils.isNotRest()) {
             log.warn("PULL-ALL-ENTER");
             log.warn("pullData-EM-ENTER");
             stockService.initEMDailyData();
@@ -59,16 +69,20 @@ public class PrepareData implements CommandLineRunner {
     @SneakyThrows
     @Scheduled(cron = " 0 0 17 * * ? ")
     public void rocCal() {
-        log.warn("ROC-ENTER");
-        stockService.initRocModel();
-        log.warn("ROC-OVER");
+        if (StockUtils.isNotRest()) {
+            log.warn("ROC-ENTER");
+            stockService.initRocModel();
+            log.warn("ROC-OVER");
+        }
     }
 
     @Scheduled(cron = " 0 0 9 * * ? ")
     public void createTable() {
-        log.warn("createTable-ENTER");
-        emRealTimeStockService.createTable();
-        log.warn("createTable-OVER");
+        if (StockUtils.isNotRest()) {
+            log.warn("createTable-ENTER");
+            emRealTimeStockService.createTable();
+            log.warn("createTable-OVER");
+        }
     }
 
     @Autowired

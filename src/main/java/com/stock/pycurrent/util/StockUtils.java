@@ -11,6 +11,7 @@ import lombok.extern.apachecommons.CommonsLog;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -43,9 +44,15 @@ public class StockUtils {
         }
     }
 
+    @SuppressWarnings("unused")
     public static boolean inStartTimePeriod() {
         return LocalDateTime.now().getHour() <= 15
-                && LocalDateTime.now().getMinute() <= 40;
+               && LocalDateTime.now().getMinute() <= 40;
+    }
+
+    public static boolean isNotRest() {
+        return LocalDateTime.now().getDayOfWeek() != DayOfWeek.SATURDAY
+               && LocalDateTime.now().getDayOfWeek() != DayOfWeek.SUNDAY;
     }
 
     public static boolean checkEmpty(String str) {
