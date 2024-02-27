@@ -42,7 +42,6 @@ public class PullData implements CommandLineRunner {
 
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    private static final String NOW_DAY = LocalDateTime.now().format(DATE_TIME_FORMAT);
 
     private static final String CODE_TYPE = "F,A,R,C,L,H";
     private static final String CODE_PRINT_TYPE = "F,A,C,L,H";
@@ -146,6 +145,7 @@ public class PullData implements CommandLineRunner {
     }
 
     private void checkRealData(String[] codes, Map<String, Map<String, EmConstantValue>> stockMap, Map<String, List<BigDecimal>> codePctMap, Map<String, List<String>> logsMap, List<EmRealTimeStock> stockList) {
+        String NOW_DAY = LocalDateTime.now().format(DATE_TIME_FORMAT);
         initLogsMap();
         String type;
         String nowClock = fixLength(stockList.get(0).getTradeDate().substring(11), 8);
