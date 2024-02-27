@@ -7,6 +7,9 @@ public enum PyFuncEnum {
     EM_HIS_AFTER_DAILY("stock_zh_a_hist", "em_d_a_stock"),
     EM_BOARD_CONCEPT_CON("stock_board_concept_cons_em", "board_concept_con"),//板块成分
     EM_BOARD_INDUSTRY_CON("stock_board_industry_cons_em", "board_industry_con"),
+
+    CONTINUOUS_UP("stock_rank_lxsz_ths", "continuous_up"),
+
     AA("xx", "nn"); //最后一条无意义
 
     private final String funcName;

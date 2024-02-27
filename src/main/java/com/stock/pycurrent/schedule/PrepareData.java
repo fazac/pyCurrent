@@ -1,9 +1,6 @@
 package com.stock.pycurrent.schedule;
 
-import com.stock.pycurrent.service.BoardConceptConService;
-import com.stock.pycurrent.service.BoardIndustryConService;
-import com.stock.pycurrent.service.EmRealTimeStockService;
-import com.stock.pycurrent.service.StockService;
+import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.PARAMS;
 import com.stock.pycurrent.util.StockUtils;
 import lombok.SneakyThrows;
@@ -31,6 +28,8 @@ public class PrepareData implements CommandLineRunner {
     private BoardIndustryConService boardIndustryConService;
 
     private EmRealTimeStockService emRealTimeStockService;
+
+    private ContinuousUpService continuousUpService;
 
     @Override
     public void run(String... args) {
@@ -63,6 +62,9 @@ public class PrepareData implements CommandLineRunner {
             log.warn("createLimitCode-ENTER");
             stockService.createLimitCode();
             log.warn("createLimitCode-OVER");
+            log.warn("continuousUp-ENTER");
+            continuousUpService.initContinuousUp();
+            log.warn("continuousUp-OVER");
         }
     }
 
@@ -103,5 +105,10 @@ public class PrepareData implements CommandLineRunner {
     @Autowired
     public void setEmRealTimeStockService(EmRealTimeStockService emRealTimeStockService) {
         this.emRealTimeStockService = emRealTimeStockService;
+    }
+
+    @Autowired
+    public void setContinuousUpService(ContinuousUpService continuousUpService) {
+        this.continuousUpService = continuousUpService;
     }
 }

@@ -263,3 +263,30 @@ create index idx_name
     on board_industry_con (name);
 create index idx_ts_code
     on board_industry_con (ts_code);
+
+
+-- 20240227
+-- 20231030
+create table continuous_up
+(
+    `statics_date` varchar(32) comment '交易日期',
+    `sort`         int comment '序号',
+    `ts_code`      varchar(10) comment '股票代码',
+    `name`         varchar(8) comment '名称',
+    `pri_close`    decimal(18, 3) null comment '收盘价',
+    `pri_high`     decimal(18, 3) null comment '最高价',
+    `pri_low`      decimal(18, 3) null comment '最低价',
+    `up_days`      int comment '连涨天数',
+    `up_per`       decimal(18, 2) null comment '连续涨跌幅',
+    `change_hand`  decimal(18, 2) comment '累计换手率',
+    `industry`     varchar(32) comment '行业'
+) ENGINE = InnoDB
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = Dynamic;
+
+create index idx_statics_date on `continuous_up` (statics_date);
+create index idx_statics_code on `continuous_up` (ts_code);
+alter table continuous_up
+    drop
+        column `sort`;
