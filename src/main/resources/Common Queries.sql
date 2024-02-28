@@ -8,6 +8,7 @@ DROP PROCEDURE IF EXISTS `conceptt`;
 DROP PROCEDURE IF EXISTS `hiscode`;
 DROP PROCEDURE IF EXISTS `rocc`;
 DROP PROCEDURE IF EXISTS `rbar`;
+DROP PROCEDURE IF EXISTS `lmtt`;
 
 DELIMITER $$
 create procedure reall(in queryCodes varchar(512))
@@ -210,6 +211,18 @@ BEGIN
     end if;
     SET @sql = CONCAT('select trade_date,ts_code,bar from real_bar where ts_code in (', queryCondition,
                       ') and trade_date > curdate() order by ts_code, trade_date desc;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end $$
+
+CREATE PROCEDURE lmtt(in queryDate varchar(8))
+BEGIN
+    DECLARE queryCondition text;
+    select code_value from limit_code where trade_date = queryDate into queryCondition;
+    SET @sql = CONCAT('select * from json_table(\'', queryCondition,
+                      '\', ''$[*]''
+                COLUMNS (codet VARCHAR(6) PATH ''$.code'' DEFAULT ''1'' ON EMPTY,countt int PATH ''$.count'' DEFAULT ''1'' ON EMPTY)) AS tt;');
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
