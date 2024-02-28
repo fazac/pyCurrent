@@ -126,10 +126,12 @@ public class StockService {
 
     private int checkReachLimit(EmDNStock emDNStock, int i) {
         EmDNStock leftOne = emDNStockRepo.findLeftOne(emDNStock.getTsCode(), emDNStock.getTradeDate());
-        String tsCode = emDNStock.getTsCode();
-        if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && CalculateUtils.reachTenLimit(emDNStock, leftOne) || tsCode.startsWith("3") && CalculateUtils.reachTwentyLimit(emDNStock, leftOne)) {
-            i++;
-            return checkReachLimit(leftOne, i);
+        if (leftOne != null) {
+            String tsCode = emDNStock.getTsCode();
+            if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && CalculateUtils.reachTenLimit(emDNStock, leftOne) || tsCode.startsWith("3") && CalculateUtils.reachTwentyLimit(emDNStock, leftOne)) {
+                i++;
+                return checkReachLimit(leftOne, i);
+            }
         }
         return i;
     }
