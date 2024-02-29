@@ -52,19 +52,21 @@ public class PrepareData implements CommandLineRunner {
             log.warn("pullData-EM-ENTER");
             stockService.initEMDailyData();
             log.warn("pullData-EM-OVER");
-            log.warn("pullData-EMBC-ENTER");
-            boardConceptConService.findBoardConceptConCurrent();
-            log.warn("pullData-EMBC-OVER");
-            log.warn("pullData-EMBI-ENTER");
-            boardIndustryConService.findBoardIndustryConCurrent();
-            log.warn("pullData-EMBI-OVER");
-            log.warn("PULL-ALL-OVER");
+            if (StockUtils.afterPullHour()) {
+                log.warn("pullData-EMBC-ENTER");
+                boardConceptConService.findBoardConceptConCurrent();
+                log.warn("pullData-EMBC-OVER");
+                log.warn("pullData-EMBI-ENTER");
+                boardIndustryConService.findBoardIndustryConCurrent();
+                log.warn("pullData-EMBI-OVER");
+                log.warn("continuousUp-ENTER");
+                continuousUpService.initContinuousUp();
+                log.warn("continuousUp-OVER");
+            }
             log.warn("createLimitCode-ENTER");
             stockService.createLimitCode();
             log.warn("createLimitCode-OVER");
-            log.warn("continuousUp-ENTER");
-            continuousUpService.initContinuousUp();
-            log.warn("continuousUp-OVER");
+            log.warn("PULL-ALL-OVER");
         }
     }
 

@@ -358,8 +358,34 @@ public class PullData implements CommandLineRunner {
     private void printMapInfo(Map<String, List<String>> logsMap, String nowClock) {
         Arrays.stream(CODE_PRINT_TYPE.split(",")).forEach(x -> {
             if (!logsMap.get(x).isEmpty()) {
-                for (int i = 0; i < logsMap.get(x).size(); i++) {
-                    log.warn("| " + nowClock + fixLength(i + 1 + " ", 3) + x + " " + logsMap.get(x).get(i));
+                List<String> remarks = logsMap.get(x);
+                remarks.sort((o1, o2) -> {
+                    char o11 = o1.charAt(1);
+                    char o21 = o2.charAt(1);
+                    if (o11 <= 57 && o11 >= 49 && o21 <= 57 && o21 >= 49) {
+                        return o21 - o11;
+                    } else {
+                        if (o11 <= 57 && o11 >= 49) {
+                            return -1;
+                        } else if (o21 <= 57 && o21 >= 49) {
+                            return 1;
+                        }
+                        char o10 = o1.charAt(0);
+                        char o20 = o2.charAt(0);
+                        if (o10 == o20) {
+                            return 0;
+                        } else if (o10 == 'P') {
+                            return -1;
+                        } else if (o20 == 'P') {
+                            return 1;
+                        } else {
+                            return o20 - o10;
+                        }
+                    }
+                });
+
+                for (int i = 0; i < remarks.size(); i++) {
+                    log.warn("| " + nowClock + fixLength(i + 1 + " ", 3) + x + " " + remarks.get(i));
                 }
             }
         });
