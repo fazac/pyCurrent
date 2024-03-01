@@ -15,15 +15,16 @@ create procedure reall(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
 
+    if length(queryCodes) = 5 then
+        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+    end if;
+
     if queryCodes like '%,%' then
         SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
     else
         SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
     end if;
 
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    end if;
 
     set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
     SET @sql = CONCAT(' select * from ', @tableName, ' where trade_date = (select max(trade_date) from ', @tableName,
@@ -54,14 +55,17 @@ BEGIN
     DECLARE delim CHAR(1) DEFAULT ',';
     DECLARE idx INT DEFAULT 1;
     DECLARE element VARCHAR(6);
+
+    if length(queryCodes) = 5 then
+        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+    end if;
+
     if queryCodes like '%,%' then
         SET queryCondition = queryCodes;
     else
         SET queryCondition = REPLACE(queryCodes, ' ', ',');
     end if;
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    end if;
+
     set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
     WHILE queryCondition != ''
         DO
@@ -208,14 +212,17 @@ $$
 CREATE PROCEDURE rbar(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
+
+    if length(queryCodes) = 5 then
+        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+    end if;
+
     if queryCodes like '%,%' then
         SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
     else
         SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
     end if;
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    end if;
+
     SET @sql = CONCAT('select trade_date,ts_code,bar from real_bar where ts_code in (', queryCondition,
                       ') and trade_date > curdate() order by ts_code, trade_date desc;');
     PREPARE stmt FROM @sql;
