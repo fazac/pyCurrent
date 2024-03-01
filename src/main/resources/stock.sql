@@ -290,3 +290,8 @@ create index idx_statics_code on `continuous_up` (ts_code);
 alter table continuous_up
     drop
         column `sort`;
+
+ALTER DATABASE stockrealtime CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+ALTER TABLE `board_concept_con` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+ALTER TABLE `board_industry_con` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;

@@ -9,6 +9,8 @@ DROP PROCEDURE IF EXISTS `hiscode`;
 DROP PROCEDURE IF EXISTS `rocc`;
 DROP PROCEDURE IF EXISTS `rbar`;
 DROP PROCEDURE IF EXISTS `lmtt`;
+DROP PROCEDURE IF EXISTS `cptt`;
+DROP PROCEDURE IF EXISTS `cptr`;
 
 DELIMITER $$
 create procedure reall(in queryCodes varchar(512))
@@ -237,6 +239,30 @@ BEGIN
     SET @sql = CONCAT('select * from json_table(\'', queryCondition,
                       '\', ''$[*]''
                 COLUMNS (codet VARCHAR(6) PATH ''$.code'' DEFAULT ''1'' ON EMPTY,countt int PATH ''$.count'' DEFAULT ''1'' ON EMPTY)) AS tt;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end $$
+
+CREATE PROCEDURE cptt(in queryName varchar(16))
+BEGIN
+    SET @sql = CONCAT('select * from board_concept_con where symbol like \'%', queryName,
+                      '%\' and trade_date = (select max(trade_date) from board_concept_con);');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+end $$
+
+CREATE PROCEDURE cptr(in queryName varchar(16))
+BEGIN
+    set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
+    SET @sql = CONCAT('select *
+    from ', @tableName, '
+    where trade_date = (select max(trade_date) from ', @tableName, ')
+      and ts_code in (select ts_code
+                      from board_concept_con
+                      where symbol like \'%', queryName, '%\'
+                        and trade_date = (select max(trade_date) from board_concept_con));');
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
