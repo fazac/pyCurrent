@@ -363,6 +363,11 @@ public class PullData implements CommandLineRunner {
                     char o11 = o1.charAt(1);
                     char o21 = o2.charAt(1);
                     if (o11 <= 57 && o11 >= 49 && o21 <= 57 && o21 >= 49) {
+                        if (o21 == o11) {
+                            char o10 = o1.charAt(0);
+                            char o20 = o2.charAt(0);
+                            return o20 - o10;
+                        }
                         return o21 - o11;
                     } else {
                         if (o11 <= 57 && o11 >= 49) {
