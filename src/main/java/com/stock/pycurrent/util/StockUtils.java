@@ -45,8 +45,9 @@ public class StockUtils {
     }
 
     public static boolean afterPullHour() {
-        return LocalDateTime.now().getHour() >= 15
-               && LocalDateTime.now().getMinute() >= 30;
+        return LocalDateTime.now().getHour() == 15
+               && LocalDateTime.now().getMinute() >= 30
+               || LocalDateTime.now().getHour() > 15;
     }
 
     @SuppressWarnings("unused")
