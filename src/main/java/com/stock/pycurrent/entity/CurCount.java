@@ -36,4 +36,17 @@ public class CurCount {
     @Column(name = "c_00a")
     private Integer c00a;
 
+    @Column(name = "c_30_5u")
+    private Integer c305u;
+    @Column(name = "c_30_7d")
+    private Integer c307d;
+    @Column(name = "c_60_5u")
+    private Integer c605u;
+    @Column(name = "c_60_7d")
+    private Integer c607d;
+    @Column(name = "c_00_5u")
+    private Integer c005u;
+    @Column(name = "c_00_7d")
+    private Integer c007d;
+
 }

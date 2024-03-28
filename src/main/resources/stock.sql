@@ -295,3 +295,11 @@ ALTER DATABASE stockrealtime CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 ALTER TABLE `board_concept_con` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
 ALTER TABLE `board_industry_con` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+
+-- 20240328
+alter table `cur_count` add column `c_30_5u` int;
+alter table `cur_count` add column `c_30_7d` int;
+alter table `cur_count` add column `c_60_5u` int;
+alter table `cur_count` add column `c_60_7d` int;
+alter table `cur_count` add column `c_00_5u` int;
+alter table `cur_count` add column `c_00_7d` int;

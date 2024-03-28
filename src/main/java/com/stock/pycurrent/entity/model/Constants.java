@@ -16,5 +16,8 @@ public class Constants {
     public static BigDecimal EIGHT = BigDecimal.valueOf(8);
     public static BigDecimal EIGHTEEN = BigDecimal.valueOf(18);
 
+    public static BigDecimal FIVE = BigDecimal.valueOf(5);
+    public static BigDecimal N_SEVEN = BigDecimal.valueOf(-7);
+
 
 }

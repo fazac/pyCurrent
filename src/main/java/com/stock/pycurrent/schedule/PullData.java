@@ -4,6 +4,7 @@ import com.stock.pycurrent.entity.*;
 import com.stock.pycurrent.entity.jsonvalue.EmConstantValue;
 import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
+import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.MessageUtil;
@@ -327,6 +328,13 @@ public class PullData implements CommandLineRunner {
         int c30a = 0;
         int c60u = 0;
         int c60a = 0;
+
+        int c305u = 0;
+        int c307d = 0;
+        int c605u = 0;
+        int c607d = 0;
+        int c005u = 0;
+        int c007d = 0;
         for (EmRealTimeStock em : stockList) {
             if (em.getPctChg() != null) {
                 if (em.getTsCode().startsWith("00")) {
@@ -334,20 +342,38 @@ public class PullData implements CommandLineRunner {
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
                         c00u++;
                     }
+                    if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
+                        c005u++;
+                    }
+                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
+                        c007d++;
+                    }
                 } else if (em.getTsCode().startsWith("30")) {
                     c30a++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
                         c30u++;
+                    }
+                    if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
+                        c305u++;
+                    }
+                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
+                        c307d++;
                     }
                 } else if (em.getTsCode().startsWith("60")) {
                     c60a++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
                         c60u++;
                     }
+                    if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
+                        c605u++;
+                    }
+                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
+                        c607d++;
+                    }
                 }
             }
         }
-        return new CurCount(stockList.get(0).getTradeDate(), c30u, c30a, c60u, c60a, c00u, c00a);
+        return new CurCount(stockList.get(0).getTradeDate(), c30u, c30a, c60u, c60a, c00u, c00a, c305u, c307d, c605u, c607d, c005u, c007d);
     }
 
 
