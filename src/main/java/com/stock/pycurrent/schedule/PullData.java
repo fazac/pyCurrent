@@ -314,7 +314,7 @@ public class PullData implements CommandLineRunner {
             rangeOverCodeService.saveEntity(rangeOverCode);
         }
 
-        if (nowMinute % 10 == 5 || nowMinute % 10 == 0) {
+        if (nowMinute % 10 == 5 || nowMinute % 10 == 0 || nowHour == 9 && nowMinute == 16) {
             CurCount curCount = statisticsCurCount(stockList);
             curCountService.saveOne(curCount);
         }
