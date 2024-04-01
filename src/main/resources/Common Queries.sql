@@ -204,6 +204,7 @@ BEGIN
     end if;
 
     call openn(queryCodes);
+    call realDay(queryCodes);
     call industryy(queryCodes);
     call conceptt(queryCodes);
     call hiscode(queryCodes, startDate);
