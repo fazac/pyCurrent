@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 @CommonsLog
@@ -314,7 +315,9 @@ public class PullData implements CommandLineRunner {
             rangeOverCodeService.saveEntity(rangeOverCode);
         }
 
-        if (nowMinute % 10 == 5 || nowMinute % 10 == 0 || nowHour == 9 && nowMinute == 16) {
+        if (nowMinute % 10 == 5 || nowMinute % 10 == 0
+            || nowHour == 9 && nowMinute == 16
+            || nowHour == 15 && nowMinute == 1) {
             CurCount curCount = statisticsCurCount(stockList);
             curCountService.saveOne(curCount);
         }
@@ -322,58 +325,46 @@ public class PullData implements CommandLineRunner {
 
 
     private CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
-        int c00u = 0;
-        int c00a = 0;
-        int c30u = 0;
-        int c30a = 0;
-        int c60u = 0;
-        int c60a = 0;
-
-        int c305u = 0;
-        int c307d = 0;
-        int c605u = 0;
-        int c607d = 0;
-        int c005u = 0;
-        int c007d = 0;
+        Integer[] countArray = Stream.generate(() -> 0).limit(12).toArray(Integer[]::new);
         for (EmRealTimeStock em : stockList) {
             if (em.getPctChg() != null) {
                 if (em.getTsCode().startsWith("00")) {
-                    c00a++;
+                    countArray[0]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        c00u++;
+                        countArray[1]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        c005u++;
+                        countArray[2]++;
                     }
                     if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        c007d++;
+                        countArray[3]++;
                     }
                 } else if (em.getTsCode().startsWith("30")) {
-                    c30a++;
+                    countArray[4]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        c30u++;
+                        countArray[5]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        c305u++;
+                        countArray[6]++;
                     }
                     if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        c307d++;
+                        countArray[7]++;
                     }
                 } else if (em.getTsCode().startsWith("60")) {
-                    c60a++;
+                    countArray[8]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        c60u++;
+                        countArray[9]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        c605u++;
+                        countArray[10]++;
                     }
                     if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        c607d++;
+                        countArray[11]++;
                     }
                 }
             }
         }
-        return new CurCount(stockList.get(0).getTradeDate(), c30u, c30a, c60u, c60a, c00u, c00a, c305u, c307d, c605u, c607d, c005u, c007d);
+        return new CurCount(stockList.get(0).getTradeDate(), countArray);
     }
 
 
