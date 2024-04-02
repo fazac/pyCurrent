@@ -209,6 +209,7 @@ BEGIN
     call conceptt(queryCodes);
     call hiscode(queryCodes, startDate);
     call rocc(queryCodes);
+    call rbar(queryCodes);
 end
 $$
 
