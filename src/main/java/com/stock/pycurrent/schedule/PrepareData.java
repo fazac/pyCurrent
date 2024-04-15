@@ -10,9 +10,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-
 /**
  * @author fzc
  * @date 2024/2/19 10:35
@@ -36,8 +33,7 @@ public class PrepareData implements CommandLineRunner {
         if (StockUtils.isNotRest()) {
             createTable();
         }
-        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY
-            && StockUtils.isNotRest()) {
+        if (StockUtils.isNotRest()) {
             pullAll();
             rocCal();
         }
