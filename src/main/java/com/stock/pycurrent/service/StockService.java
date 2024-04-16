@@ -43,6 +43,7 @@ public class StockService {
 
     public void initEMDailyData() {
         // 每日更新日行情
+        log.info("EM-INIT-GETDATA-ENTER");
         String dailyNoStartDate = findMaxTradeDate(Constants.REHABILITATION_NO);
         String dailyAfterStartDate = findMaxTradeDate(Constants.REHABILITATION_AFTER);
         if (StockUtils.checkEmpty(dailyNoStartDate)) {
@@ -51,6 +52,7 @@ public class StockService {
         if (StockUtils.checkEmpty(dailyAfterStartDate)) {
             dailyAfterStartDate = Constants.EM_DEFAULT_START_DAY;
         }
+        log.info("EM-INIT-GETDATA-OVER");
         String endDate = StockUtils.getPullHourEndDate();
         log.info("ENTER-EM-INIT-DATA");
         if (DateUtils.before(dailyNoStartDate, endDate)) {
