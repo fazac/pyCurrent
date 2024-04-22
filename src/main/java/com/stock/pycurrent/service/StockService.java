@@ -43,7 +43,7 @@ public class StockService {
 
     public void initEMDailyData() {
         // 每日更新日行情
-        log.info("EM-INIT-GETDATA-ENTER");
+        log.warn("EM-INIT-GETDATA-ENTER");
         String dailyNoStartDate = findMaxTradeDate(Constants.REHABILITATION_NO);
         String dailyAfterStartDate = findMaxTradeDate(Constants.REHABILITATION_AFTER);
         if (StockUtils.checkEmpty(dailyNoStartDate)) {
@@ -52,16 +52,18 @@ public class StockService {
         if (StockUtils.checkEmpty(dailyAfterStartDate)) {
             dailyAfterStartDate = Constants.EM_DEFAULT_START_DAY;
         }
-        log.info("EM-INIT-GETDATA-OVER");
+        log.warn("EM-INIT-GETDATA-OVER");
         String endDate = StockUtils.getPullHourEndDate();
-        log.info("ENTER-EM-INIT-DATA");
+        log.warn("ENTER-EM-INIT-DATA");
         if (DateUtils.before(dailyNoStartDate, endDate)) {
             StockUtils.initEmBasicData(dailyNoStartDate, endDate, Constants.REHABILITATION_NO, Constants.PERIOD_DAILY, PyFuncEnum.EM_HIS_NO_DAILY);
         }
+        log.warn("OVER-EM-INIT-DATA-1");
         if (DateUtils.before(dailyAfterStartDate, endDate)) {
             StockUtils.initEmBasicData(dailyAfterStartDate, endDate, Constants.REHABILITATION_AFTER, Constants.PERIOD_DAILY, PyFuncEnum.EM_HIS_AFTER_DAILY);
         }
-        log.info("EM-DAILY-OVER");
+        log.warn("OVER-EM-INIT-DATA-2");
+        log.warn("EM-DAILY-OVER");
     }
 
     public String findMaxTradeDate(String period) {

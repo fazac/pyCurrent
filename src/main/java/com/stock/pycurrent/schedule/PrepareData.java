@@ -10,6 +10,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+
 /**
  * @author fzc
  * @date 2024/2/19 10:35
@@ -33,14 +36,15 @@ public class PrepareData implements CommandLineRunner {
         if (StockUtils.isNotRest()) {
             createTable();
         }
-        if (StockUtils.isNotRest()) {
+        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY
+            && StockUtils.isNotRest()) {
             pullAll();
             rocCal();
         }
     }
 
     @SneakyThrows
-    @Scheduled(cron = " 0 15 16 * * ? ")
+    @Scheduled(cron = " 0 30 16 * * ? ")
     public void pullAll() {
         if (!PARAMS.BAK_MODE
             && StockUtils.isNotRest()) {
@@ -67,7 +71,7 @@ public class PrepareData implements CommandLineRunner {
     }
 
     @SneakyThrows
-    @Scheduled(cron = " 0 0 17 * * ? ")
+    @Scheduled(cron = " 0 10 17 * * ? ")
     public void rocCal() {
         if (StockUtils.isNotRest()) {
             log.warn("ROC-ENTER");
