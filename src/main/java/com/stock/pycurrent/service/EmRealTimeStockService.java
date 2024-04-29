@@ -53,7 +53,7 @@ public class EmRealTimeStockService {
                         SELECT count(1)
                         FROM information_schema.tables
                         WHERE table_schema = 'stockrealtime'
-                          AND table_name = :tableName;
+                          AND table_name = :tableName
                           """, Long.class)
                 .setParameter("tableName", tableName)
                 .getSingleResult();
