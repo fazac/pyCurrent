@@ -36,11 +36,18 @@ public class StockUtils {
 
     public static String getPullHourEndDate() {
         String endDate = DateUtils.now();
-        boolean afterPullHour = LocalDateTime.now().getHour() >= Constants.EM_PULL_HOUR;
-        if (afterPullHour) {
+        LocalDateTime now = LocalDateTime.now();
+        if (now.getDayOfWeek().equals(DayOfWeek.SATURDAY)
+            || now.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            endDate = DateUtils.getFriday(now);
             return endDate;
         } else {
-            return DateUtils.getDateAtOffset(endDate, -1, ChronoUnit.DAYS);
+            boolean afterPullHour = now.getHour() >= Constants.EM_PULL_HOUR;
+            if (afterPullHour) {
+                return endDate;
+            } else {
+                return DateUtils.getDateAtOffset(endDate, -1, ChronoUnit.DAYS);
+            }
         }
     }
 

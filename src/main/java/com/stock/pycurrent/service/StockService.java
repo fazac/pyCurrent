@@ -48,12 +48,34 @@ public class StockService {
         String dailyAfterStartDate = findMaxTradeDate(Constants.REHABILITATION_AFTER);
         if (StockUtils.checkEmpty(dailyNoStartDate)) {
             dailyNoStartDate = Constants.EM_DEFAULT_START_DAY;
+        } else {
+            while (true) {
+                long dnCount = findCountTradeDate(Constants.REHABILITATION_NO, dailyNoStartDate);
+                if (dnCount > 5300) {
+                    break;
+                } else {
+                    deleteByTradeDate(Constants.REHABILITATION_NO, dailyNoStartDate);
+                    dailyNoStartDate = findMaxTradeDate(Constants.REHABILITATION_NO);
+                }
+            }
         }
+
         if (StockUtils.checkEmpty(dailyAfterStartDate)) {
             dailyAfterStartDate = Constants.EM_DEFAULT_START_DAY;
+        } else {
+            while (true) {
+                long daCount = findCountTradeDate(Constants.REHABILITATION_AFTER, dailyAfterStartDate);
+                if (daCount > 5300) {
+                    break;
+                } else {
+                    deleteByTradeDate(Constants.REHABILITATION_AFTER, dailyAfterStartDate);
+                    dailyAfterStartDate = findMaxTradeDate(Constants.REHABILITATION_AFTER);
+                }
+            }
         }
         log.warn("EM-INIT-GETDATA-OVER");
         String endDate = StockUtils.getPullHourEndDate();
+
         log.warn("ENTER-EM-INIT-DATA");
         if (DateUtils.before(dailyNoStartDate, endDate)) {
             StockUtils.initEmBasicData(dailyNoStartDate, endDate, Constants.REHABILITATION_NO, Constants.PERIOD_DAILY, PyFuncEnum.EM_HIS_NO_DAILY);
@@ -74,6 +96,24 @@ public class StockService {
             lastDate = emDAStockRepo.findMaxTradeDate();
         }
         return StockUtils.checkEmpty(lastDate) ? "" : lastDate;
+    }
+
+    public Long findCountTradeDate(String period, String date) {
+        Long count = 0L;
+        if (Constants.REHABILITATION_NO.equals(period)) {
+            count = emDNStockRepo.findCountByDate(date);
+        } else if (Constants.REHABILITATION_AFTER.equals(period)) {
+            count = emDAStockRepo.findCountByDate(date);
+        }
+        return count;
+    }
+
+    public void deleteByTradeDate(String period, String date) {
+        if (Constants.REHABILITATION_NO.equals(period)) {
+            emDNStockRepo.deleteByDate(date);
+        } else if (Constants.REHABILITATION_AFTER.equals(period)) {
+            emDAStockRepo.deleteByDate(date);
+        }
     }
 
 

@@ -1,10 +1,12 @@
 package com.stock.pycurrent.util;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -56,4 +58,8 @@ public class DateUtils {
         return DateUtils.getDayInterval(DateUtils.defaultFormat(startDate), DateUtils.defaultFormat(endDate)) > 0;
     }
 
+
+    public static String getFriday(LocalDateTime localDateTime) {
+        return localDateTime.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY)).format(DATE_TIME_FORMAT);
+    }
 }

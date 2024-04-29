@@ -33,11 +33,11 @@ public class PrepareData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.warn("START");
         if (StockUtils.isNotRest()) {
             createTable();
         }
-        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY
-            && StockUtils.isNotRest()) {
+        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY) {
             pullAll();
             rocCal();
         }
@@ -46,8 +46,7 @@ public class PrepareData implements CommandLineRunner {
     @SneakyThrows
     @Scheduled(cron = " 0 30 16 * * ? ")
     public void pullAll() {
-        if (!PARAMS.BAK_MODE
-            && StockUtils.isNotRest()) {
+        if (!PARAMS.BAK_MODE) {
             log.warn("PULL-ALL-ENTER");
             log.warn("pullData-EM-ENTER");
             stockService.initEMDailyData();
@@ -73,11 +72,9 @@ public class PrepareData implements CommandLineRunner {
     @SneakyThrows
     @Scheduled(cron = " 0 10 17 * * ? ")
     public void rocCal() {
-        if (StockUtils.isNotRest()) {
-            log.warn("ROC-ENTER");
-            stockService.initRocModel();
-            log.warn("ROC-OVER");
-        }
+        log.warn("ROC-ENTER");
+        stockService.initRocModel();
+        log.warn("ROC-OVER");
     }
 
     @Scheduled(cron = " 0 0 9 * * ? ")

@@ -49,8 +49,21 @@ public class EmRealTimeStockService {
     @Modifying
     public void createTable() {
         String tableName = "em_real_time_stock_" + DateUtils.now();
-        int nativeQuery = 0;
-        log.warn("创建表：" + tableName);
+        Long res = (Long) entityManager.createNativeQuery("""
+                        SELECT count(1)
+                        FROM information_schema.tables
+                        WHERE table_schema = 'stockrealtime'
+                          AND table_name = :tableName;
+                          """, Long.class)
+                .setParameter("tableName", tableName)
+                .getSingleResult();
+        if (res > 0) {
+            log.warn("已存在当日表,无需新建");
+            return;
+        } else {
+            log.warn("创建表：" + tableName);
+        }
+        int nativeQuery;
         String sql = "CREATE TABLE IF NOT EXISTS " + '`' + tableName + '`' + """
                 (
                     `trade_date`                   varchar(32)    DEFAULT NULL COMMENT '交易日期',
@@ -85,13 +98,9 @@ public class EmRealTimeStockService {
                                         """;
         try {
             nativeQuery = entityManager.createNativeQuery(sql).executeUpdate();
+            log.warn("nativeQuery: " + nativeQuery);
         } catch (Exception e) {
             log.error("创建失败：" + tableName, e);
-        }
-        if (nativeQuery > 0) {
-            log.warn("创建成功，表名称：" + tableName);
-        } else {
-            log.warn("已存在该表,无需新建");
         }
     }
 }
