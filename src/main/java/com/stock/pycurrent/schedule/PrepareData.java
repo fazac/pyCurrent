@@ -33,7 +33,7 @@ public class PrepareData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.warn("START");
+        log.warn("START " + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
         if (StockUtils.isNotRest()) {
             createTable();
         }
