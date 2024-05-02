@@ -16,5 +16,5 @@ public interface LimitCodeRepo extends JpaRepository<LimitCode, String> {
 
     @Query(value = """
             SELECT count(1) FROM holiday_date WHERE date_year= year(curdate()) and :nowDate member of (after_value)""", nativeQuery = true)
-    Boolean checkDateHoliday(@Param("nowDate") String nowDate);
+    Long checkDateHoliday(@Param("nowDate") String nowDate);
 }

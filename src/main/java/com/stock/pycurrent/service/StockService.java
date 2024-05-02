@@ -51,7 +51,7 @@ public class StockService {
         } else {
             while (true) {
                 long dnCount = findCountTradeDate(Constants.REHABILITATION_NO, dailyNoStartDate);
-                if (dnCount > 5300) {
+                if (dnCount >= 5250) {
                     break;
                 } else {
                     deleteByTradeDate(Constants.REHABILITATION_NO, dailyNoStartDate);
@@ -65,7 +65,7 @@ public class StockService {
         } else {
             while (true) {
                 long daCount = findCountTradeDate(Constants.REHABILITATION_AFTER, dailyAfterStartDate);
-                if (daCount > 5300) {
+                if (daCount > 5250) {
                     break;
                 } else {
                     deleteByTradeDate(Constants.REHABILITATION_AFTER, dailyAfterStartDate);
