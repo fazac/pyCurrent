@@ -6,10 +6,7 @@ import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
-import com.stock.pycurrent.util.CalculateUtils;
-import com.stock.pycurrent.util.MessageUtil;
-import com.stock.pycurrent.util.PARAMS;
-import com.stock.pycurrent.util.StockUtils;
+import com.stock.pycurrent.util.*;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -448,6 +445,9 @@ public class PullData implements CommandLineRunner {
 
     private boolean isTradeHour() {
         LocalDateTime n = LocalDateTime.now();
+        if (limitCodeService.checkDateHoliday(String.format("%02d", n.getMonthValue()) + "-" + String.format("%02d", n.getDayOfMonth()))) {
+            return false;
+        }
         String res = String.format("%02d", n.getHour()) + String.format("%02d", n.getMinute());
         int tmp = Integer.parseInt(res);
         return tmp >= 915 && tmp < 1131 || tmp >= 1300 && tmp < 1501;

@@ -24,8 +24,8 @@ public class LimitCodeService {
         return limitCodeRepo.findLastOne(tradeDate);
     }
 
-    public void save(LimitCode limitCode) {
-        limitCodeRepo.saveAndFlush(limitCode);
+    public  Boolean checkDateHoliday(String nowDate) {
+        return limitCodeRepo.checkDateHoliday(nowDate);
     }
 
     @Autowired

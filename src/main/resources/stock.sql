@@ -303,3 +303,16 @@ alter table `cur_count` add column `c_60_5u` int;
 alter table `cur_count` add column `c_60_7d` int;
 alter table `cur_count` add column `c_00_5u` int;
 alter table `cur_count` add column `c_00_7d` int;
+
+-- 20240502
+drop table if exists holiday_date;
+create table holiday_date
+(
+    `date_year` varchar(4) primary key,
+    `date_value` json DEFAULT NULL COMMENT '原值',
+    `after_value` json DEFAULT NULL COMMENT '修改后值'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
+
