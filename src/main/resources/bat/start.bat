@@ -26,10 +26,10 @@ echo 7. stop all
 echo.
 set /p input="please choose next action : "
  
-if "%input%"=="0"(
+if "%input%"=="0" (
     call :startcur
     call :startfull
-)else if "%input%"=="1" (
+) else if "%input%"=="1" (
     call :startcur
 ) else if "%input%"=="2" (
     call :startfull
@@ -38,6 +38,7 @@ if "%input%"=="0"(
 
     call :stopcur
     call :movejar %JAR_SOURCE_FILE_1%
+    call :startcur
 
     echo Current task has been restarted.
 ) else if "%input%" =="4" (
@@ -45,7 +46,6 @@ if "%input%"=="0"(
 
     call :stopfull
     call :movejar %JAR_SOURCE_FILE_2%
-
     call :startfull
 
     echo Full task has been restarted.
@@ -60,28 +60,33 @@ if "%input%"=="0"(
     echo INVALID CHOICE
 )
 
+exit /b 0
+
 :startcur
-start "pycur" "%JAVA_HOME%\bin\pycur.exe" -jar "%JAR_FILE_1%"
-echo pycur task start
-goto :eof
+	start "pycur" "%JAVA_HOME%\bin\pycur.exe" -jar "%JAR_FILE_1%"
+	echo pycur task start
+goto:eof
 
 :startfull
-start "pyfull" "%JAVA_HOME%\bin\pyfull.exe" -jar "%JAR_FILE_2%"
-echo pyfull task start
-goto :eof
+	start "pyfull" "%JAVA_HOME%\bin\pyfull.exe" -jar "%JAR_FILE_2%"
+	echo pyfull task start
+goto:eof
 
 :stopcur
-taskkill -f -t -im pycur.exe
-echo pycur process killed
-goto :eof
+	taskkill -f -t -im pycur.exe
+	echo pycur process killed
+goto:eof
 
 :stopfull
-taskkill -f -t -im pyfull.exe
-echo pyfull process killed
-goto :eof
+	taskkill -f -t -im pyfull.exe
+	echo pyfull process killed
+goto:eof
  
 :movejar
-copy %~1 %PACKAGE% /y
-echo jar moved
+	copy %~1 %PACKAGE% /y
+	echo jar moved
+goto:eof
 
 pause
+
+
