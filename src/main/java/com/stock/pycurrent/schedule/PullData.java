@@ -194,8 +194,6 @@ public class PullData implements CommandLineRunner {
                 if (peFlag || cmFlag) {
                     continue;
                 }
-            } else {
-                continue;
             }
             String tsName = rt.getName();
             if (tsName.contains("*ST") || tsName.contains("ST")) {
@@ -208,6 +206,10 @@ public class PullData implements CommandLineRunner {
             concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
             noBuy = codes[3].contains(tsCode);
             yesterdayHigh = limitCodeMap.containsKey(tsCode);
+
+            if (!tsCode.startsWith("30") && !concerned && !holds) {
+                continue;
+            }
 
             String nameFirst = "N,C".contains(String.valueOf(tsName.charAt(0))) ? tsName.substring(1, 3) : tsName.substring(0, 2);
             if (rt.getCurrentPri() != null && (tsCode.startsWith("0") || tsCode.startsWith("60")) && !tsName.contains("退") && !noConcerned && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)) || holds || (concerned && !tsCode.startsWith("30"))) {
