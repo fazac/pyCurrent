@@ -19,5 +19,6 @@ public class Constants {
     public static BigDecimal FIVE = BigDecimal.valueOf(5);
     public static BigDecimal N_SEVEN = BigDecimal.valueOf(-7);
 
+    public static BigDecimal FIVE_BILLION = BigDecimal.valueOf(5000000000L);
 
 }

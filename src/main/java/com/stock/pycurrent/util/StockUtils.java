@@ -21,6 +21,7 @@ import java.util.List;
 
 @CommonsLog
 public class StockUtils {
+
     private StockUtils() {
         throw new IllegalStateException("StockUtils class");
     }
@@ -70,6 +71,10 @@ public class StockUtils {
 
     public static boolean checkEmpty(String str) {
         return str == null || str.isBlank();
+    }
+
+    public static String concatChar(String value, int length) {
+        return value.repeat(length);
     }
 
     public static boolean availableCode(String code) {
