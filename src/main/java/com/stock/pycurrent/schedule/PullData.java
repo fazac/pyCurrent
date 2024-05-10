@@ -187,10 +187,13 @@ public class PullData implements CommandLineRunner {
 
         StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
-            if (rt.getPe().compareTo(BigDecimal.ZERO) < 0 && rt.getCirculationMarketCap().compareTo(Constants.FIVE_BILLION) < 0) {
+            String tsCode = rt.getTsCode();
+            if (tsCode.startsWith("30") && rt.getPe().compareTo(BigDecimal.ZERO) < 0 && rt.getCirculationMarketCap().compareTo(Constants.FOUR_BILLION) < 0) {
                 continue;
             }
-            String tsCode = rt.getTsCode();
+            if ((tsCode.startsWith("60") || tsCode.startsWith("00")) && rt.getPe().compareTo(BigDecimal.ZERO) < 0) {
+                continue;
+            }
             String tsName = rt.getName();
             if (tsName.contains("*ST") || tsName.contains("ST")) {
                 tsName = tsName.replace("*ST", "");
