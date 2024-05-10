@@ -79,7 +79,8 @@ public class PullData implements CommandLineRunner {
         }
     }
 
-    @Scheduled(cron = "58 * 9-16 * * ?")
+    //    @Scheduled(cron = "58 * 9-16 * * ?")
+    @SuppressWarnings("unused")
     public void pullRealTimeData() {
         if (isTradeHour() && StockUtils.isNotRest()) {
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
@@ -88,6 +89,20 @@ public class PullData implements CommandLineRunner {
             Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
 
             checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
+        }
+    }
+
+    @Scheduled(cron = "10 * 9-16 * * ?")
+    public void pullRealTimeDataFull() {
+        if (isTradeHour() && StockUtils.isNotRest()) {
+            List<EmRealTimeStock> stockList = emRealTimeStockService.findLast();
+            if (!stockList.isEmpty()) {
+                List<EmConstant> emConstants = emConstantService.findAll();
+                String[] codes = prepareConstantsCodes(emConstants);
+                Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
+
+                checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
+            }
         }
     }
 
@@ -188,12 +203,12 @@ public class PullData implements CommandLineRunner {
         StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
             String tsCode = rt.getTsCode();
-            if (tsCode.startsWith("30") && rt.getPe().compareTo(BigDecimal.ZERO) < 0 && rt.getCirculationMarketCap().compareTo(Constants.FOUR_BILLION) < 0) {
-                continue;
-            }
-            if ((tsCode.startsWith("60") || tsCode.startsWith("00")) && rt.getPe().compareTo(BigDecimal.ZERO) < 0) {
-                continue;
-            }
+//            if (tsCode.startsWith("30") && rt.getPe().compareTo(BigDecimal.ZERO) < 0 && rt.getCirculationMarketCap().compareTo(Constants.FOUR_BILLION) < 0) {
+//                continue;
+//            }
+//            if ((tsCode.startsWith("60") || tsCode.startsWith("00")) && rt.getPe().compareTo(BigDecimal.ZERO) < 0) {
+//                continue;
+//            }
             String tsName = rt.getName();
             if (tsName.contains("*ST") || tsName.contains("ST")) {
                 tsName = tsName.replace("*ST", "");

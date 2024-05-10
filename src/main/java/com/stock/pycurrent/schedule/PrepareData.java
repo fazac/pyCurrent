@@ -8,10 +8,6 @@ import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Scheduled;
-
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
 
 /**
  * @author fzc
@@ -33,18 +29,19 @@ public class PrepareData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.warn("START " + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
-        if (StockUtils.isNotRest()) {
-            createTable();
-        }
-        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY) {
-            pullAll();
-            rocCal();
-        }
+//        log.warn("START " + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
+//        if (StockUtils.isNotRest()) {
+//            createTable();
+//        }
+//        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY) {
+//            pullAll();
+//            rocCal();
+//        }
     }
 
     @SneakyThrows
-    @Scheduled(cron = " 0 30 16 * * ? ")
+//    @Scheduled(cron = " 0 30 16 * * ? ")
+    @SuppressWarnings("unused")
     public void pullAll() {
         if (!PARAMS.BAK_MODE) {
             log.warn("PULL-ALL-ENTER");
@@ -70,14 +67,16 @@ public class PrepareData implements CommandLineRunner {
     }
 
     @SneakyThrows
-    @Scheduled(cron = " 0 10 17 * * ? ")
+//    @Scheduled(cron = " 0 10 17 * * ? ")
+    @SuppressWarnings("unused")
     public void rocCal() {
         log.warn("ROC-ENTER");
         stockService.initRocModel();
         log.warn("ROC-OVER");
     }
 
-    @Scheduled(cron = " 0 0 9 * * ? ")
+    //    @Scheduled(cron = " 0 0 9 * * ? ")
+    @SuppressWarnings("unused")
     public void createTable() {
         if (StockUtils.isNotRest()) {
             log.warn("createTable-ENTER");
