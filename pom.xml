@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.stock</groupId>
     <artifactId>pyCurrent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>pyCurrent</name>
     <description>pyCurrent</description>
     <properties>
