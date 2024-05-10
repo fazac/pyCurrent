@@ -33,7 +33,7 @@ logging:
   level:
     root: warn
   file:
-    path: ./log/current
+    path: ./log/full
   logback:
     rollingpolicy:
       max-history: 30
