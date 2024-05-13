@@ -9,7 +9,7 @@ set JAR_FILE_1=C:\Users\fa\Desktop\bat\pyCurrent-0.0.1-SNAPSHOT.jar
 set JAR_SOURCE_FILE_1=C:\Users\fa\.m2\repository\com\stock\pyCurrent\0.0.1-SNAPSHOT\pyCurrent-0.0.1-SNAPSHOT.jar
 
 set JAR_FILE_2=C:\Users\fa\Desktop\bat\pyCurrent-0.0.2-SNAPSHOT.jar
-set JAR_SOURCE_FILE_2=C:\Users\fa\.m2\repository\com\stock\pyCurrent\0.0.2-SNAPSHOT\pyCurrent-0.0.1-SNAPSHOT.jar
+set JAR_SOURCE_FILE_2=C:\Users\fa\.m2\repository\com\stock\pyCurrent\0.0.2-SNAPSHOT\pyCurrent-0.0.2-SNAPSHOT.jar
 
 
 echo AVAILABLE CHOICE
@@ -27,11 +27,15 @@ echo.
 set /p input="please choose next action : "
  
 if "%input%"=="0" (
+    call :stopcur
+    call :stopfull
     call :startcur
     call :startfull
 ) else if "%input%"=="1" (
+    call :stopcur
     call :startcur
 ) else if "%input%"=="2" (
+    call :stopfull
     call :startfull
 ) else if "%input%" =="3" (
     echo Restart Current Task...  
@@ -59,6 +63,8 @@ if "%input%"=="0" (
 ) else (
     echo INVALID CHOICE
 )
+
+pause
 
 exit /b 0
 
