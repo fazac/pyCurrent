@@ -279,3 +279,29 @@ end $$
 
 DELIMITER ;
 
+
+
+DROP PROCEDURE IF EXISTS `curcc`;
+DELIMITER $$
+CREATE PROCEDURE curcc()
+BEGIN
+    select c_30_5u,
+           c_30_7d,
+           c_30u,
+           c_30a,
+           c_60_5u,
+           c_60_7d,
+           c_60u,
+           c_60a,
+           c_00_5u,
+           c_00_7d,
+           c_00u,
+           c_00a
+    from cur_count
+    where trade_date > curdate()
+    order by trade_date desc;
+end $$
+DELIMITER ;
+
+
+
