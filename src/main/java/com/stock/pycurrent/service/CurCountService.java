@@ -2,6 +2,7 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.CurCount;
 import com.stock.pycurrent.repo.CurCountRepo;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CurCountService {
+    @Resource
     private CurCountRepo curCountRepo;
 
     public void saveOne(CurCount curCount) {

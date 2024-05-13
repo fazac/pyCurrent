@@ -6,11 +6,13 @@ import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
-import com.stock.pycurrent.util.*;
+import com.stock.pycurrent.util.CalculateUtils;
+import com.stock.pycurrent.util.MessageUtil;
+import com.stock.pycurrent.util.PARAMS;
+import com.stock.pycurrent.util.StockUtils;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -47,13 +49,15 @@ public class PullData implements CommandLineRunner {
     private static final String CODE_PRINT_TYPE = "F,A,C,L,H";
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
+    @Resource
     private EmConstantService emConstantService;
+    @Resource
     private RangeOverCodeService rangeOverCodeService;
-
+    @Resource
     private RealBarService realBarService;
-
+    @Resource
     private LimitCodeService limitCodeService;
-
+    @Resource
     private CurCountService curCountService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
@@ -468,16 +472,38 @@ public class PullData implements CommandLineRunner {
         RealBar newBar = new RealBar();
         RealBar lastBar = realBarService.findOne(tradeDate, tsCode);
         if (curPri == null || lastBar == null) {
-            newBar.setShortSmaPrice(curPri);
-            newBar.setLongSmaPrice(curPri);
-            newBar.setDif(BigDecimal.ZERO);
-            newBar.setDea(BigDecimal.ZERO);
-            newBar.setBar(BigDecimal.ZERO);
-            newBar.setCurPri(curPri);
-            newBar.setTradeDate(tradeDate);
-            newBar.setTsCode(tsCode);
-            lastBar = realBarService.save(newBar);
-            return lastBar.getBar();
+            List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findRBarStockByCode(tsCode);
+            if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
+                BigDecimal lastBarValue = BigDecimal.ZERO;
+                EmRealTimeStock cur = emRealTimeStockList.get(0);
+                newBar.setShortSmaPrice(cur.getCurrentPri());
+                newBar.setLongSmaPrice(cur.getCurrentPri());
+                newBar.setDif(BigDecimal.ZERO);
+                newBar.setDea(BigDecimal.ZERO);
+                newBar.setBar(BigDecimal.ZERO);
+                newBar.setCurPri(cur.getCurrentPri());
+                newBar.setTradeDate(cur.getTradeDate());
+                newBar.setTsCode(tsCode);
+                realBarService.save(newBar);
+                if (emRealTimeStockList.size() > 1) {
+                    for (int i = 1; i < emRealTimeStockList.size(); i++) {
+                        cur = emRealTimeStockList.get(i);
+                        lastBarValue = calBar(tsCode, cur.getTradeDate(), cur.getCurrentPri());
+                    }
+                }
+                return lastBarValue;
+            } else {
+                newBar.setShortSmaPrice(curPri);
+                newBar.setLongSmaPrice(curPri);
+                newBar.setDif(BigDecimal.ZERO);
+                newBar.setDea(BigDecimal.ZERO);
+                newBar.setBar(BigDecimal.ZERO);
+                newBar.setCurPri(curPri);
+                newBar.setTradeDate(tradeDate);
+                newBar.setTsCode(tsCode);
+                lastBar = realBarService.save(newBar);
+                return lastBar.getBar();
+            }
         } else {
             newBar.setShortSmaPrice(CalculateUtils.calShortEMANext(curPri, lastBar.getShortSmaPrice()));
             newBar.setLongSmaPrice(CalculateUtils.calLongEMANext(curPri, lastBar.getLongSmaPrice()));
@@ -512,28 +538,4 @@ public class PullData implements CommandLineRunner {
     }
 
 
-    @Autowired
-    public void setEmConstantService(EmConstantService emConstantService) {
-        this.emConstantService = emConstantService;
-    }
-
-    @Autowired
-    public void setRangeOverCodeService(RangeOverCodeService rangeOverCodeService) {
-        this.rangeOverCodeService = rangeOverCodeService;
-    }
-
-    @Autowired
-    public void setRealBarService(RealBarService realBarService) {
-        this.realBarService = realBarService;
-    }
-
-    @Autowired
-    public void setLimitCodeService(LimitCodeService limitCodeService) {
-        this.limitCodeService = limitCodeService;
-    }
-
-    @Autowired
-    public void setCurCountService(CurCountService curCountService) {
-        this.curCountService = curCountService;
-    }
 }

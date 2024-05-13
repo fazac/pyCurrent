@@ -2,7 +2,7 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.EmConstant;
 import com.stock.pycurrent.repo.EmConstantRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Service
 public class EmConstantService {
+    @Resource
     private EmConstantRepo emConstantRepo;
 
     public List<EmConstant> findAll() {
@@ -24,8 +25,4 @@ public class EmConstantService {
         return emConstantRepo.findByKey("NOTIFICATION");
     }
 
-    @Autowired
-    public void setEmConstantRepo(EmConstantRepo emConstantRepo) {
-        this.emConstantRepo = emConstantRepo;
-    }
 }

@@ -2,7 +2,7 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.RealBar;
 import com.stock.pycurrent.repo.RealBarRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RealBarService {
+    @Resource
     private RealBarRepo realBarRepo;
 
     public RealBar findOne(String tradeDate, String tsCode) {
@@ -22,8 +23,4 @@ public class RealBarService {
         return realBarRepo.saveAndFlush(realBar);
     }
 
-    @Autowired
-    public void setRealBarRepo(RealBarRepo realBarRepo) {
-        this.realBarRepo = realBarRepo;
-    }
 }
