@@ -45,6 +45,16 @@ public class EmRealTimeStockService {
         return PythonScriptUtils.execThreadPY(Constants.AKSHARE_EM_REALTIME, PyFuncEnum.EM_CURRENT.toString(), this::findLast);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<EmRealTimeStock> findRBarStockByCode(String tsCode) {
+        String tableName = "em_real_time_stock_" + DateUtils.now();
+        String sql = "select * from " + tableName
+                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
+        return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
+                .setParameter("tsCode", tsCode)
+                .getResultList();
+    }
+
     @Transactional
     @Modifying
     public void createTable() {
