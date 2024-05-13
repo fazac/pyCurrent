@@ -7,6 +7,7 @@ import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.*;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class PullData implements CommandLineRunner {
 
     private static final String CODE_TYPE = "F,A,R,C,L,H";
     private static final String CODE_PRINT_TYPE = "F,A,C,L,H";
-
+    @Resource
     private EmRealTimeStockService emRealTimeStockService;
     private EmConstantService emConstantService;
     private RangeOverCodeService rangeOverCodeService;
@@ -76,19 +77,6 @@ public class PullData implements CommandLineRunner {
     public void run(String... args) {
         if (PARAMS.BAK_MODE) {
             pullTest();
-        }
-    }
-
-    //    @Scheduled(cron = "58 * 9-16 * * ?")
-    @SuppressWarnings("unused")
-    public void pullRealTimeData() {
-        if (isTradeHour() && StockUtils.isNotRest()) {
-            List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
-            List<EmConstant> emConstants = emConstantService.findAll();
-            String[] codes = prepareConstantsCodes(emConstants);
-            Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
-
-            checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
         }
     }
 
@@ -523,11 +511,6 @@ public class PullData implements CommandLineRunner {
         return " ";
     }
 
-
-    @Autowired
-    public void setEmRealTimeStockService(EmRealTimeStockService emRealTimeStockService) {
-        this.emRealTimeStockService = emRealTimeStockService;
-    }
 
     @Autowired
     public void setEmConstantService(EmConstantService emConstantService) {
