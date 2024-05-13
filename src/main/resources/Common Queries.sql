@@ -11,6 +11,7 @@ DROP PROCEDURE IF EXISTS `rbar`;
 DROP PROCEDURE IF EXISTS `lmtt`;
 DROP PROCEDURE IF EXISTS `cptt`;
 DROP PROCEDURE IF EXISTS `cptr`;
+DROP PROCEDURE IF EXISTS `cdday`;
 
 DELIMITER $$
 create procedure reall(in queryCodes varchar(512))
@@ -268,6 +269,12 @@ BEGIN
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
+end $$
+
+CREATE PROCEDURE cdday()
+BEGIN
+    select trade_date,count(1) from em_d_n_stock group by trade_date order by trade_date desc limit 10;
+    select trade_date,count(1) from em_d_a_stock group by trade_date order by trade_date desc limit 10;
 end $$
 
 DELIMITER ;
