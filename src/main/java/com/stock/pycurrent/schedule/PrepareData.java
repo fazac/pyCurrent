@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.LocalDateTime;
+
 /**
  * @author fzc
  * @date 2024/2/19 10:35
@@ -29,7 +31,7 @@ public class PrepareData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        log.warn("START " + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
+        log.warn("START V2" + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
 //        if (StockUtils.isNotRest()) {
 //            createTable();
 //        }
