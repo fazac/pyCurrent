@@ -4,7 +4,6 @@ import com.stock.pycurrent.entity.*;
 import com.stock.pycurrent.entity.jsonvalue.EmConstantValue;
 import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
-import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.MessageUtil;
@@ -24,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Configuration
 @CommonsLog
@@ -57,8 +55,6 @@ public class PullData implements CommandLineRunner {
     private RealBarService realBarService;
     @Resource
     private LimitCodeService limitCodeService;
-    @Resource
-    private CurCountService curCountService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
@@ -319,56 +315,6 @@ public class PullData implements CommandLineRunner {
             rangeOverCodeService.saveEntity(rangeOverCode);
         }
 
-        if (nowMinute % 10 == 5 || nowMinute % 10 == 0
-            || nowHour == 9 && nowMinute == 16
-            || nowHour == 15 && nowMinute == 1) {
-            CurCount curCount = statisticsCurCount(stockList);
-            curCountService.saveOne(curCount);
-        }
-    }
-
-
-    private CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
-        Integer[] countArray = Stream.generate(() -> 0).limit(12).toArray(Integer[]::new);
-        for (EmRealTimeStock em : stockList) {
-            if (em.getPctChg() != null) {
-                if (em.getTsCode().startsWith("00")) {
-                    countArray[0]++;
-                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        countArray[1]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        countArray[2]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        countArray[3]++;
-                    }
-                } else if (em.getTsCode().startsWith("30")) {
-                    countArray[4]++;
-                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        countArray[5]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        countArray[6]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        countArray[7]++;
-                    }
-                } else if (em.getTsCode().startsWith("60")) {
-                    countArray[8]++;
-                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        countArray[9]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        countArray[10]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        countArray[11]++;
-                    }
-                }
-            }
-        }
-        return new CurCount(stockList.get(0).getTradeDate(), countArray);
     }
 
 
