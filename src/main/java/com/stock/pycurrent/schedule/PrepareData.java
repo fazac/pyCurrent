@@ -17,7 +17,7 @@ public class PrepareData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.warn("START V2" + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
+        log.warn("START V2 " + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
     }
 
 }
