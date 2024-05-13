@@ -77,6 +77,10 @@ public class StockUtils {
         return value.repeat(length);
     }
 
+    public static String addOneZero(int value) {
+        return String.format("%02d", value);
+    }
+
     public static boolean availableCode(String code) {
         return !checkEmpty(code) && (code.startsWith("30") || code.startsWith("00") || code.startsWith("60"));
     }

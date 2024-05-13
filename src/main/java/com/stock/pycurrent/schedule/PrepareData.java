@@ -1,16 +1,16 @@
 package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.service.*;
+import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.PARAMS;
 import com.stock.pycurrent.util.StockUtils;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 /**
@@ -21,23 +21,26 @@ import java.time.LocalDateTime;
 @Configuration
 @CommonsLog
 public class PrepareData implements CommandLineRunner {
-
+    @Resource
     private StockService stockService;
-
+    @Resource
     private BoardConceptConService boardConceptConService;
+    @Resource
     private BoardIndustryConService boardIndustryConService;
-
+    @Resource
     private EmRealTimeStockService emRealTimeStockService;
-
+    @Resource
     private ContinuousUpService continuousUpService;
+    @Resource
+    private LimitCodeService limitCodeService;
 
     @Override
     public void run(String... args) {
-        log.warn("START " + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute());
-        if (StockUtils.isNotRest()) {
+        LocalDateTime n = LocalDateTime.now();
+        log.warn("START " + DateUtils.getH_M(n));
+        if (StockUtils.isNotRest()
+            && !limitCodeService.checkDateHoliday(DateUtils.getM_D(n))) {
             createTable();
-        }
-        if (LocalDateTime.now().getDayOfWeek() != DayOfWeek.MONDAY) {
             pullAll();
             rocCal();
         }
@@ -84,30 +87,5 @@ public class PrepareData implements CommandLineRunner {
             emRealTimeStockService.createTable();
             log.warn("createTable-OVER");
         }
-    }
-
-    @Autowired
-    public void setStockService(StockService stockService) {
-        this.stockService = stockService;
-    }
-
-    @Autowired
-    public void setBoardConceptConService(BoardConceptConService boardConceptConService) {
-        this.boardConceptConService = boardConceptConService;
-    }
-
-    @Autowired
-    public void setBoardIndustryConService(BoardIndustryConService boardIndustryConService) {
-        this.boardIndustryConService = boardIndustryConService;
-    }
-
-    @Autowired
-    public void setEmRealTimeStockService(EmRealTimeStockService emRealTimeStockService) {
-        this.emRealTimeStockService = emRealTimeStockService;
-    }
-
-    @Autowired
-    public void setContinuousUpService(ContinuousUpService continuousUpService) {
-        this.continuousUpService = continuousUpService;
     }
 }

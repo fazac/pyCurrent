@@ -2,7 +2,7 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.LimitCode;
 import com.stock.pycurrent.repo.LimitCodeRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LimitCodeService {
+    @Resource
     private LimitCodeRepo limitCodeRepo;
 
     @SuppressWarnings("unused")
@@ -28,8 +29,4 @@ public class LimitCodeService {
         return limitCodeRepo.checkDateHoliday(nowDate) > 0;
     }
 
-    @Autowired
-    public void setLimitCodeRepo(LimitCodeRepo limitCodeRepo) {
-        this.limitCodeRepo = limitCodeRepo;
-    }
 }

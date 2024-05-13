@@ -15,9 +15,9 @@ import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.ExecutorUtils;
 import com.stock.pycurrent.util.StockUtils;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -32,12 +32,13 @@ import java.util.*;
 @Component
 @CommonsLog
 public class StockService {
-
+    @Resource
     private EmDAStockRepo emDAStockRepo;
+    @Resource
     private EmDNStockRepo emDNStockRepo;
-
+    @Resource
     private RocModelRepo rocModelRepo;
-
+    @Resource
     private LimitCodeRepo limitCodeRepo;
 
 
@@ -139,12 +140,23 @@ public class StockService {
 
     public void createLimitCode() {
         String nowDay = DateUtils.now();
-        LimitCode nowDayOne = limitCodeRepo.findByDate(nowDay);
-        if (nowDayOne != null && nowDayOne.getTradeDate() != null) {
-            return;
+        List<EmDNStock> emDNStockList = null;
+        boolean flag = false;
+        while (true) {
+            LimitCode nowDayOne = limitCodeRepo.findByDate(nowDay);
+            if (nowDayOne != null && nowDayOne.getTradeDate() != null) {
+                flag = true;
+                break;
+            } else {
+                emDNStockList = emDNStockRepo.findCurrent(nowDay);
+                if (emDNStockList == null || emDNStockList.isEmpty()) {
+                    nowDay = DateUtils.getDateAtOffset(nowDay, -1, ChronoUnit.DAYS);
+                } else {
+                    break;
+                }
+            }
         }
-        List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(nowDay);
-        if (emDNStockList == null || emDNStockList.isEmpty()) {
+        if (flag) {
             return;
         }
         emDNStockList.sort(Comparator.comparing(EmDNStock::getTsCode));
@@ -180,23 +192,4 @@ public class StockService {
         return i;
     }
 
-    @Autowired
-    public void setEmDAStockRepo(EmDAStockRepo emDAStockRepo) {
-        this.emDAStockRepo = emDAStockRepo;
-    }
-
-    @Autowired
-    public void setEmDNStockRepo(EmDNStockRepo emDNStockRepo) {
-        this.emDNStockRepo = emDNStockRepo;
-    }
-
-    @Autowired
-    public void setRocModelRepo(RocModelRepo rocModelRepo) {
-        this.rocModelRepo = rocModelRepo;
-    }
-
-    @Autowired
-    public void setLimitCodeRepo(LimitCodeRepo limitCodeRepo) {
-        this.limitCodeRepo = limitCodeRepo;
-    }
 }

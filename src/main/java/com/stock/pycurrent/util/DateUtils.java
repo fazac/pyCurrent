@@ -62,4 +62,12 @@ public class DateUtils {
     public static String getFriday(LocalDateTime localDateTime) {
         return localDateTime.with(TemporalAdjusters.previous(DayOfWeek.FRIDAY)).format(DATE_TIME_FORMAT);
     }
+
+    public static String getM_D(LocalDateTime localDateTime) {
+        return StockUtils.addOneZero(localDateTime.getMonthValue()) + "-" + StockUtils.addOneZero(localDateTime.getDayOfMonth());
+    }
+
+    public static String getH_M(LocalDateTime localDateTime) {
+        return localDateTime.getHour() + ":" + localDateTime.getMinute();
+    }
 }

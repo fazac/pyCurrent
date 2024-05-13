@@ -2,7 +2,7 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.RangeOverCode;
 import com.stock.pycurrent.repo.RangeOverCodeRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RangeOverCodeService {
+    @Resource
     private RangeOverCodeRepo rangeOverCodeRepo;
 
     public RangeOverCode findByDate(String tradeDate) {
@@ -22,8 +23,4 @@ public class RangeOverCodeService {
         rangeOverCodeRepo.saveAndFlush(rangeOverCode);
     }
 
-    @Autowired
-    public void setRangeOverCodeRepo(RangeOverCodeRepo rangeOverCodeRepo) {
-        this.rangeOverCodeRepo = rangeOverCodeRepo;
-    }
 }

@@ -6,10 +6,13 @@ import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
-import com.stock.pycurrent.util.*;
+import com.stock.pycurrent.util.CalculateUtils;
+import com.stock.pycurrent.util.MessageUtil;
+import com.stock.pycurrent.util.PARAMS;
+import com.stock.pycurrent.util.StockUtils;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,15 +47,17 @@ public class PullData implements CommandLineRunner {
 
     private static final String CODE_TYPE = "F,A,R,C,L,H";
     private static final String CODE_PRINT_TYPE = "F,A,C,L,H";
-
+    @Resource
     private EmRealTimeStockService emRealTimeStockService;
+    @Resource
     private EmConstantService emConstantService;
+    @Resource
     private RangeOverCodeService rangeOverCodeService;
-
+    @Resource
     private RealBarService realBarService;
-
+    @Resource
     private LimitCodeService limitCodeService;
-
+    @Resource
     private CurCountService curCountService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
@@ -519,34 +524,4 @@ public class PullData implements CommandLineRunner {
         return " ";
     }
 
-
-    @Autowired
-    public void setEmRealTimeStockService(EmRealTimeStockService emRealTimeStockService) {
-        this.emRealTimeStockService = emRealTimeStockService;
-    }
-
-    @Autowired
-    public void setEmConstantService(EmConstantService emConstantService) {
-        this.emConstantService = emConstantService;
-    }
-
-    @Autowired
-    public void setRangeOverCodeService(RangeOverCodeService rangeOverCodeService) {
-        this.rangeOverCodeService = rangeOverCodeService;
-    }
-
-    @Autowired
-    public void setRealBarService(RealBarService realBarService) {
-        this.realBarService = realBarService;
-    }
-
-    @Autowired
-    public void setLimitCodeService(LimitCodeService limitCodeService) {
-        this.limitCodeService = limitCodeService;
-    }
-
-    @Autowired
-    public void setCurCountService(CurCountService curCountService) {
-        this.curCountService = curCountService;
-    }
 }
