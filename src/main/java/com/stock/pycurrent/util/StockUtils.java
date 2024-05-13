@@ -47,7 +47,11 @@ public class StockUtils {
             if (afterPullHour) {
                 return endDate;
             } else {
-                return DateUtils.getDateAtOffset(endDate, -1, ChronoUnit.DAYS);
+                if (now.getDayOfWeek().equals(DayOfWeek.MONDAY)) {
+                    return DateUtils.getDateAtOffset(endDate, -3, ChronoUnit.DAYS);
+                } else {
+                    return DateUtils.getDateAtOffset(endDate, -1, ChronoUnit.DAYS);
+                }
             }
         }
     }
