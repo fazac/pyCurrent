@@ -395,7 +395,7 @@ public class PullData implements CommandLineRunner {
         }
         String res = String.format("%02d", n.getHour()) + String.format("%02d", n.getMinute());
         int tmp = Integer.parseInt(res);
-        return tmp >= 915 && tmp < 1132 || tmp >= 1300 && tmp < 1502;
+        return tmp >= 915 && tmp < 1133 || tmp >= 1300 && tmp < 1503;
     }
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
