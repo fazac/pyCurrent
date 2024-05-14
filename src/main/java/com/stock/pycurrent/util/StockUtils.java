@@ -78,7 +78,7 @@ public class StockUtils {
     }
 
     public static String concatChar(String value, int length) {
-        return value.repeat(length);
+        return " " + value.repeat(length - 1);
     }
 
     public static String addOneZero(int value) {
