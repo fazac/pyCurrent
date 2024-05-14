@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 @Configuration
 @CommonsLog
 public class PullData implements CommandLineRunner {
+
+    private static final int CHAR_LENGTH = 128;
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal THOUSAND = BigDecimal.valueOf(1000);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(15);
@@ -205,7 +207,7 @@ public class PullData implements CommandLineRunner {
 
             String nameFirst = "N,C".contains(String.valueOf(tsName.charAt(0))) ? tsName.substring(1, 3) : tsName.substring(0, 2);
             if (rt.getCurrentPri() != null && (tsCode.startsWith("0") || tsCode.startsWith("60")) && !tsName.contains("退") && !noConcerned && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)) || holds || (concerned && !tsCode.startsWith("30"))) {
-                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.charAt(0) + tsCode.substring(2, 6)) + fixLength(nameFirst, 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 10) + fixLength("", 10) + fixLength(rt.getCurrentPri(), 6) + fixLength("", 11) + fixLength(rt.getVol() != null && checkOverLimit ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.charAt(0) + tsCode.substring(2, 6)) + fixLength(nameFirst, 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength("", 11) + fixLength(rt.getVol() != null && checkOverLimit ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
             }
 
             if (!tsName.contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkOverLimit) {
@@ -233,21 +235,11 @@ public class PullData implements CommandLineRunner {
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
                     EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) ? stockMap.get("HOLD_CODES").get(tsCode) : stockMap.get("CONCERN_CODES").get(tsCode);
                     BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
-                    BigDecimal amount = rt.getCurrentPri().subtract(emConstantValue.getPrice()).multiply(BigDecimal.valueOf(emConstantValue.getVol()));
-                    BigDecimal potentialBenefits;
                     holdRemark.append(fixLength(realRatio, 7));
-                    if (emConstantValue.getProfit() != null) {
-                        potentialBenefits = amount.subtract(emConstantValue.getProfit());
-                        holdRemark.append(fixLength(emConstantValue.getProfit(), 10));
-                        holdRemark.append(fixLength(potentialBenefits.setScale(2, RoundingMode.HALF_UP), 10));
-                    } else {
-                        holdRemark.append(fixLength(amount, 10));
-                        holdRemark.append(fixLength("", 10));
-                    }
+                    holdRemark.append(fixLength(emConstantValue.getPrice(), 7));
                 } else {
                     holdRemark.append(fixLength("", 7));
-                    holdRemark.append(fixLength("", 10));
-                    holdRemark.append(fixLength("", 10));
+                    holdRemark.append(fixLength("", 7));
                 }
 
                 long volStep = 0L;
@@ -303,12 +295,12 @@ public class PullData implements CommandLineRunner {
                 }
             }
         }
-        log.warn(StockUtils.concatChar("_", 144));
-        String title = "|   TIME   |  I  |" + " T     CODE 简称 |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle("   AM   ", 8) + fixLengthTitle("   PB   ", 8) + fixLengthTitle(" CP ", 4) + fixLengthTitle("VOL", 9) + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
+        log.warn(StockUtils.concatChar("_", CHAR_LENGTH));
+        String title = "|   TIME   |  I  |" + " T     CODE 简称 |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4) + fixLengthTitle("VOL", 9) + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
         log.warn(title.substring(0, title.length() - 2));
-        log.warn(StockUtils.concatChar("‾", 144));
+        log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         printMapInfo(logsMap, nowClock);
-        log.warn(StockUtils.concatChar("‾", 144));
+        log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
             rangeOverCode.setCodeValue(valueList);
