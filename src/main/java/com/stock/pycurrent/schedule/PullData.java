@@ -220,7 +220,9 @@ public class PullData implements CommandLineRunner {
                     || holds
                     || concerned)) {
                 logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.charAt(0) + tsCode.substring(2, 6)) + fixLength(nameFirst, 3) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 10) + fixLength("", 10) + fixLength(rt.getCurrentPri(), 6) + fixLength("", 11) + fixLength(rt.getVol() != null && checkOverLimit ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
-                sendNewNotification(notification, rt, tsCode);
+                if (!holds && !concerned) {
+                    sendNewNotification(notification, rt, tsCode);
+                }
             }
 
             if (!tsName.contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkOverLimit) {
@@ -288,7 +290,7 @@ public class PullData implements CommandLineRunner {
                     volMap.put(tsCode, rt.getVol());
                     volStepMap.put(rt.getTsCode(), volStep);
                 }
-                if (!rangeOverLimit) {
+                if (highLimit) {
                     sendNewNotification(notification, rt, tsCode);
                 }
             }
