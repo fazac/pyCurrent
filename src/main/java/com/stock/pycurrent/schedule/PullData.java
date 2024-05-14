@@ -259,13 +259,13 @@ public class PullData implements CommandLineRunner {
 
                     holdRemark.append(fixLength(realRatio, 7));
                     if (emConstantValue.getProfit() != null) {
-                        holdRemark.append(fixLength(emConstantValue.getPrice(), 10));
+                        holdRemark.append(fixLength(emConstantValue.getPrice(), 7));
                     } else {
-                        holdRemark.append(fixLength("", 10));
+                        holdRemark.append(fixLength("", 7));
                     }
                 } else {
                     holdRemark.append(fixLength("", 7));
-                    holdRemark.append(fixLength("", 10));
+                    holdRemark.append(fixLength("", 7));
                 }
 
                 long volStep = 0L;
