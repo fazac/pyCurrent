@@ -68,6 +68,6 @@ public class DateUtils {
     }
 
     public static String getH_M(LocalDateTime localDateTime) {
-        return localDateTime.getHour() + ":" + localDateTime.getMinute();
+        return StockUtils.addOneZero(localDateTime.getHour()) + ":" + StockUtils.addOneZero(localDateTime.getMinute());
     }
 }
