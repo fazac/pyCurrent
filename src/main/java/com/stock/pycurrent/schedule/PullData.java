@@ -105,7 +105,9 @@ public class PullData implements CommandLineRunner {
         List<String> times = emRealTimeStockService.findTradeDates();
         for (String s : times) {
             List<EmRealTimeStock> stockList = emRealTimeStockService.findStockByDate(s);
-            checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
+            if (stockList != null && !stockList.isEmpty()) {
+                checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
+            }
         }
     }
 
