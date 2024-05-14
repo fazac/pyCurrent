@@ -38,7 +38,8 @@ public class PrepareData implements CommandLineRunner {
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
-        if (StockUtils.isNotRest()
+        if (!PARAMS.BAK_MODE
+            && StockUtils.isNotRest()
             && !limitCodeService.checkDateHoliday(DateUtils.getM_D(n))) {
             createTable();
             pullAll();
@@ -49,27 +50,25 @@ public class PrepareData implements CommandLineRunner {
     @SneakyThrows
     @Scheduled(cron = " 0 30 16 * * ? ")
     public void pullAll() {
-        if (!PARAMS.BAK_MODE) {
-            log.warn("PULL-ALL-ENTER");
-            log.warn("pullData-EM-ENTER");
-            stockService.initEMDailyData();
-            log.warn("pullData-EM-OVER");
-            if (StockUtils.afterPullHour()) {
-                log.warn("pullData-EMBC-ENTER");
-                boardConceptConService.findBoardConceptConCurrent();
-                log.warn("pullData-EMBC-OVER");
-                log.warn("pullData-EMBI-ENTER");
-                boardIndustryConService.findBoardIndustryConCurrent();
-                log.warn("pullData-EMBI-OVER");
-                log.warn("continuousUp-ENTER");
-                continuousUpService.initContinuousUp();
-                log.warn("continuousUp-OVER");
-            }
-            log.warn("createLimitCode-ENTER");
-            stockService.createLimitCode();
-            log.warn("createLimitCode-OVER");
-            log.warn("PULL-ALL-OVER");
+        log.warn("PULL-ALL-ENTER");
+        log.warn("pullData-EM-ENTER");
+        stockService.initEMDailyData();
+        log.warn("pullData-EM-OVER");
+        if (StockUtils.afterPullHour()) {
+            log.warn("pullData-EMBC-ENTER");
+            boardConceptConService.findBoardConceptConCurrent();
+            log.warn("pullData-EMBC-OVER");
+            log.warn("pullData-EMBI-ENTER");
+            boardIndustryConService.findBoardIndustryConCurrent();
+            log.warn("pullData-EMBI-OVER");
+            log.warn("continuousUp-ENTER");
+            continuousUpService.initContinuousUp();
+            log.warn("continuousUp-OVER");
         }
+        log.warn("createLimitCode-ENTER");
+        stockService.createLimitCode();
+        log.warn("createLimitCode-OVER");
+        log.warn("PULL-ALL-OVER");
     }
 
     @SneakyThrows
