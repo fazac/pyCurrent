@@ -18,7 +18,7 @@ public class EmRealTimeStockService {
     @SuppressWarnings("unchecked")
     public List<EmRealTimeStock> findLast() {
         String tableName = "em_real_time_stock_" + DateUtils.now();
-        String sql = " select * from " + tableName + " where trade_date = (select (max(a.trade_date)) from " + tableName + " a) order by ts_code;";
+        String sql = " select * from " + tableName + " where trade_date = (select max(a.trade_date) from " + tableName + " a) order by ts_code;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).getResultList();
     }
 
