@@ -338,3 +338,36 @@ begin
 end$$
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS `opc`;
+DELIMITER $$
+create procedure opc(in dayCount int, in pchLimit int)
+begin
+    declare startDate varchar(8);
+    declare codes varchar(512);
+
+    select min(trade_date)
+    from (select distinct trade_date from em_d_n_stock order by trade_date desc limit dayCount) t
+    into startDate;
+
+    select group_concat(ts_code)
+    from (select ts_code, round((ep - sp) * 100 / sp, 2) as pc
+          from (select ts_code,
+                       max(case when t1.num = 1 then t1.pri_close end)        as sp,
+                       max(case when t1.num = dayCount then t1.pri_close end) as ep
+                from (select ts_code,
+                             pri_close,
+                             row_number() over (partition by ts_code order by trade_date) as num
+                      from em_d_n_stock
+                      where trade_date >= startDate
+                        and ts_code like '30%') t1
+                where t1.num = 1
+                   or t1.num = dayCount
+                group by ts_code) t2) t3
+    where t3.pc > pchLimit
+    into codes;
+
+    call openn(codes);
+
+end$$
+DELIMITER ;
+
