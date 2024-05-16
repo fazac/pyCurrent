@@ -334,7 +334,6 @@ begin
       and t.change_hand > handLimit into codes;
 
     call openn(codes);
-    call rocc(codes);
 
 end$$
 DELIMITER ;
