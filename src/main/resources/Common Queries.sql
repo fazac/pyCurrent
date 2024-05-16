@@ -312,4 +312,30 @@ begin
 end$$
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS `ohc`;
+DELIMITER $$
+create procedure ohc(in dayCount int, in handLimit int)
+begin
+    declare startDate varchar(8);
+    declare codes varchar(512);
+
+    select min(trade_date)
+    from (select distinct trade_date from em_d_n_stock order by trade_date desc limit dayCount) t
+    into startDate;
+
+    select group_concat(ts_code)
+    from (select ts_code,
+                 change_hand,
+                 row_number() over (partition by ts_code order by change_hand ) as num
+          from em_d_n_stock
+          where trade_date >= startDate
+            and ts_code like '30%') t
+    where t.num = 1
+      and t.change_hand > handLimit into codes;
+
+    call openn(codes);
+    call rocc(codes);
+
+end$$
+DELIMITER ;
 
