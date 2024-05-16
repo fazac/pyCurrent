@@ -304,4 +304,12 @@ end $$
 DELIMITER ;
 
 
+DROP PROCEDURE IF EXISTS `procedure_template`;
+DELIMITER $$
+create procedure procedure_template()
+begin
+
+end$$
+DELIMITER ;
+
 
