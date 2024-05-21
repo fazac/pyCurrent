@@ -196,7 +196,7 @@ public class PullData implements CommandLineRunner {
             if (tsCode.startsWith("30")) {
                 boolean peFlag = rt.getPe() == null || rt.getPe().compareTo(BigDecimal.ZERO) < 0;
                 boolean cmFlag = rt.getCirculationMarketCap() == null || rt.getCirculationMarketCap().compareTo(Constants.FOUR_BILLION) < 0;
-                if (peFlag || cmFlag || !concerned || !holds) {
+                if ((peFlag || cmFlag) && !concerned && !holds) {
                     continue;
                 }
             }
