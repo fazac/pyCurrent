@@ -191,10 +191,12 @@ public class PullData implements CommandLineRunner {
         StringBuilder holdRemark = new StringBuilder();
         for (EmRealTimeStock rt : stockList) {
             String tsCode = rt.getTsCode();
+            holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
+            concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
             if (tsCode.startsWith("30")) {
                 boolean peFlag = rt.getPe() == null || rt.getPe().compareTo(BigDecimal.ZERO) < 0;
                 boolean cmFlag = rt.getCirculationMarketCap() == null || rt.getCirculationMarketCap().compareTo(Constants.FOUR_BILLION) < 0;
-                if (peFlag || cmFlag) {
+                if (peFlag || cmFlag || !concerned || !holds) {
                     continue;
                 }
             }
@@ -205,8 +207,7 @@ public class PullData implements CommandLineRunner {
             }
             holdRemark.setLength(0);
             noConcerned = codes[1].contains(tsCode);
-            holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
-            concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
+
             yesterdayHigh = limitCodeMap.containsKey(tsCode);
 
             if (!tsCode.startsWith("30") && !concerned && !holds) {

@@ -389,25 +389,49 @@ begin
     from (select distinct trade_date from em_d_n_stock order by trade_date desc limit trueDayCount) t
     into startDate;
 
+    create temporary table tmp_sum as (select *
+                                       from (select ts_code, round((ep - sp) * 100 / sp, 2) as pc, hand
+                                             from (select ts_code,
+                                                          max(case when t1.num = 1 then t1.pri_close end)            as sp,
+                                                          max(case when t1.num = trueDayCount then t1.pri_close end) as ep,
+                                                          sum(case when t1.num != 1 then t1.change_hand end)         as hand
+                                                   from (select ts_code,
+                                                                pri_close,
+                                                                change_hand,
+                                                                row_number() over (partition by ts_code order by trade_date) as num
+                                                         from em_d_n_stock
+                                                         where trade_date >= startDate
+                                                           and ts_code like '30%') t1
+                                                   group by ts_code) t2) t3
+                                       where t3.pc > pchLimit
+                                         and hand > handLimit);
+
+    select * from tmp_sum;
+
     select group_concat(ts_code)
-    from (select ts_code, round((ep - sp) * 100 / sp, 2) as pc, hand
-          from (select ts_code,
-                       max(case when t1.num = 1 then t1.pri_close end)            as sp,
-                       max(case when t1.num = trueDayCount then t1.pri_close end) as ep,
-                       sum(case when t1.num != 1 then t1.change_hand end)         as hand
-                from (select ts_code,
-                             pri_close,
-                             change_hand,
-                             row_number() over (partition by ts_code order by trade_date) as num
-                      from em_d_n_stock
-                      where trade_date >= startDate
-                        and ts_code like '30%') t1
-                group by ts_code) t2) t3
-    where t3.pc > pchLimit
-      and hand > handLimit
+    from tmp_sum
     into codes;
 
-    call openn(codes);
+    set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
+    SET @sql = CONCAT(' select t.ts_code,t.name,s.pc,s.hand,t.pct_chg,t.change_hand,
+           t.pe,t.pb,truncate(t.circulation_market_cap/100000000,2) as cap,
+           truncate((t.pri_open - t.pri_close_pre) * 100 / t.pri_close_pre, 3) as ''open'',
+           truncate((t.pri_low - t.pri_close_pre) * 100 / t.pri_close_pre, 3)  as ''low'',
+           truncate((t.pri_high - t.pri_close_pre) * 100 / t.pri_close_pre, 3) as ''high'',
+           t.current_pri,
+           truncate(t.amount / t.vol / 100, 3)                               as ''avg_pri'',
+           t.pri_close_pre as ''pri_pre''
+    from ', @tableName, ' t, tmp_sum s
+    where t.trade_date = (select max(trade_date) from ', @tableName, ')
+      and t.ts_code in (', codes, ')
+      and t.ts_code = s.ts_code
+    order by t.ts_code ;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    drop table `tmp_sum`;
 
 end$$
 DELIMITER ;
+
