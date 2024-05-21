@@ -385,6 +385,8 @@ begin
 
     set trueDayCount = dayCount + 1;
 
+    drop table if exists `tmp_sum`;
+
     select min(trade_date)
     from (select distinct trade_date from em_d_n_stock order by trade_date desc limit trueDayCount) t
     into startDate;
