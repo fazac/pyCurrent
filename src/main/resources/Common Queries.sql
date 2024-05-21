@@ -74,7 +74,7 @@ BEGIN
         DO
             SET element = SUBSTRING_INDEX(queryCondition, delim, 1);
             set @sql = concat(
-                    'select trade_date, ts_code, current_pri, pct_chg, change_hand, vol, amount / vol / 100 as avg_pri from ',
+                    'select trade_date, ts_code, current_pri, pct_chg, change_hand, vol, round(amount / vol / 100, 2) as avg_pri from ',
                     @tableName, ' where ts_code =', element,
                     ' and trade_date > CURDATE() order by trade_date desc;');
             PREPARE stmt FROM @sql;
@@ -273,12 +273,11 @@ end $$
 
 CREATE PROCEDURE cdday()
 BEGIN
-    select trade_date,count(1) from em_d_n_stock group by trade_date order by trade_date desc limit 10;
-    select trade_date,count(1) from em_d_a_stock group by trade_date order by trade_date desc limit 10;
+    select trade_date, count(1) from em_d_n_stock group by trade_date order by trade_date desc limit 10;
+    select trade_date, count(1) from em_d_a_stock group by trade_date order by trade_date desc limit 10;
 end $$
 
 DELIMITER ;
-
 
 
 DROP PROCEDURE IF EXISTS `curcc`;
@@ -331,7 +330,8 @@ begin
           where trade_date >= startDate
             and ts_code like '30%') t
     where t.num = 1
-      and t.change_hand > handLimit into codes;
+      and t.change_hand > handLimit
+    into codes;
 
     call openn(codes);
 
@@ -344,16 +344,18 @@ create procedure opc(in dayCount int, in pchLimit int)
 begin
     declare startDate varchar(8);
     declare codes varchar(512);
+    declare trueDayCount int;
 
+    set trueDayCount = dayCount + 1;
     select min(trade_date)
-    from (select distinct trade_date from em_d_n_stock order by trade_date desc limit dayCount) t
+    from (select distinct trade_date from em_d_n_stock order by trade_date desc limit trueDayCount) t
     into startDate;
 
     select group_concat(ts_code)
     from (select ts_code, round((ep - sp) * 100 / sp, 2) as pc
           from (select ts_code,
-                       max(case when t1.num = 1 then t1.pri_close end)        as sp,
-                       max(case when t1.num = dayCount then t1.pri_close end) as ep
+                       max(case when t1.num = 1 then t1.pri_close end)            as sp,
+                       max(case when t1.num = trueDayCount then t1.pri_close end) as ep
                 from (select ts_code,
                              pri_close,
                              row_number() over (partition by ts_code order by trade_date) as num
@@ -361,7 +363,7 @@ begin
                       where trade_date >= startDate
                         and ts_code like '30%') t1
                 where t1.num = 1
-                   or t1.num = dayCount
+                   or t1.num = trueDayCount
                 group by ts_code) t2) t3
     where t3.pc > pchLimit
     into codes;
@@ -371,3 +373,41 @@ begin
 end$$
 DELIMITER ;
 
+
+DROP PROCEDURE IF EXISTS `ophc`;
+DELIMITER $$
+create procedure ophc(in dayCount int, in pchLimit int, in handLimit int)
+begin
+    declare startDate varchar(8);
+    declare codes varchar(512);
+
+    declare trueDayCount int;
+
+    set trueDayCount = dayCount + 1;
+
+    select min(trade_date)
+    from (select distinct trade_date from em_d_n_stock order by trade_date desc limit trueDayCount) t
+    into startDate;
+
+    select group_concat(ts_code)
+    from (select ts_code, round((ep - sp) * 100 / sp, 2) as pc, hand
+          from (select ts_code,
+                       max(case when t1.num = 1 then t1.pri_close end)            as sp,
+                       max(case when t1.num = trueDayCount then t1.pri_close end) as ep,
+                       sum(case when t1.num != 1 then t1.change_hand end)         as hand
+                from (select ts_code,
+                             pri_close,
+                             change_hand,
+                             row_number() over (partition by ts_code order by trade_date) as num
+                      from em_d_n_stock
+                      where trade_date >= startDate
+                        and ts_code like '30%') t1
+                group by ts_code) t2) t3
+    where t3.pc > pchLimit
+      and hand > handLimit
+    into codes;
+
+    call openn(codes);
+
+end$$
+DELIMITER ;
