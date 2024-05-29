@@ -77,7 +77,7 @@ BEGIN
                     'select left(right(r.trade_date,8),5) as `', concat(left(element, 1), substr(element, 3)),
                     '`,  r.current_pri as cp, r.pct_chg as pct ,round(b.bar * 1000,1) as bar, r.change_hand as h , r.vol as v, round(r.amount / r.vol / 100, 2) as ap from ',
                     @tableName,
-                    ' r, real_bar b  where r.ts_code = b.ts_code and r.trade_date = b.trade_date and r.ts_code =',
+                    ' r left join real_bar b on  r.ts_code = b.ts_code and r.trade_date = b.trade_date where r.ts_code =',
                     element,
                     ' and r.trade_date > CURDATE() order by r.trade_date desc;');
             PREPARE stmt FROM @sql;
