@@ -75,7 +75,9 @@ BEGIN
             SET element = SUBSTRING_INDEX(queryCondition, delim, 1);
             set @sql = concat(
                     'select left(right(r.trade_date,8),5) as td, right(r.ts_code,3) as tc, r.current_pri as cp, r.pct_chg as pct ,round(b.bar * 1000,1) as bar, r.change_hand as h , r.vol as v, round(r.amount / r.vol / 100, 2) as ap from ',
-                    @tableName, ' r, real_bar b  where r.ts_code = b.ts_code and r.trade_date = b.trade_date and r.ts_code =', element,
+                    @tableName,
+                    ' r, real_bar b  where r.ts_code = b.ts_code and r.trade_date = b.trade_date and r.ts_code =',
+                    element,
                     ' and r.trade_date > CURDATE() order by r.trade_date desc;');
             PREPARE stmt FROM @sql;
             EXECUTE stmt;
@@ -233,7 +235,8 @@ $$
 #     PREPARE stmt FROM @sql;
 #     EXECUTE stmt;
 #     DEALLOCATE PREPARE stmt;
-# end $$
+# end
+$$
 
 CREATE PROCEDURE lmtt(in queryDate varchar(8))
 BEGIN
@@ -284,21 +287,36 @@ DROP PROCEDURE IF EXISTS `curcc`;
 DELIMITER $$
 CREATE PROCEDURE curcc()
 BEGIN
-    select c_30_5u as 35u,
-           c_30_7d as 37d,
-           c_30u as 3u,
-           c_30a as 3a,
-           c_60_5u as 65u,
-           c_60_7d as 67d,
-           c_60u as 6u,
-           c_60a as 6a,
-           c_00_5u as 05u,
-           c_00_7d as 07d,
-           c_00u as 0u,
-           c_00a as oa
-    from cur_count
-    where trade_date > curdate()
-    order by trade_date desc;
+    declare 30a varchar(4);
+    declare 60a varchar(4);
+    declare 00a varchar(4);
+    select c_30a from cur_count order by trade_date desc limit 1 into 30a;
+    select c_60a from cur_count order by trade_date desc limit 1 into 60a;
+    select c_00a from cur_count order by trade_date desc limit 1 into 00a;
+    SET @sql = CONCAT('
+                        select c_30_5u  as 35u,
+                               c_30_35u as 335u,
+                               c_30_13u as 313u,
+                               c_30_01u as 301u,
+                               c_30_01d as 301d,
+                               c_30_13d as 313d,
+                               c_30_37d as 337d,
+                               c_30_7d  as 37d,
+                               c_30u    as `', 30a, '`,
+                               c_60_5u  as 65u,
+                               c_60_7d  as 67d,
+                               c_60u    as `', 60a, '`,
+                               c_00_5u  as 05u,
+                               c_00_7d  as 07d,
+                               c_00u    as `', 00a, '`
+                        from cur_count
+                        where trade_date > curdate()
+                        order by trade_date desc;
+    ');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
 end $$
 DELIMITER ;
 
