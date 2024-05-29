@@ -74,9 +74,9 @@ BEGIN
         DO
             SET element = SUBSTRING_INDEX(queryCondition, delim, 1);
             set @sql = concat(
-                    'select trade_date, ts_code, current_pri, pct_chg, change_hand, vol, round(amount / vol / 100, 2) as avg_pri from ',
-                    @tableName, ' where ts_code =', element,
-                    ' and trade_date > CURDATE() order by trade_date desc;');
+                    'select left(right(r.trade_date,8),5) as td, right(r.ts_code,3) as tc, r.current_pri as cp, r.pct_chg as pct ,round(b.bar * 1000,1) as bar, r.change_hand as h , r.vol as v, round(r.amount / r.vol / 100, 2) as ap from ',
+                    @tableName, ' r, real_bar b  where r.ts_code = b.ts_code and r.trade_date = b.trade_date and r.ts_code =', element,
+                    ' and r.trade_date > CURDATE() order by r.trade_date desc;');
             PREPARE stmt FROM @sql;
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
@@ -210,30 +210,30 @@ BEGIN
     call conceptt(queryCodes);
     call hiscode(queryCodes, startDate);
     call rocc(queryCodes);
-    call rbar(queryCodes);
+#     call rbar(queryCodes);
 end
 $$
 
-CREATE PROCEDURE rbar(in queryCodes varchar(512))
-BEGIN
-    DECLARE queryCondition VARCHAR(512);
-
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    end if;
-
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
-
-    SET @sql = CONCAT('select trade_date,ts_code,bar from real_bar where ts_code in (', queryCondition,
-                      ') and trade_date > curdate() order by ts_code, trade_date desc;');
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt;
-    DEALLOCATE PREPARE stmt;
-end $$
+# CREATE PROCEDURE rbar(in queryCodes varchar(512))
+# BEGIN
+#     DECLARE queryCondition VARCHAR(512);
+#
+#     if length(queryCodes) = 5 then
+#         set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+#     end if;
+#
+#     if queryCodes like '%,%' then
+#         SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
+#     else
+#         SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
+#     end if;
+#
+#     SET @sql = CONCAT('select trade_date,ts_code,bar from real_bar where ts_code in (', queryCondition,
+#                       ') and trade_date > curdate() order by ts_code, trade_date desc;');
+#     PREPARE stmt FROM @sql;
+#     EXECUTE stmt;
+#     DEALLOCATE PREPARE stmt;
+# end $$
 
 CREATE PROCEDURE lmtt(in queryDate varchar(8))
 BEGIN
@@ -284,18 +284,18 @@ DROP PROCEDURE IF EXISTS `curcc`;
 DELIMITER $$
 CREATE PROCEDURE curcc()
 BEGIN
-    select c_30_5u,
-           c_30_7d,
-           c_30u,
-           c_30a,
-           c_60_5u,
-           c_60_7d,
-           c_60u,
-           c_60a,
-           c_00_5u,
-           c_00_7d,
-           c_00u,
-           c_00a
+    select c_30_5u as 35u,
+           c_30_7d as 37d,
+           c_30u as 3u,
+           c_30a as 3a,
+           c_60_5u as 65u,
+           c_60_7d as 67d,
+           c_60u as 6u,
+           c_60a as 6a,
+           c_00_5u as 05u,
+           c_00_7d as 07d,
+           c_00u as 0u,
+           c_00a as oa
     from cur_count
     where trade_date > curdate()
     order by trade_date desc;

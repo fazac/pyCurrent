@@ -17,6 +17,10 @@ public class Constants {
     public static BigDecimal EIGHTEEN = BigDecimal.valueOf(18);
 
     public static BigDecimal FIVE = BigDecimal.valueOf(5);
+    public static BigDecimal THREE = BigDecimal.valueOf(3);
+    public static BigDecimal N_ONE = BigDecimal.valueOf(-1);
+
+    public static BigDecimal N_THREE = BigDecimal.valueOf(-3);
     public static BigDecimal N_SEVEN = BigDecimal.valueOf(-7);
 
     public static BigDecimal FOUR_BILLION = BigDecimal.valueOf(4000000000L);

@@ -316,3 +316,28 @@ create table holiday_date
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
 
+-- 20240529
+
+alter table `cur_count` add column `c_30_35u` int;
+alter table `cur_count` add column `c_60_35u` int;
+alter table `cur_count` add column `c_00_35u` int;
+
+alter table `cur_count` add column `c_30_13u` int;
+alter table `cur_count` add column `c_60_13u` int;
+alter table `cur_count` add column `c_00_13u` int;
+
+alter table `cur_count` add column `c_30_01u` int;
+alter table `cur_count` add column `c_60_01u` int;
+alter table `cur_count` add column `c_00_01u` int;
+
+alter table `cur_count` add column `c_30_01d` int;
+alter table `cur_count` add column `c_60_01d` int;
+alter table `cur_count` add column `c_00_01d` int;
+
+alter table `cur_count` add column `c_30_13d` int;
+alter table `cur_count` add column `c_60_13d` int;
+alter table `cur_count` add column `c_00_13d` int;
+
+alter table `cur_count` add column `c_30_37d` int;
+alter table `cur_count` add column `c_60_37d` int;
+alter table `cur_count` add column `c_00_37d` int;

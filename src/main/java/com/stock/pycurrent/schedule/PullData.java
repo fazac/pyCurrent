@@ -343,31 +343,64 @@ public class PullData implements CommandLineRunner {
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
                         countArray[2]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
+                    } else if (em.getPctChg().compareTo(Constants.THREE) >= 0) {
+                        countArray[4]++;
+                    } else if (em.getPctChg().compareTo(BigDecimal.ONE) >= 0) {
+                        countArray[5]++;
+                    } else if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
+                        countArray[6]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_ONE) >= 0) {
+                        countArray[7]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_THREE) >= 0) {
+                        countArray[8]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_SEVEN) >= 0) {
+                        countArray[9]++;
+                    } else {
                         countArray[3]++;
                     }
                 } else if (em.getTsCode().startsWith("30")) {
-                    countArray[4]++;
+                    countArray[10]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        countArray[5]++;
+                        countArray[11]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        countArray[6]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        countArray[7]++;
+                        countArray[12]++;
+                    } else if (em.getPctChg().compareTo(Constants.THREE) >= 0) {
+                        countArray[14]++;
+                    } else if (em.getPctChg().compareTo(BigDecimal.ONE) >= 0) {
+                        countArray[15]++;
+                    } else if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
+                        countArray[16]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_ONE) >= 0) {
+                        countArray[17]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_THREE) >= 0) {
+                        countArray[18]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_SEVEN) >= 0) {
+                        countArray[19]++;
+                    } else {
+                        countArray[13]++;
                     }
                 } else if (em.getTsCode().startsWith("60")) {
-                    countArray[8]++;
+                    countArray[20]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
-                        countArray[9]++;
+                        countArray[21]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
-                        countArray[10]++;
-                    }
-                    if (em.getPctChg().compareTo(Constants.N_SEVEN) <= 0) {
-                        countArray[11]++;
+                        countArray[22]++;
+                    } else if (em.getPctChg().compareTo(Constants.THREE) >= 0) {
+                        countArray[24]++;
+                    } else if (em.getPctChg().compareTo(BigDecimal.ONE) >= 0) {
+                        countArray[25]++;
+                    } else if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
+                        countArray[26]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_ONE) >= 0) {
+                        countArray[27]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_THREE) >= 0) {
+                        countArray[28]++;
+                    } else if (em.getPctChg().compareTo(Constants.N_SEVEN) >= 0) {
+                        countArray[29]++;
+                    } else {
+                        countArray[23]++;
                     }
                 }
             }
