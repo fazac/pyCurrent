@@ -115,12 +115,12 @@ public class CurCount {
         this.c60u = ca[21];
         this.c605u = ca[22];
         this.c607d = ca[23];
-        this.c6035u = ca[14];
-        this.c6013u = ca[15];
-        this.c6001u = ca[16];
-        this.c6001d = ca[17];
-        this.c6013d = ca[18];
-        this.c6037d = ca[19];
+        this.c6035u = ca[24];
+        this.c6013u = ca[25];
+        this.c6001u = ca[26];
+        this.c6001d = ca[27];
+        this.c6013d = ca[28];
+        this.c6037d = ca[29];
 
     }
 

@@ -333,12 +333,12 @@ public class PullData implements CommandLineRunner {
     }
 
     private CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
-        Integer[] countArray = Stream.generate(() -> 0).limit(12).toArray(Integer[]::new);
+        Integer[] countArray = Stream.generate(() -> 0).limit(30).toArray(Integer[]::new);
         for (EmRealTimeStock em : stockList) {
             if (em.getPctChg() != null) {
                 if (em.getTsCode().startsWith("00")) {
                     countArray[0]++;
-                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
+                    if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[1]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
@@ -360,7 +360,7 @@ public class PullData implements CommandLineRunner {
                     }
                 } else if (em.getTsCode().startsWith("30")) {
                     countArray[10]++;
-                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
+                    if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[11]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
@@ -382,7 +382,7 @@ public class PullData implements CommandLineRunner {
                     }
                 } else if (em.getTsCode().startsWith("60")) {
                     countArray[20]++;
-                    if (em.getPctChg().compareTo(BigDecimal.ZERO) > 0) {
+                    if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[21]++;
                     }
                     if (em.getPctChg().compareTo(Constants.FIVE) >= 0) {
