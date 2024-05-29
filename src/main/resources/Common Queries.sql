@@ -294,14 +294,14 @@ BEGIN
     select c_60a from cur_count order by trade_date desc limit 1 into 60a;
     select c_00a from cur_count order by trade_date desc limit 1 into 00a;
     SET @sql = CONCAT('
-                        select c_30_5u  as 35u,
-                               c_30_35u as 335u,
-                               c_30_13u as 313u,
-                               c_30_01u as 301u,
-                               c_30_01d as 301d,
-                               c_30_13d as 313d,
-                               c_30_37d as 337d,
-                               c_30_7d  as 37d,
+                        select c_30_5u  as 5u,
+                               c_30_35u as 35u,
+                               c_30_13u as 13u,
+                               c_30_01u as 01u,
+                               c_30_01d as 10d,
+                               c_30_13d as 31d,
+                               c_30_37d as 73d,
+                               c_30_7d  as 7d,
                                c_30u    as `', 30a, '`,
                                c_60_5u  as 65u,
                                c_60_7d  as 67d,
