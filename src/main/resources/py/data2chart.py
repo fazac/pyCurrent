@@ -32,9 +32,7 @@ x_data_line=[da-1 for i,da in enumerate(x_data) if i < len(x_data)]
 y_date3_tmp = [0] + [row[1] for row in data]
 y_date3 = [y_date3_tmp[i+1]- date3 for i,date3 in enumerate(y_date3_tmp) if i < len(y_date3_tmp)-1]
 
-print(len(x_data))
-print(len(y_data))
-print(len(y_date3))
+
 sql2 = "select bar from real_bar where ts_code = '" + code + "' and trade_date > curdate();"
 cursor.execute(sql2)
 data2 = cursor.fetchall()
