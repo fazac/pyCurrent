@@ -58,6 +58,7 @@ BEGIN
     DECLARE delim CHAR(1) DEFAULT ',';
     DECLARE idx INT DEFAULT 1;
     DECLARE element VARCHAR(6);
+    DECLARE cmd CHAR(255);
 
     if length(queryCodes) = 5 then
         set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
@@ -85,6 +86,8 @@ BEGIN
             DEALLOCATE PREPARE stmt;
             SET queryCondition = SUBSTRING(queryCondition, LENGTH(element) + 2);
             SET idx = idx + 1;
+            SET cmd = concat('python C:/Users/fa/Desktop/py/data2chart.py --emcode=', element);
+            SET @result = sys_exec(cmd);
         END WHILE;
 end
 $$
