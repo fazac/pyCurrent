@@ -5,6 +5,8 @@ import pyecharts.options as opts
 import argparse
 import datetime
 from sqlalchemy import create_engine
+from pyecharts.globals import ThemeType
+
 
 parser = argparse.ArgumentParser()
 
@@ -42,7 +44,7 @@ y_data2 = [row[0] for row in data2]
 
 
 bar=(
-    Bar(init_opts=opts.InitOpts(width="1366px", height="768px"))
+    Bar(init_opts=opts.InitOpts(width="1366px", height="768px",theme=ThemeType.CHALK))
     .add_xaxis(x_data)
     .extend_axis(yaxis=opts.AxisOpts(
                         is_scale=True,
@@ -57,6 +59,10 @@ bar=(
      .set_series_opts(
         itemstyle_opts=opts.ItemStyleOpts(opacity=0.7)
      )
+     .set_global_opts(
+        yaxis_opts=opts.AxisOpts(is_scale=True,splitline_opts=opts.SplitLineOpts(is_show=False)),
+        xaxis_opts=opts.AxisOpts(is_scale=True,splitline_opts=opts.SplitLineOpts(is_show=False)),
+     )
 )
 
 
@@ -67,14 +73,16 @@ line=(
         "",
         y_data,
         yaxis_index=1,
-        itemstyle_opts=opts.ItemStyleOpts(color='red'),
+        label_opts=opts.LabelOpts(is_show=False),
         symbol="emptyCircle",
-        is_symbol_show=False,
+        itemstyle_opts=opts.ItemStyleOpts(color='red'),
         linestyle_opts=opts.LineStyleOpts(width=3),
     )
     .set_global_opts(
+        tooltip_opts=opts.TooltipOpts(trigger="axis"),
         title_opts=opts.TitleOpts(title="", subtitle=""),
-        yaxis_opts=opts.AxisOpts(is_scale=True),
+        yaxis_opts=opts.AxisOpts(is_scale=True,splitline_opts=opts.SplitLineOpts(is_show=False)),
+        xaxis_opts=opts.AxisOpts(is_scale=True,splitline_opts=opts.SplitLineOpts(is_show=False)),
     )
 )
 
@@ -93,7 +101,8 @@ line1=(
     )
     .set_global_opts(
         title_opts=opts.TitleOpts(title="", subtitle=""),
-        yaxis_opts=opts.AxisOpts(is_scale=True),
+        yaxis_opts=opts.AxisOpts(is_scale=True,splitline_opts=opts.SplitLineOpts(is_show=False)),
+        xaxis_opts=opts.AxisOpts(is_scale=True,splitline_opts=opts.SplitLineOpts(is_show=False)),
      )
 )    
 
