@@ -20,6 +20,8 @@ BEGIN
 
     if length(queryCodes) = 5 then
         set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+    ELSEIF length(queryCodes) = 4 then
+        set queryCodes = concat('30', queryCodes);
     end if;
 
     if queryCodes like '%,%' then
@@ -62,6 +64,8 @@ BEGIN
 
     if length(queryCodes) = 5 then
         set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+    ELSEIF length(queryCodes) = 4 then
+        set queryCodes = concat('30', queryCodes);
     end if;
 
     if queryCodes like '%,%' then
@@ -208,6 +212,8 @@ BEGIN
 
     if length(queryCodes) = 5 then
         set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
+    ELSEIF length(queryCodes) = 4 then
+        set queryCodes = concat('30', queryCodes);
     end if;
 
     call openn(queryCodes);
