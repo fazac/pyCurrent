@@ -97,8 +97,7 @@ bar = (
 
 x_max = max(x_data_line)
 y_max = y_data[x_max]
-print(x_max)
-print(y_max)
+
 line = (
     Line()
     .add_xaxis(x_data_line)
@@ -194,8 +193,6 @@ script_content = (extra_code_script + '</script>').join(split_content)
 # 保存修改后的模板文件
 with open(html_file, 'w') as file:
     file.write(script_content)
-
-print('模版文件修改成功!')
 
 # 关闭数据库连接
 db.close()
