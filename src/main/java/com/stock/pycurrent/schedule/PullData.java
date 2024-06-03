@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 @CommonsLog
 public class PullData implements CommandLineRunner {
 
-    private static final int CHAR_LENGTH = 124;
+    private static final int CHAR_LENGTH = 98;
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final BigDecimal THOUSAND = BigDecimal.valueOf(1000);
     private static final BigDecimal PCH_LIMIT = BigDecimal.valueOf(15);
@@ -219,7 +219,7 @@ public class PullData implements CommandLineRunner {
                 && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
                     || holds
                     || concerned)) {
-                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength("", 11) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (!holds && !concerned) {
                     sendNewNotification(notification, rt, tsCode);
                 }
@@ -266,32 +266,15 @@ public class PullData implements CommandLineRunner {
                     holdRemark.append(fixLength("", 7));
                 }
 
-                long volStep = 0L;
-                String volStr = "";
-                if (rt.getVol() != null) {
-                    if (volMap.containsKey(tsCode)) {
-                        volStep = rt.getVol() - volMap.get(tsCode);
-                        volStr = fixPositiveLength(volStep, 5);
-                        if (volStepMap.get(rt.getTsCode()) != 0) {
-                            volStr = fixPositiveLength("(" + calRatio(volStep, volStepMap.get(rt.getTsCode())) + ")", 5) + volStr;
-                        }
-                    } else {
-                        volStep = rt.getVol();
-                        volStr = fixPositiveLength(volStep, 10);
-                    }
-                }
-                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(volStr, 11) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
-                if (rt.getVol() != null) {
-                    volMap.put(tsCode, rt.getVol());
-                    volStepMap.put(rt.getTsCode(), volStep);
-                }
+
+                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6)  + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (highLimit) {
                     sendNewNotification(notification, rt, tsCode);
                 }
             }
         }
         log.warn(StockUtils.concatChar("_", CHAR_LENGTH));
-        String title = "|   TIME   |  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4) + fixLengthTitle("VOL", 9) + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
+        String title = "|  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4)  + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
         log.warn(title.substring(0, title.length() - 2));
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         printMapInfo(logsMap, nowClock);
@@ -444,7 +427,7 @@ public class PullData implements CommandLineRunner {
                 });
 
                 for (int i = 0; i < remarks.size(); i++) {
-                    log.warn("| " + nowClock + fixLength(i + 1 + " ", 3) + x + " " + remarks.get(i));
+                    log.warn("| " + fixLength(i + 1 + " ", 3) + x + " " + remarks.get(i));
                 }
             }
         });
