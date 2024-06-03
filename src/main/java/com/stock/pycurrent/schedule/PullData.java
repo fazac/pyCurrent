@@ -6,10 +6,7 @@ import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.service.*;
-import com.stock.pycurrent.util.CalculateUtils;
-import com.stock.pycurrent.util.MessageUtil;
-import com.stock.pycurrent.util.PARAMS;
-import com.stock.pycurrent.util.StockUtils;
+import com.stock.pycurrent.util.*;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
@@ -222,7 +219,7 @@ public class PullData implements CommandLineRunner {
                 && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
                     || holds
                     || concerned)) {
-                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + ( tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength("", 11) + fixLength(rt.getVol() != null && checkOverLimit ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength("", 11) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (!holds && !concerned) {
                     sendNewNotification(notification, rt, tsCode);
                 }
@@ -283,7 +280,7 @@ public class PullData implements CommandLineRunner {
                         volStr = fixPositiveLength(volStep, 10);
                     }
                 }
-                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(volStr, 11) + fixLength(rt.getVol() != null && checkOverLimit ? calBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(volStr, 11) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (rt.getVol() != null) {
                     volMap.put(tsCode, rt.getVol());
                     volStepMap.put(rt.getTsCode(), volStep);
@@ -502,6 +499,15 @@ public class PullData implements CommandLineRunner {
 
     private BigDecimal calRatio(Long curValue, Long doorValue) {
         return BigDecimal.valueOf(curValue).divide(BigDecimal.valueOf(doorValue), 1, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal deleteOrCalBar(String tsCode, String tradeDate, BigDecimal curPri) {
+        int dataCount = emRealTimeStockService.findRBarStockCountByCode(tsCode);
+        int barCount = realBarService.findBarCount(tsCode);
+        if (barCount > 0 && dataCount - barCount > 1) {
+            realBarService.deleteBarByCode(tsCode);
+        }
+        return calBar(tsCode, tradeDate, curPri);
     }
 
     private BigDecimal calBar(String tsCode, String tradeDate, BigDecimal curPri) {

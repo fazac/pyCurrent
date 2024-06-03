@@ -55,6 +55,15 @@ public class EmRealTimeStockService {
                 .getResultList();
     }
 
+    public int findRBarStockCountByCode(String tsCode) {
+        String tableName = "em_real_time_stock_" + DateUtils.now();
+        String sql = "select count(1) from " + tableName
+                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
+        return ((Long) entityManager.createNativeQuery(sql)
+                .setParameter("tsCode", tsCode)
+                .getSingleResult()).intValue();
+    }
+
     @Transactional
     @Modifying
     public void createTable() {

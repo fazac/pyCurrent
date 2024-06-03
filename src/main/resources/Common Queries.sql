@@ -18,18 +18,7 @@ create procedure reall(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
 
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    ELSEIF length(queryCodes) = 4 then
-        set queryCodes = concat('30', queryCodes);
-    end if;
-
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
-
+    call prepare_codes(queryCodes, queryCondition);
 
     set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
     SET @sql = CONCAT(' select * from ', @tableName, ' where trade_date = (select max(trade_date) from ', @tableName,
@@ -58,28 +47,19 @@ create procedure realDay(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
     DECLARE delim CHAR(1) DEFAULT ',';
-    DECLARE idx INT DEFAULT 1;
-    DECLARE element VARCHAR(6);
+
+    DECLARE element VARCHAR(8);
     DECLARE cmd CHAR(255);
+    call prepare_codes(queryCodes, queryCondition);
 
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    ELSEIF length(queryCodes) = 4 then
-        set queryCodes = concat('30', queryCodes);
-    end if;
-
-    if queryCodes like '%,%' then
-        SET queryCondition = queryCodes;
-    else
-        SET queryCondition = REPLACE(queryCodes, ' ', ',');
-    end if;
 
     set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
     WHILE queryCondition != ''
         DO
             SET element = SUBSTRING_INDEX(queryCondition, delim, 1);
             set @sql = concat(
-                    'select left(right(r.trade_date,8),5) as `', concat(left(element, 1), substr(element, 3)),
+                    'select left(right(r.trade_date,8),5) as `',
+                    concat(SUBSTRING(element, 2, 1), SUBSTRING(element, 4, 4)),
                     '`,  r.current_pri as cp, r.pct_chg as pct ,round(b.bar * 1000,1) as bar, r.change_hand as h , r.vol as v, round(r.amount / r.vol / 100, 2) as ap from ',
                     @tableName,
                     ' r left join real_bar b on  r.ts_code = b.ts_code and r.trade_date = b.trade_date where r.ts_code =',
@@ -89,8 +69,7 @@ BEGIN
             EXECUTE stmt;
             DEALLOCATE PREPARE stmt;
             SET queryCondition = SUBSTRING(queryCondition, LENGTH(element) + 2);
-            SET idx = idx + 1;
-            SET cmd = concat('python C:/Users/fa/Desktop/py/data2chart.py --emcode=', element);
+            SET cmd = concat('python C:/Users/fa/Desktop/py/data2chart.py --emcode=', SUBSTRING(element, 2, 6));
             SET @result = sys_exec(cmd);
         END WHILE;
 end
@@ -100,11 +79,9 @@ $$
 CREATE PROCEDURE openn(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
+    call prepare_codes(queryCodes, queryCondition);
+
+
     set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
     SET @sql = CONCAT(' select t.ts_code,t.name,t.pct_chg,t.change_hand,
            t.pe,t.pb,truncate(t.circulation_market_cap/100000000,2) as cap,
@@ -127,11 +104,8 @@ $$
 CREATE PROCEDURE hiscode(in queryCodes varchar(512), in startDate varchar(8))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
+    call prepare_codes(queryCodes, queryCondition);
+
     SET @sql = CONCAT('select ts_code,
            trade_date,
            pct_chg,
@@ -153,11 +127,9 @@ END $$
 CREATE PROCEDURE conceptt(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
+
+    call prepare_codes(queryCodes, queryCondition);
+
     SET @sql = CONCAT('select ts_code,group_concat(distinct symbol)
     from board_concept_con
     where ts_code in (', queryCondition,
@@ -170,11 +142,8 @@ end $$
 CREATE PROCEDURE industryy(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
+
+    call prepare_codes(queryCodes, queryCondition);
     SET @sql = CONCAT(' select ts_code,group_concat(distinct symbol)
     from board_industry_con
     where ts_code in (', queryCondition,
@@ -187,11 +156,8 @@ end $$
 create procedure rocc(in queryCodes varchar(512))
 BEGIN
     DECLARE queryCondition VARCHAR(512);
-    if queryCodes like '%,%' then
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ',', '\',\''), '\'');
-    else
-        SET queryCondition = CONCAT('\'', REPLACE(queryCodes, ' ', '\',\''), '\'');
-    end if;
+
+    call prepare_codes(queryCodes, queryCondition);
     SET @sql = CONCAT(' select *
     from roc_model
     where params=(select max(params) from roc_model) and ts_code in (', queryCondition,
@@ -210,11 +176,6 @@ BEGIN
                       DATE_ADD(LAST_DAY(DATE_SUB(Now(), INTERVAL 1 MONTH)), INTERVAL -45 DAY)), '-', '')
     into startDate;
 
-    if length(queryCodes) = 5 then
-        set queryCodes = concat(left(queryCodes, 1), '0', substr(queryCodes, 2));
-    ELSEIF length(queryCodes) = 4 then
-        set queryCodes = concat('30', queryCodes);
-    end if;
 
     call openn(queryCodes);
     call realDay(queryCodes);
@@ -464,4 +425,36 @@ begin
 
 end$$
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `prepare_codes`;
+DELIMITER $$
+create procedure prepare_codes(in queryCodes varchar(512), out queryCondition varchar(512))
+begin
+    DECLARE tmpElement varchar(6);
+    declare finalQueryCodes varchar(512);
+    declare delim varchar(1);
+    declare codeLength int;
+    set finalQueryCodes = '';
+
+    if queryCodes like '%,%' then
+        set delim = ',';
+    else
+        set delim = ' ';
+    end if;
+    WHILE queryCodes != ''
+        DO
+            SET tmpElement = SUBSTRING_INDEX(queryCodes, delim, 1);
+            set codeLength = LENGTH(tmpElement);
+            if length(tmpElement) = 5 then
+                set tmpElement = concat(left(tmpElement, 1), '0', substr(tmpElement, 2));
+            ELSEIF length(tmpElement) = 4 then
+                set tmpElement = concat('30', tmpElement);
+            end if;
+            set finalQueryCodes = concat(finalQueryCodes, ',\'', tmpElement, '\'');
+            SET queryCodes = SUBSTRING(queryCodes, codeLength + 2);
+        END WHILE;
+    SET queryCondition = SUBSTRING(finalQueryCodes, 2);
+end$$
+DELIMITER ;
+
 

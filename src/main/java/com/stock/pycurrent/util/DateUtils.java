@@ -1,15 +1,13 @@
 package com.stock.pycurrent.util;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 public class DateUtils {
     private DateUtils() {
@@ -17,7 +15,9 @@ public class DateUtils {
     }
 
     private static final String DEFAULT_DATE_FORMAT = "yyyyMMdd";
+    private static final String COMMON_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+    private static final DateTimeFormatter COMMON_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(COMMON_DATE_FORMAT);
 
 
     public static Date toDate(LocalDateTime localDateTime) {
@@ -31,6 +31,10 @@ public class DateUtils {
 
     public static long getDayInterval(Date start, Date end) {
         return DAYS.between(toLocalDateTime(start), toLocalDateTime(end));
+    }
+
+    public static long getMinuteInterval(String start, String end) {
+        return Duration.between(LocalDateTime.parse(start, COMMON_DATE_TIME_FORMAT), LocalDateTime.parse(end, COMMON_DATE_TIME_FORMAT)).toMinutes();
     }
 
     public static Date defaultFormat(String dateStr) {

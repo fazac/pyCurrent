@@ -21,7 +21,7 @@ cursor = db.cursor()
 
 # 提取数据
 
-sql1 = "select current_pri, vol,ROW_NUMBER() OVER () AS ri,change_hand  from " + em_table + " where ts_code = '" + code + "' and right(trade_date,8)> '09:29:00';"
+sql1 = "select current_pri, vol,ROW_NUMBER() OVER () AS ri,change_hand,pct_chg  from " + em_table + " where ts_code = '" + code + "' and right(trade_date,8)> '09:29:00';"
 cursor.execute(sql1)
 data = cursor.fetchall()
 # x_data = [row[0] for row in data]
@@ -29,6 +29,7 @@ y_data = [row[0] for row in data]
 x_data = [row[2] for row in data]
 
 y_data4 = [row[3] for row in data]
+y_data5 = [row[4] for row in data]
 
 x_data_line = [da - 1 for i, da in enumerate(x_data) if i < len(x_data)]
 
@@ -86,6 +87,15 @@ bar = (
             position="right",  # 位于y轴右侧
         )
     )
+    .extend_axis(
+        yaxis=opts.AxisOpts(
+            name="g",  # y轴名称
+            type_="value",
+            is_scale=True,
+            is_show=False,
+            position="right",  # 位于y轴右侧
+        )
+    )
     .set_series_opts(
         itemstyle_opts=opts.ItemStyleOpts(opacity=0.3)
     )
@@ -96,7 +106,10 @@ bar = (
 )
 
 x_max = max(x_data_line)
-y_max = y_data[x_max]
+y_x_max = y_data[x_max]
+
+x_min = min(x_data_line)
+y_x_min = y_data[x_min] 
 
 line = (
     Line()
@@ -113,9 +126,14 @@ line = (
                                                                    itemstyle_opts=opts.ItemStyleOpts(color="yellow",
                                                                                                      opacity=0.3)),
                                                 opts.MarkPointItem(type_="max", symbol_size=[18, 18],
-                                                                   coord=[x_max, y_max], value=y_max,
+                                                                   coord=[x_max, y_x_max], value=y_x_max,
                                                                    itemstyle_opts=opts.ItemStyleOpts(color="yellow",
-                                                                                                     opacity=0.3))]
+                                                                                                     opacity=0.3)),
+                                                opts.MarkPointItem(type_="max", symbol_size=[18, 18],
+                                                                   coord=[x_min, y_x_min], value=y_x_min,
+                                                                   itemstyle_opts=opts.ItemStyleOpts(color="yellow",
+                                                                                                     opacity=0.3)),
+                                                                                                     ]
                                           , label_opts=opts.LabelOpts(position="top", color="red", font_weight="bold",
                                                                       font_size=18, background_color="white",
                                                                       padding=[3, 4])
@@ -153,6 +171,26 @@ line2 = (
             data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
             symbol="diamond", symbol_size=[8, 8],
             label_opts=opts.LabelOpts(position="bottom", color="yellow", font_weight="bold", font_size=18,
+                                      background_color="white", padding=[3, 4])
+        ),
+    )
+)
+
+line3 = (
+    Line()
+    .add_xaxis(x_data_line)
+    .add_yaxis(
+        "g",
+        y_data5,
+        is_smooth=False,
+        yaxis_index=5,
+        itemstyle_opts=opts.ItemStyleOpts(color='blue'),
+        is_symbol_show=False,
+        linestyle_opts=opts.LineStyleOpts(width=1),
+        markpoint_opts=opts.MarkPointOpts(
+            data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
+            symbol="diamond", symbol_size=[8, 8],
+            label_opts=opts.LabelOpts(position="bottom", color="blue", font_weight="bold", font_size=18,
                                       background_color="white", padding=[3, 4])
         ),
     )

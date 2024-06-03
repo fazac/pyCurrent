@@ -19,6 +19,14 @@ public class RealBarService {
         return realBarRepo.findOne(tradeDate, tsCode);
     }
 
+    public int findBarCount(String tsCode) {
+        return realBarRepo.findBarCount(tsCode).intValue();
+    }
+
+    public void deleteBarByCode(String tsCode) {
+        realBarRepo.deleteBarByCode(tsCode);
+    }
+
     public RealBar save(RealBar realBar) {
         return realBarRepo.saveAndFlush(realBar);
     }
