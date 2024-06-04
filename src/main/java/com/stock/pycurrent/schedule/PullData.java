@@ -64,9 +64,6 @@ public class PullData implements CommandLineRunner {
 
     private final Map<String, List<String>> logsMap = new HashMap<>();
 
-    private final Map<String, Long> volMap = new HashMap<>();
-    private final Map<String, Long> volStepMap = new HashMap<>();
-
 
     private void initLogsMap() {
         logsMap.clear();
@@ -219,7 +216,7 @@ public class PullData implements CommandLineRunner {
                 && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
                     || holds
                     || concerned)) {
-                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "", 2) + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "") + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (!holds && !concerned) {
                     sendNewNotification(notification, rt, tsCode);
                 }
@@ -277,7 +274,7 @@ public class PullData implements CommandLineRunner {
         String title = "|  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4)  + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
         log.warn(title.substring(0, title.length() - 2));
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
-        printMapInfo(logsMap, nowClock);
+        printMapInfo(logsMap);
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
@@ -392,7 +389,7 @@ public class PullData implements CommandLineRunner {
         return Integer.parseInt(nowClock.substring(0, 2)) * 60 * 2 + Integer.parseInt(nowClock.substring(3, 5)) * 2 + (Integer.parseInt(nowClock.substring(6, 8)) >= 30 ? 1 : 0) - 1140;
     }
 
-    private void printMapInfo(Map<String, List<String>> logsMap, String nowClock) {
+    private void printMapInfo(Map<String, List<String>> logsMap) {
         Arrays.stream(CODE_PRINT_TYPE.split(",")).forEach(x -> {
             if (!logsMap.get(x).isEmpty()) {
                 List<String> remarks = logsMap.get(x);
@@ -455,8 +452,8 @@ public class PullData implements CommandLineRunner {
         return String.format("%-" + length + "s", str);
     }
 
-    private String fixPositiveLength(Object str, int length) {
-        return String.format("%" + length + "s", str);
+    private String fixPositiveLength(Object str) {
+        return String.format("%2s", str);
     }
 
     private boolean calRange(List<BigDecimal> values) {
@@ -478,10 +475,6 @@ public class PullData implements CommandLineRunner {
 
     private BigDecimal calRatio(BigDecimal curClosePri, BigDecimal doorPri) {
         return curClosePri.subtract(doorPri).multiply(HUNDRED).divide(doorPri, 2, RoundingMode.HALF_UP);
-    }
-
-    private BigDecimal calRatio(Long curValue, Long doorValue) {
-        return BigDecimal.valueOf(curValue).divide(BigDecimal.valueOf(doorValue), 1, RoundingMode.HALF_UP);
     }
 
     private BigDecimal deleteOrCalBar(String tsCode, String tradeDate, BigDecimal curPri) {
