@@ -109,7 +109,7 @@ x_max = max(x_data_line)
 y_x_max = y_data[x_max]
 
 x_min = min(x_data_line)
-y_x_min = y_data[x_min] 
+y_x_min = y_data[x_min]
 
 line = (
     Line()
@@ -133,7 +133,7 @@ line = (
                                                                    coord=[x_min, y_x_min], value=y_x_min,
                                                                    itemstyle_opts=opts.ItemStyleOpts(color="yellow",
                                                                                                      opacity=0.3)),
-                                                                                                     ]
+                                                ]
                                           , label_opts=opts.LabelOpts(position="top", color="red", font_weight="bold",
                                                                       font_size=18, background_color="white",
                                                                       padding=[3, 4])
@@ -168,7 +168,8 @@ line2 = (
         is_symbol_show=False,
         linestyle_opts=opts.LineStyleOpts(width=1),
         markpoint_opts=opts.MarkPointOpts(
-            data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
+            data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3)),
+                  opts.MarkPointItem(type_="min", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
             symbol="diamond", symbol_size=[8, 8],
             label_opts=opts.LabelOpts(position="bottom", color="yellow", font_weight="bold", font_size=18,
                                       background_color="white", padding=[3, 4])
