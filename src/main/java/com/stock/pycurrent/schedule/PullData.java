@@ -54,6 +54,8 @@ public class PullData implements CommandLineRunner {
     private RealBarService realBarService;
     @Resource
     private LimitCodeService limitCodeService;
+    @Resource
+    private BoardCodeService boardCodeService;
 
     @Resource
     private CurCountService curCountService;
@@ -172,12 +174,27 @@ public class PullData implements CommandLineRunner {
                 limitCodeMap = codeValueList.stream().collect(Collectors.toMap(LimitCodeValue::getCode, Function.identity()));
             }
         }
+
+        BoardCode boardCode = boardCodeService.findByDate(NOW_DAY);
+
+        List<String> todayBoardCodes = new ArrayList<>();
+        if (boardCode != null) {
+            if (!boardCode.getCodeValue().isBlank()) {
+                todayBoardCodes = new ArrayList<>(Arrays.asList(boardCode.getCodeValue().split(",")));
+            }
+        } else if (checkOverLimit) {
+            boardCode = new BoardCode();
+            boardCode.setTradeDate(NOW_DAY);
+        }
+
+
         boolean rangeOverLimit;
         boolean highLimit;
         boolean noConcerned;
         boolean holds;
         boolean concerned;
         boolean yesterdayHigh;
+        boolean onboard;
 
         EmConstant emConstant = emConstantService.findOneByKey();
         boolean notification = "TRUE".equals(emConstant.getCValue());
@@ -242,11 +259,12 @@ public class PullData implements CommandLineRunner {
             }
             rangeOverLimit = valueCodeCountMap.containsKey(tsCode) && (convertTimeCount(nowClock) - valueCodeCountMap.get(tsCode) <= 40 || rt.getPctChg().compareTo(BigDecimal.TEN) >= 0);
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
+            onboard = todayBoardCodes.contains(tsCode);
             if (!noConcerned
                 && !tsName.contains("退")
                 && tsCode.startsWith("3")
                 && rt.getPctChg() != null
-                && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh)) {
+                && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : !yesterdayHigh ? "R" : "L");
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
                     EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) ? stockMap.get("HOLD_CODES").get(tsCode) : stockMap.get("CONCERN_CODES").get(tsCode);
@@ -264,14 +282,15 @@ public class PullData implements CommandLineRunner {
                 }
 
 
-                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6)  + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (highLimit) {
+                    todayBoardCodes.add(tsCode);
                     sendNewNotification(notification, rt, tsCode);
                 }
             }
         }
         log.warn(StockUtils.concatChar("_", CHAR_LENGTH));
-        String title = "|  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4)  + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
+        String title = "|  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4) + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
         log.warn(title.substring(0, title.length() - 2));
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         printMapInfo(logsMap);
@@ -280,6 +299,11 @@ public class PullData implements CommandLineRunner {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
             rangeOverCode.setCodeValue(valueList);
             rangeOverCodeService.saveEntity(rangeOverCode);
+        }
+
+        if (checkOverLimit && !todayBoardCodes.isEmpty()) {
+            boardCode.setCodeValue(todayBoardCodes.stream().distinct().collect(Collectors.joining(",")));
+            boardCodeService.saveEntity(boardCode);
         }
 
         if (nowMinute % 10 == 5 || nowMinute % 10 == 0

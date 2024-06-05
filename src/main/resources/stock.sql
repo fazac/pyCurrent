@@ -341,3 +341,13 @@ alter table `cur_count` add column `c_00_13d` int;
 alter table `cur_count` add column `c_30_37d` int;
 alter table `cur_count` add column `c_60_37d` int;
 alter table `cur_count` add column `c_00_37d` int;
+
+drop table if exists board_code;
+create table board_code
+(
+    `trade_date` varchar(8) primary key,
+    `code_value` varchar(512) COMMENT '多值'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
