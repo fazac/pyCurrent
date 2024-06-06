@@ -44,12 +44,29 @@ cursor.execute(sql2)
 data2 = cursor.fetchall()
 y_data2 = [row[0] for row in data2]
 
+x_max = max(x_data_line)
+y_x_max = y_data[x_max]
+
+yf_x_max = y_data5[x_max]
+
+x_min = min(x_data_line)
+y_x_min = y_data[x_min]
+
+yf_x_min = y_data5[x_min]
+
+y_pre = y_data6[0]
+y_avg = y_data7[len(y_data7) - 1]
+
+y_avg_ratio = round((y_avg - y_pre) * 100 / y_pre, 2)
+
 # 画图
 
 
 bar = (
     Bar(init_opts=opts.InitOpts(width="100vw", height="100vh", theme=ThemeType.CHALK))
-    .add_xaxis(x_data)
+    .add_xaxis(
+        x_data,
+    )
     .add_yaxis(
         "v",
         y_date3,
@@ -103,25 +120,12 @@ bar = (
         itemstyle_opts=opts.ItemStyleOpts(opacity=0.3)
     )
     .set_global_opts(
-        xaxis_opts=opts.AxisOpts(splitline_opts=opts.SplitLineOpts(is_show=False)),
-        title_opts=opts.TitleOpts(title=code[-4:], pos_left="3%", pos_top="46%")
+        xaxis_opts=opts.AxisOpts(splitline_opts=opts.SplitLineOpts(is_show=False), is_show=False),
+        # title_opts=opts.TitleOpts(title=code[-4:], pos_left="3%", pos_top="46%"),
+        legend_opts=opts.LegendOpts(selected_map={"v": True, "p": False, "b": True, "h": True, "g": False}),
+        datazoom_opts=opts.DataZoomOpts(type_="inside", range_start=0, range_end=100),
     )
 )
-
-x_max = max(x_data_line)
-y_x_max = y_data[x_max]
-
-yf_x_max = y_data5[x_max]
-
-x_min = min(x_data_line)
-y_x_min = y_data[x_min]
-
-yf_x_min = y_data5[x_min]
-
-y_pre = y_data6[0]
-y_avg = y_data7[len(y_data7) - 1]
-
-y_avg_ratio = round((y_avg - y_pre) * 100 / y_pre, 2)
 
 line = (
     Line()
