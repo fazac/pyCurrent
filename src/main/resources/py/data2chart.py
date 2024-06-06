@@ -199,7 +199,7 @@ line2 = (
         linestyle_opts=opts.LineStyleOpts(width=1),
         markpoint_opts=opts.MarkPointOpts(
             data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3)),
-                  opts.MarkPointItem(type_="min", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
+                  ],
             symbol="diamond", symbol_size=[8, 8],
             label_opts=opts.LabelOpts(position="top", color="yellow", font_weight="bold", font_size=18,
                                       background_color="white", padding=[3, 4])
