@@ -21,7 +21,7 @@ cursor = db.cursor()
 
 # 提取数据
 
-sql1 = "select current_pri, vol,ROW_NUMBER() OVER () AS ri,change_hand,pct_chg  from " + em_table + " where ts_code = '" + code + "' and right(trade_date,8)> '09:29:00';"
+sql1 = "select current_pri, vol,ROW_NUMBER() OVER () AS ri,change_hand,pct_chg,pri_close_pre,round(amount/vol/100,2) as ap  from " + em_table + " where ts_code = '" + code + "' and right(trade_date,8)> '09:29:00';"
 cursor.execute(sql1)
 data = cursor.fetchall()
 # x_data = [row[0] for row in data]
@@ -30,6 +30,9 @@ x_data = [row[2] for row in data]
 
 y_data4 = [row[3] for row in data]
 y_data5 = [row[4] for row in data]
+
+y_data6 = [row[5] for row in data]
+y_data7 = [row[6] for row in data]
 
 x_data_line = [da - 1 for i, da in enumerate(x_data) if i < len(x_data)]
 
@@ -62,38 +65,38 @@ bar = (
     )
     .extend_axis(
         yaxis=opts.AxisOpts(
-            name="p",  # y轴名称
+            name="p",
             type_="value",
             is_scale=True,
-            position="left",  # 位于y轴右侧
+            position="left",
             splitline_opts=opts.SplitLineOpts(is_show=True, linestyle_opts=opts.LineStyleOpts(opacity=0.2)),
         )
     )
     .extend_axis(
         yaxis=opts.AxisOpts(
-            name="b",  # y轴名称
+            name="b",
             type_="value",
             is_scale=True,
             is_show=False,
-            position="right",  # 位于y轴右侧
+            position="right",
         )
     )
     .extend_axis(
         yaxis=opts.AxisOpts(
-            name="h",  # y轴名称
+            name="h",
             type_="value",
             is_scale=True,
             is_show=False,
-            position="right",  # 位于y轴右侧
+            position="right",
         )
     )
     .extend_axis(
         yaxis=opts.AxisOpts(
-            name="g",  # y轴名称
+            name="g",
             type_="value",
             is_scale=True,
-            is_show=False,
-            position="right",  # 位于y轴右侧
+            position="right",
+            splitline_opts=opts.SplitLineOpts(is_show=True, linestyle_opts=opts.LineStyleOpts(opacity=0.2)),
         )
     )
     .set_series_opts(
@@ -108,8 +111,17 @@ bar = (
 x_max = max(x_data_line)
 y_x_max = y_data[x_max]
 
+yf_x_max = y_data5[x_max]
+
 x_min = min(x_data_line)
 y_x_min = y_data[x_min]
+
+yf_x_min = y_data5[x_min]
+
+y_pre = y_data6[0]
+y_avg = y_data7[len(y_data7) - 1]
+
+y_avg_ratio = round((y_avg - y_pre) * 100 / y_pre, 2)
 
 line = (
     Line()
@@ -117,6 +129,7 @@ line = (
     .add_yaxis(
         "p",
         y_data,
+        is_smooth=True,
         yaxis_index=2,
         label_opts=opts.LabelOpts(is_show=False),
         symbol="emptyCircle",
@@ -125,19 +138,36 @@ line = (
         markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_="max", symbol_size=[18, 18],
                                                                    itemstyle_opts=opts.ItemStyleOpts(color="yellow",
                                                                                                      opacity=0.3)),
-                                                opts.MarkPointItem(type_="max", symbol_size=[18, 18],
+                                                opts.MarkPointItem(type_="min", symbol_size=[18, 18],
+                                                                   itemstyle_opts=opts.ItemStyleOpts(color="yellow",
+                                                                                                     opacity=0.3)),
+                                                opts.MarkPointItem(symbol_size=[18, 18],
                                                                    coord=[x_max, y_x_max], value=y_x_max,
                                                                    itemstyle_opts=opts.ItemStyleOpts(color="yellow",
                                                                                                      opacity=0.3)),
-                                                opts.MarkPointItem(type_="max", symbol_size=[18, 18],
+                                                opts.MarkPointItem(symbol_size=[18, 18],
                                                                    coord=[x_min, y_x_min], value=y_x_min,
                                                                    itemstyle_opts=opts.ItemStyleOpts(color="yellow",
                                                                                                      opacity=0.3)),
                                                 ]
-                                          , label_opts=opts.LabelOpts(position="top", color="red", font_weight="bold",
+                                          , label_opts=opts.LabelOpts(position="right", color="red", font_weight="bold",
                                                                       font_size=18, background_color="white",
                                                                       padding=[3, 4])
                                           ),
+        markline_opts=opts.MarkLineOpts(
+            data=[
+                opts.MarkLineItem(
+                    name="pre",
+                    y=y_pre,
+                ),
+                opts.MarkLineItem(
+                    name="avg",
+                    y=y_avg,
+
+                )],
+            symbol="none",
+            linestyle_opts=opts.LineStyleOpts(width=1, color='red', opacity=0.8, type_="dashed")
+        ),
     )
 )
 
@@ -171,8 +201,33 @@ line2 = (
             data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3)),
                   opts.MarkPointItem(type_="min", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
             symbol="diamond", symbol_size=[8, 8],
-            label_opts=opts.LabelOpts(position="bottom", color="yellow", font_weight="bold", font_size=18,
+            label_opts=opts.LabelOpts(position="top", color="yellow", font_weight="bold", font_size=18,
                                       background_color="white", padding=[3, 4])
+        ),
+        markline_opts=opts.MarkLineOpts(
+            data=[
+                opts.MarkLineItem(
+                    y=5, name=""
+                ),
+                opts.MarkLineItem(
+                    y=10, name=""
+                ),
+                opts.MarkLineItem(
+                    y=15, name=""
+                ),
+                opts.MarkLineItem(
+                    y=20, name=""
+                ),
+                opts.MarkLineItem(
+                    y=25, name=""
+                ),
+                opts.MarkLineItem(
+                    y=30, name=""
+                ),
+            ],
+            symbol="none",
+            label_opts=opts.LabelOpts(position="right", color="yellow"),
+            linestyle_opts=opts.LineStyleOpts(width=1, color='yellow', opacity=0.6, type_="dashed")
         ),
     )
 )
@@ -183,21 +238,46 @@ line3 = (
     .add_yaxis(
         "g",
         y_data5,
-        is_smooth=False,
+        is_smooth=True,
         yaxis_index=5,
-        itemstyle_opts=opts.ItemStyleOpts(color='blue'),
-        is_symbol_show=False,
-        linestyle_opts=opts.LineStyleOpts(width=1),
+        label_opts=opts.LabelOpts(is_show=False),
+        symbol="emptyCircle",
+        itemstyle_opts=opts.ItemStyleOpts(color='green'),
+        linestyle_opts=opts.LineStyleOpts(width=2),
         markpoint_opts=opts.MarkPointOpts(
-            data=[opts.MarkPointItem(type_="max", itemstyle_opts=opts.ItemStyleOpts(color="red", opacity=0.3))],
-            symbol="diamond", symbol_size=[8, 8],
-            label_opts=opts.LabelOpts(position="bottom", color="blue", font_weight="bold", font_size=18,
-                                      background_color="white", padding=[3, 4])
+            data=[opts.MarkPointItem(type_="max", symbol_size=[18, 18],
+                                     itemstyle_opts=opts.ItemStyleOpts(color="yellow",
+                                                                       opacity=0.3)),
+                  opts.MarkPointItem(type_="min", symbol_size=[18, 18],
+                                     itemstyle_opts=opts.ItemStyleOpts(color="yellow",
+                                                                       opacity=0.3)),
+                  opts.MarkPointItem(symbol_size=[18, 18],
+                                     coord=[x_max, yf_x_max], value=yf_x_max,
+                                     itemstyle_opts=opts.ItemStyleOpts(color="yellow",
+                                                                       opacity=0.3)),
+                  opts.MarkPointItem(symbol_size=[18, 18],
+                                     coord=[x_min, yf_x_min], value=yf_x_min,
+                                     itemstyle_opts=opts.ItemStyleOpts(color="yellow",
+                                                                       opacity=0.3)),
+                  ],
+            symbol="diamond", symbol_size=[3, 3],
+            label_opts=opts.LabelOpts(position="right", color="yellow", font_weight="bold", font_size=18,
+                                      background_color="gray", padding=[3, 4])
+        ),
+        markline_opts=opts.MarkLineOpts(
+            data=[
+                opts.MarkLineItem(
+                    name="avg",
+                    y=y_avg_ratio,
+
+                )],
+            symbol="none",
+            linestyle_opts=opts.LineStyleOpts(width=1, color='green', opacity=0.8, type_="dashed")
         ),
     )
 )
 
-c = bar.overlap(line1).overlap(line2).overlap(line)
+c = bar.overlap(line1).overlap(line2).overlap(line3).overlap(line)
 
 html_file = "line_chart.html"
 c.render(html_file)
