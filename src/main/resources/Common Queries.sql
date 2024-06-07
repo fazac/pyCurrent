@@ -458,3 +458,19 @@ end$$
 DELIMITER ;
 
 
+DROP PROCEDURE IF EXISTS `realrank`;
+DELIMITER $$
+create procedure `realrank`()
+begin
+
+    set @tableName = CONCAT('em_real_time_stock', '_', DATE_FORMAT(CURDATE(), '%Y%m%d'));
+    SET @sql = CONCAT('select ts_code, name, round(circulation_market_cap / 100000000, 1) as ci, pct_chg, change_hand, pe, pb
+    from ', @tableName,
+                      ' where trade_date = (select max(trade_date) from ', @tableName, ')');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+end$$
+DELIMITER ;
+
