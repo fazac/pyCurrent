@@ -4,6 +4,7 @@ from pyecharts.charts import Line, Bar, Grid
 import pyecharts.options as opts
 import argparse
 import datetime
+import math
 from sqlalchemy import create_engine
 from pyecharts.globals import ThemeType, RenderType
 
@@ -58,6 +59,10 @@ y_pre = y_data6[0]
 y_avg = y_data7[len(y_data7) - 1]
 
 y_avg_ratio = round((y_avg - y_pre) * 100 / y_pre, 2)
+
+hand_max = y_data4[x_max]
+
+hand_step = math.ceil(hand_max / 4)
 
 # 画图
 
@@ -211,22 +216,13 @@ line2 = (
         markline_opts=opts.MarkLineOpts(
             data=[
                 opts.MarkLineItem(
-                    y=5, name=""
+                    y=hand_step, name=""
                 ),
                 opts.MarkLineItem(
-                    y=10, name=""
+                    y=hand_step * 2, name=""
                 ),
                 opts.MarkLineItem(
-                    y=15, name=""
-                ),
-                opts.MarkLineItem(
-                    y=20, name=""
-                ),
-                opts.MarkLineItem(
-                    y=25, name=""
-                ),
-                opts.MarkLineItem(
-                    y=30, name=""
+                    y=hand_step * 3, name=""
                 ),
             ],
             symbol="none",
