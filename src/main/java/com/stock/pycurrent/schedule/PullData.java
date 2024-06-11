@@ -59,6 +59,8 @@ public class PullData implements CommandLineRunner {
 
     @Resource
     private CurCountService curCountService;
+    @Resource
+    private CurConcernCodeService curConcernCodeService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
@@ -147,7 +149,10 @@ public class PullData implements CommandLineRunner {
         String NOW_DAY = LocalDateTime.now().format(DATE_TIME_FORMAT);
         initLogsMap();
         String type;
-        String nowClock = fixLength(stockList.get(0).getTradeDate().substring(11), 8);
+
+        String curTradeDate = stockList.get(0).getTradeDate();
+
+        String nowClock = fixLength(curTradeDate.substring(11), 8);
         int nowHour = Integer.parseInt(nowClock.trim().substring(0, 2));
         int nowMinute = Integer.parseInt(nowClock.trim().substring(3, 5));
 
@@ -200,6 +205,7 @@ public class PullData implements CommandLineRunner {
         boolean notification = "TRUE".equals(emConstant.getCValue());
 
         StringBuilder holdRemark = new StringBuilder();
+        List<CurConcernCode> curConcernCodeList = new ArrayList<>();
         for (EmRealTimeStock rt : stockList) {
             String tsCode = rt.getTsCode();
             holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
@@ -266,13 +272,16 @@ public class PullData implements CommandLineRunner {
                 && rt.getPctChg() != null
                 && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : !yesterdayHigh ? "R" : "L");
+                CurConcernCode curConcernCode = new CurConcernCode();
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
                     EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) ? stockMap.get("HOLD_CODES").get(tsCode) : stockMap.get("CONCERN_CODES").get(tsCode);
                     BigDecimal realRatio = calRatio(rt.getCurrentPri(), emConstantValue.getPrice());
 
+                    curConcernCode.setRr(realRatio);
                     holdRemark.append(fixLength(realRatio, 7));
-                    if (emConstantValue.getProfit() != null) {
+                    if (emConstantValue.getPrice() != null) {
                         holdRemark.append(fixLength(emConstantValue.getPrice(), 7));
+                        curConcernCode.setBp(emConstantValue.getPrice());
                     } else {
                         holdRemark.append(fixLength("", 7));
                     }
@@ -281,11 +290,26 @@ public class PullData implements CommandLineRunner {
                     holdRemark.append(fixLength("", 7));
                 }
 
+                String tmpType = yesterdayHigh ? "" + limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ";
+                BigDecimal tmpBar = BigDecimal.ZERO;
+                if (rt.getVol() != null && checkOverLimit) {
+                    tmpBar = deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR);
+                }
+                logsMap.get(type).add(getPeekDesc(rt) + tmpType + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? tmpBar : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
 
-                logsMap.get(type).add(getPeekDesc(rt) + (yesterdayHigh ? limitCodeMap.get(tsCode).getCount() : rangeOverLimit ? "R" : " ") + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 if (highLimit) {
                     todayBoardCodes.add(tsCode);
                     sendNewNotification(notification, rt, tsCode);
+                    curConcernCode.setTsCode(tsCode);
+                    curConcernCode.setMark(type + " " + getPeekDesc(rt) + " " + tmpType);
+                    curConcernCode.setRt(rt.getPctChg());
+                    curConcernCode.setH(rt.getChangeHand());
+                    curConcernCode.setCp(rt.getCurrentPri());
+                    curConcernCode.setBar(tmpBar);
+                    curConcernCode.setCm(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP));
+                    curConcernCode.setPe(rt.getPe());
+                    curConcernCode.setTradeDate(curTradeDate);
+                    curConcernCodeList.add(curConcernCode);
                 }
             }
         }
@@ -312,7 +336,10 @@ public class PullData implements CommandLineRunner {
             CurCount curCount = statisticsCurCount(stockList);
             curCountService.saveOne(curCount);
         }
-
+        if (!curConcernCodeList.isEmpty()) {
+            curConcernCodeService.saveList(curConcernCodeList);
+            MySseEmitterUtil.sendMsgToClient(curConcernCodeList);
+        }
     }
 
     private void sendNewNotification(boolean notification, EmRealTimeStock rt, String tsCode) {

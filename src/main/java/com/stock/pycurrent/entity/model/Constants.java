@@ -12,6 +12,9 @@ public class Constants {
     public static String AKSHARE_EM_HIS = "akshare_his_stock_cur.py";
     public static String AKSHARE_EM_REALTIME = "akshare_stock_realtime.py";
     public static String AKSHARE_STOCK_PY = "akshare_stock_cur.py";
+
+    public static String TASK_RESULT = "sse_cur_list";
+    public static String CLIENT_ID = "sse_client_id";
     public static BigDecimal HUNDRED = BigDecimal.valueOf(100);
     public static BigDecimal EIGHT = BigDecimal.valueOf(8);
     public static BigDecimal EIGHTEEN = BigDecimal.valueOf(18);

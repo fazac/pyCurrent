@@ -351,3 +351,24 @@ create table board_code
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
+
+-- 20240611
+create table `cur_concern_code`
+(
+    `trade_date` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `ts_code`    varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `mark`       varchar(2),
+    `rt`         decimal(7, 2),
+    `h`          decimal(7, 2),
+    `rr`         decimal(7, 2),
+    `bp`         decimal(7, 2),
+    `cp`         decimal(7, 2),
+    `bar`        decimal(7, 2),
+    `cm`         decimal(8, 3),
+    `pe`         decimal(7, 2),
+    KEY `idx_ccc_code` (`ts_code`) USING BTREE,
+    KEY `idx_ccc_date` (`trade_date`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
