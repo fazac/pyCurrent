@@ -101,6 +101,7 @@ public class PullData implements CommandLineRunner {
         Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
         List<String> times = emRealTimeStockService.findTradeDates();
         for (String s : times) {
+            Thread.sleep(30000);
             List<EmRealTimeStock> stockList = emRealTimeStockService.findStockByDate(s);
             checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
         }

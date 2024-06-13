@@ -31,4 +31,7 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
     @Query(value = "select * from em_d_n_stock where ts_code = :tsCode and trade_date <:tradeDate order by trade_date desc limit 1"
             , nativeQuery = true)
     EmDNStock findLeftOne(@Param("tsCode") String tsCode, @Param("tradeDate") String tradeDate);
+
+    @Query(value = "select * from em_d_n_stock where ts_code = :code order by trade_date desc limit :count ", nativeQuery = true)
+    List<EmDNStock> findByCodeCount(@Param("code") String code, @Param("count") int count);
 }

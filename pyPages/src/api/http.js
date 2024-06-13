@@ -1,7 +1,7 @@
 import axios from "axios";
 
 axios.defaults.timeout = 600000;
-axios.defaults.baseURL = process.env.VUE_APP_API_URL;
+axios.defaults.baseURL = "http://localhost:19093";
 
 // http request 请求 拦截器
 axios.interceptors.request.use(

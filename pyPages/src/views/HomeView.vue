@@ -1,9 +1,7 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import CodeDataView from '../components/CodeDataView.vue'
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+    <CodeDataView />
 </template>
