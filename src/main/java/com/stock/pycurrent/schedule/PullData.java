@@ -96,14 +96,16 @@ public class PullData implements CommandLineRunner {
 
     @SneakyThrows
     public void pullTest() {
-        List<EmConstant> emConstants = emConstantService.findAll();
-        String[] codes = prepareConstantsCodes(emConstants);
-        Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
-        List<String> times = emRealTimeStockService.findTradeDates();
-        for (String s : times) {
-            Thread.sleep(30000);
-            List<EmRealTimeStock> stockList = emRealTimeStockService.findStockByDate(s);
-            checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
+        while (true) {
+            List<EmConstant> emConstants = emConstantService.findAll();
+            String[] codes = prepareConstantsCodes(emConstants);
+            Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
+            List<String> times = emRealTimeStockService.findTradeDates();
+            for (String s : times) {
+                Thread.sleep(5000);
+                List<EmRealTimeStock> stockList = emRealTimeStockService.findStockByDate(s);
+                checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
+            }
         }
     }
 
@@ -301,17 +303,17 @@ public class PullData implements CommandLineRunner {
                 if (highLimit) {
                     todayBoardCodes.add(tsCode);
                     sendNewNotification(notification, rt, tsCode);
-                    curConcernCode.setTsCode(tsCode);
-                    curConcernCode.setMark(type + " " + getPeekDesc(rt) + " " + tmpType);
-                    curConcernCode.setRt(rt.getPctChg());
-                    curConcernCode.setH(rt.getChangeHand());
-                    curConcernCode.setCp(rt.getCurrentPri());
-                    curConcernCode.setBar(tmpBar);
-                    curConcernCode.setCm(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP));
-                    curConcernCode.setPe(rt.getPe());
-                    curConcernCode.setTradeDate(curTradeDate);
-                    curConcernCodeList.add(curConcernCode);
                 }
+                curConcernCode.setTsCode(tsCode);
+                curConcernCode.setMark(type + " " + getPeekDesc(rt) + " " + tmpType);
+                curConcernCode.setRt(rt.getPctChg());
+                curConcernCode.setH(rt.getChangeHand());
+                curConcernCode.setCp(rt.getCurrentPri());
+                curConcernCode.setBar(tmpBar);
+                curConcernCode.setCm(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP));
+                curConcernCode.setPe(rt.getPe());
+                curConcernCode.setTradeDate(curTradeDate);
+                curConcernCodeList.add(curConcernCode);
             }
         }
         log.warn(StockUtils.concatChar("_", CHAR_LENGTH));
