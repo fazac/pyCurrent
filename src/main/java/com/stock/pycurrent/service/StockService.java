@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author fzc
@@ -176,7 +177,7 @@ public class StockService {
                 }
             }
         }
-        newLimitCodeOne.setCodeValue(newLimitCodeValues);
+        newLimitCodeOne.setCodeValue(newLimitCodeValues.stream().distinct().collect(Collectors.toList()));
         limitCodeRepo.saveAndFlush(newLimitCodeOne);
     }
 

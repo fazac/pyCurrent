@@ -1,47 +1,82 @@
 <script setup>
-import {reactive, ref, onMount} from 'vue'
+import {reactive, ref, onMounted} from 'vue'
 import {v4 as uuidv4} from 'uuid'
-import {findDetails} from '@/api/backend.js';
+import {findDetails} from '@/api/backend.js'
+import {ElTable} from 'element-plus'
+import LineChart from '../components/LineChart.vue'
 
-defineProps({
-  codeDateList: {type: Array, required: true},
-})
 
-onMount()
-{
+const codeDateList = reactive([{}]);
+
+
+const handleCurrentChange = (val) => {
+  if (val !== null) {
+    findDetails(val.tsCode).then(res => {
+      console.log(res);
+    }).catch(err => {
+      console.log(err)
+    });
+  }
+}
+
+onMounted(() => {
   if (!!window.EventSource) {
-    this.source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=" + uuidv4());
-    this.source.addEventListener('open', function (e) {
+    window.source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=" + uuidv4());
+    window.source.addEventListener('open', function (e) {
       console.log("建立连接");
     })
-    this.source.onmessage = function (event) {
+    window.source.onmessage = function (event) {
       if (event.lastEventId !== 'sse_client_id') {
-        this.codeDateList = JSON.parse(event.data);
-        console.log(this.codeDateList);
+        codeDateList.value = JSON.parse(event.data);
       }
     }
   }
-}
-,
-}
+
+});
+
+
 </script>
 
 <template>
-  <div class="container pb-5">
-    <div class="row">
-      <div class="col">
-        <el-table :data="codeDateList" style="width: 100%">
-          <el-table-column prop="mark" label="mark" width="180"/>
-        </el-table>
-      </div>
-      <div class="col">
-        xxx
-      </div>
-    </div>
-
+  <div class="table-container">
+    <el-table
+        @current-change="handleCurrentChange"
+        :data="codeDateList.value" empty-text=" "
+        highlight-current-row
+        border
+        stripe
+        style="width: 100%;text-align: center;max-width: 1200px"
+    >
+      <el-table-column prop="mark" label="mark" class="txtr"/>
+      <el-table-column prop="cp" label="cp" class="txtr"/>
+      <el-table-column prop="rt" label="rt" class="txtr"/>
+      <el-table-column prop="h" label="h" class="txtr"/>
+      <el-table-column prop="bp" label="bp" class="txtr"/>
+      <el-table-column prop="rr" label="rr" class="txtr"/>
+      <el-table-column prop="cm" label="cm" class="txtr"/>
+      <el-table-column prop="pe" label="pe" class="txtr"/>
+      <el-table-column prop="tsCode" label="code" class="txtr">
+        <template #default="scope">
+          <span>{{ scope.row.tsCode.substring(2, 6) }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
+  <LineChart :rtdata="null">
+
+  </LineChart>
+
 </template>
 
 <style scoped>
+.table-container {
+  display: flex;
+  justify-content: center;
+
+}
+
+.txtr {
+  text-align: right;
+}
 
 </style>

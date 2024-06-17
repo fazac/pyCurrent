@@ -3,5 +3,5 @@ import CodeDataView from '../components/CodeDataView.vue'
 </script>
 
 <template>
-    <CodeDataView />
+  <CodeDataView/>
 </template>

@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 public interface RealBarRepo extends JpaRepository<RealBar, BasicStockPK> {
     @Query(value = """
@@ -25,4 +27,7 @@ public interface RealBarRepo extends JpaRepository<RealBar, BasicStockPK> {
             select count(1) from real_bar where  trade_date>curdate() and ts_code= :tsCode order by trade_date desc limit 1
             """, nativeQuery = true)
     Long findBarCount(@Param("tsCode") String tsCode);
+
+    @Query(value = "select c.trade_date,c.bar from real_bar c where c.trade_date > curdate() and c.ts_code = :tsCode", nativeQuery = true)
+    List<Object> findIntradayBar(@Param("tsCode") String tsCode);
 }
