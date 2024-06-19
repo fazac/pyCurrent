@@ -21,14 +21,4 @@ public class SseEmitterController {
         return MySseEmitterUtil.createSseConnect(clientId);
     }
 
-    /**
-     * 关闭SSE连接
-     *
-     * @param clientId 客户端ID
-     **/
-    @GetMapping("/CloseSseConnect")
-    public void closeSseConnect(@RequestParam(value = "clientId", required = false) String clientId) {
-        MySseEmitterUtil.closeSseConnect(clientId);
-    }
-
 }

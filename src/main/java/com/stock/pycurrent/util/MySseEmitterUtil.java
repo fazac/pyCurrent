@@ -1,6 +1,6 @@
 package com.stock.pycurrent.util;
 
-import com.stock.pycurrent.entity.CurConcernCode;
+import com.stock.pycurrent.entity.emum.SSEMsgEnum;
 import com.stock.pycurrent.entity.model.Constants;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.http.MediaType;
@@ -25,68 +25,88 @@ public class MySseEmitterUtil {
     /**
      * 容器，保存连接，用于输出返回
      */
-    private static final Map<String, SseEmitter> sseCache = new ConcurrentHashMap<>();
+    public static final Map<String, SseEmitter> clientSSECache = new ConcurrentHashMap<>();
+    public static final Map<String, SseEmitter> codeSSECache = new ConcurrentHashMap<>();
+
+    public static boolean codeCacheEmpty() {
+        return codeSSECache.isEmpty();
+    }
 
     public static SseEmitter createSseConnect(String clientId) {
         SseEmitter sseEmitter = new SseEmitter(0L);
-        // 是否需要给客户端推送ID
         if (clientId.isBlank()) {
+            closeMapConnect(clientSSECache);
             clientId = UUID.randomUUID().toString();
+            clientSSECache.put(clientId, sseEmitter);
+        } else {
+            closeMapConnect(codeSSECache);
+            codeSSECache.put(clientId, sseEmitter);
         }
-        // 注册回调
         sseEmitter.onCompletion(completionCallBack(clientId));
-        sseCache.put(clientId, sseEmitter);
-
         try {
             sseEmitter.send(SseEmitter.event().id(Constants.CLIENT_ID).data(clientId));
         } catch (IOException e) {
             log.error("MySseEmitterService[createSseConnect]: 创建长链接异常，客户端ID:" + clientId, e);
         }
+        log.warn("ClientSSECacheSize: " + clientSSECache.size());
+        log.warn("CodeSSECacheSize: " + clientSSECache.size());
         return sseEmitter;
     }
 
-    public static void closeSseConnect(String clientId) {
-        if (clientId == null || clientId.isBlank()) {
-            if (!sseCache.isEmpty()) {
-                for (Map.Entry<String, SseEmitter> entry : sseCache.entrySet()) {
-                    entry.getValue().complete();
-                    removeClient(entry.getKey());
-                }
+    public static void closeMapConnect(Map<String, SseEmitter> sseCache) {
+        if (!sseCache.isEmpty()) {
+            for (Map.Entry<String, SseEmitter> entry : sseCache.entrySet()) {
+                entry.getValue().complete();
             }
-        } else {
-            SseEmitter sseEmitter = sseCache.get(clientId);
-            if (sseEmitter != null) {
-                sseEmitter.complete();
-                removeClient(clientId);
-            }
+            sseCache.clear();
         }
     }
 
-    public static void sendMsgToClient(List<CurConcernCode> curConcernCodeList) {
-        if (sseCache.isEmpty()) {
-            return;
-        }
-        for (Map.Entry<String, SseEmitter> entry : sseCache.entrySet()) {
-            sendMsgToClientByClientId(entry.getKey(), curConcernCodeList, entry.getValue());
+    @SuppressWarnings("rawtypes")
+    public static void sendMsgToClient(List data, SSEMsgEnum sseMsgEnum) {
+        switch (sseMsgEnum) {
+            case SSEMsgEnum.RT_CURRENT:
+                if (clientSSECache.isEmpty()) {
+                    return;
+                }
+                for (Map.Entry<String, SseEmitter> entry : clientSSECache.entrySet()) {
+                    sendMsgToClientByClientId(entry.getKey(), Constants.SSE_RT_LIST, data, entry.getValue());
+                }
+                break;
+            case SSEMsgEnum.RT_HIS:
+                if (codeSSECache.isEmpty()) {
+                    return;
+                }
+                for (Map.Entry<String, SseEmitter> entry : codeSSECache.entrySet()) {
+                    sendMsgToClientByClientId(entry.getKey(), Constants.SSE_RT_HIS, data, entry.getValue());
+                }
+                break;
         }
     }
 
     /**
      * 推送消息到客户端
-     * 此处做了推送失败后，重试推送机制，可根据自己业务进行修改
      *
-     * @param clientId           客户端ID
-     * @param curConcernCodeList 推送信息，此处结合具体业务，定义自己的返回值即可
+     * @param clientId 客户端ID
      **/
-    private static void sendMsgToClientByClientId(String clientId, List<CurConcernCode> curConcernCodeList, SseEmitter sseEmitter) {
+    @SuppressWarnings("rawtypes")
+    private static void sendMsgToClientByClientId(String clientId, String id, List data, SseEmitter sseEmitter) {
         if (sseEmitter == null) {
             return;
         }
-        SseEmitter.SseEventBuilder sendData = SseEmitter.event().id(Constants.TASK_RESULT).data(curConcernCodeList, MediaType.APPLICATION_JSON);
+        SseEmitter.SseEventBuilder sendData = SseEmitter.event().id(id).data(data, MediaType.APPLICATION_JSON);
         try {
             sseEmitter.send(sendData);
-        } catch (Exception e) {
+        } catch (IOException e) {
             closeSseConnect(clientId);
+        }
+    }
+
+    public static void closeSseConnect(String clientId) {
+        SseEmitter sseEmitter = clientId.length() > 6 ? clientSSECache.get(clientId) : codeSSECache.get(clientId);
+        if (sseEmitter != null) {
+            sseEmitter.complete();
+            removeClient(clientId);
         }
     }
 
@@ -97,9 +117,7 @@ public class MySseEmitterUtil {
      * @return java.lang.Runnable
      **/
     private static Runnable completionCallBack(String clientId) {
-        return () -> {
-            removeClient(clientId);
-        };
+        return () -> removeClient(clientId);
     }
 
 
@@ -109,6 +127,10 @@ public class MySseEmitterUtil {
      * @param clientId 客户端ID
      **/
     private static void removeClient(String clientId) {
-        sseCache.remove(clientId);
+        if (clientId.length() > 6) {
+            clientSSECache.remove(clientId);
+        } else {
+            codeSSECache.remove(clientId);
+        }
     }
 }

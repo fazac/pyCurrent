@@ -1,10 +1,12 @@
 package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.entity.*;
+import com.stock.pycurrent.entity.emum.SSEMsgEnum;
 import com.stock.pycurrent.entity.jsonvalue.EmConstantValue;
 import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.jsonvalue.RangeOverCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
+import com.stock.pycurrent.entity.vo.RealTimeVO;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.*;
 import jakarta.annotation.Resource;
@@ -61,6 +63,8 @@ public class PullData implements CommandLineRunner {
     private CurCountService curCountService;
     @Resource
     private CurConcernCodeService curConcernCodeService;
+    @Resource
+    private EmDNStockService emDNStockService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
@@ -320,7 +324,7 @@ public class PullData implements CommandLineRunner {
         String title = "|  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4) + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
         log.warn(title.substring(0, title.length() - 2));
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
-        printMapInfo(logsMap);
+//        printMapInfo(logsMap);
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
@@ -341,8 +345,22 @@ public class PullData implements CommandLineRunner {
         }
         if (!curConcernCodeList.isEmpty()) {
             curConcernCodeService.saveList(curConcernCodeList);
-            MySseEmitterUtil.sendMsgToClient(curConcernCodeList);
+            MySseEmitterUtil.sendMsgToClient(curConcernCodeList, SSEMsgEnum.RT_CURRENT);
+            if (!MySseEmitterUtil.codeCacheEmpty()) {
+                MySseEmitterUtil.codeSSECache.keySet().forEach(x -> {
+                    MySseEmitterUtil.sendMsgToClient(prepareRTHisData(x), SSEMsgEnum.RT_HIS);
+                });
+            }
         }
+    }
+
+    public List<EmDNStock> prepareDNHisData(String code) {
+        return emDNStockService.findByCodeCount(code, 30).reversed();
+    }
+
+    private List<RealTimeVO> prepareRTHisData(String code) {
+        return ArrayUtils.convertRealTimeVO(
+                emRealTimeStockService.findRBarStockByCode(code), realBarService.findIntradayBar(code));
     }
 
     private void sendNewNotification(boolean notification, EmRealTimeStock rt, String tsCode) {

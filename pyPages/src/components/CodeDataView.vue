@@ -1,27 +1,22 @@
 <script setup>
 import {reactive, ref, onMounted} from 'vue'
-import {v4 as uuidv4} from 'uuid'
-import {findDetails} from '@/api/backend.js'
 import {ElTable} from 'element-plus'
 import LineChart from '../components/LineChart.vue'
 
 
 const codeDateList = reactive([{}]);
 
+const code = ref('');
 
 const handleCurrentChange = (val) => {
   if (val !== null) {
-    findDetails(val.tsCode).then(res => {
-      console.log(res);
-    }).catch(err => {
-      console.log(err)
-    });
+    code.value = val.tsCode;
   }
 }
 
 onMounted(() => {
   if (!!window.EventSource) {
-    window.source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=" + uuidv4());
+    window.source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=");
     window.source.addEventListener('open', function (e) {
       console.log("建立连接");
     })
@@ -62,21 +57,12 @@ onMounted(() => {
       </el-table-column>
     </el-table>
   </div>
-  <LineChart :rtdata="null">
+  <LineChart :code=code>
 
   </LineChart>
 
 </template>
 
 <style scoped>
-.table-container {
-  display: flex;
-  justify-content: center;
-
-}
-
-.txtr {
-  text-align: right;
-}
 
 </style>

@@ -13,11 +13,16 @@ public class Constants {
     public static String AKSHARE_EM_REALTIME = "akshare_stock_realtime.py";
     public static String AKSHARE_STOCK_PY = "akshare_stock_cur.py";
 
-    public static String TASK_RESULT = "sse_cur_list";
+    public static String SSE_RT_LIST = "sse_rt_list";
+    public static String SSE_RT_HIS = "sse_rt_his";
+    public static String SSE_DN_HIS = "sse_dn_his";
     public static String CLIENT_ID = "sse_client_id";
     public static BigDecimal HUNDRED = BigDecimal.valueOf(100);
     public static BigDecimal EIGHT = BigDecimal.valueOf(8);
     public static BigDecimal EIGHTEEN = BigDecimal.valueOf(18);
+
+    public static BigDecimal PRICE_MAX = BigDecimal.valueOf(999999);
+    public static BigDecimal PRICE_MIN = BigDecimal.valueOf(-1);
 
     public static BigDecimal FIVE = BigDecimal.valueOf(5);
     public static BigDecimal THREE = BigDecimal.valueOf(3);

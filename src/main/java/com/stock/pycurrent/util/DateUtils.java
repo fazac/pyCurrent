@@ -7,7 +7,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.ChronoUnit.MINUTES;
 
 public class DateUtils {
     private DateUtils() {
@@ -33,6 +32,7 @@ public class DateUtils {
         return DAYS.between(toLocalDateTime(start), toLocalDateTime(end));
     }
 
+    @SuppressWarnings("unused")
     public static long getMinuteInterval(String start, String end) {
         return Duration.between(LocalDateTime.parse(start, COMMON_DATE_TIME_FORMAT), LocalDateTime.parse(end, COMMON_DATE_TIME_FORMAT)).toMinutes();
     }
@@ -55,6 +55,10 @@ public class DateUtils {
 
     public static String now() {
         return LocalDateTime.now().format(DATE_TIME_FORMAT);
+    }
+
+    public static String commonNow() {
+        return LocalDateTime.now().format(COMMON_DATE_TIME_FORMAT);
     }
 
 

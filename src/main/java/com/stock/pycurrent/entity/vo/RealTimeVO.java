@@ -1,5 +1,9 @@
 package com.stock.pycurrent.entity.vo;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 
 /**
@@ -8,6 +12,9 @@ import java.math.BigDecimal;
  * @description
  */
 
+@Setter
+@Getter
+@NoArgsConstructor
 public class RealTimeVO {
     private int di; //down_index
     private BigDecimal cp;//current_price
@@ -15,52 +22,4 @@ public class RealTimeVO {
     private BigDecimal h;//change_hand
     private BigDecimal rt;//pch_change
     private BigDecimal bar;
-
-    public int getDi() {
-        return di;
-    }
-
-    public void setDi(int di) {
-        this.di = di;
-    }
-
-    public BigDecimal getCp() {
-        return cp;
-    }
-
-    public void setCp(BigDecimal cp) {
-        this.cp = cp;
-    }
-
-    public Long getVs() {
-        return vs;
-    }
-
-    public void setVs(Long vs) {
-        this.vs = vs;
-    }
-
-    public BigDecimal getH() {
-        return h;
-    }
-
-    public void setH(BigDecimal h) {
-        this.h = h;
-    }
-
-    public BigDecimal getRt() {
-        return rt;
-    }
-
-    public void setRt(BigDecimal rt) {
-        this.rt = rt;
-    }
-
-    public BigDecimal getBar() {
-        return bar;
-    }
-
-    public void setBar(BigDecimal bar) {
-        this.bar = bar;
-    }
 }
