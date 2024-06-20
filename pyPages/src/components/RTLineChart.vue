@@ -10,6 +10,7 @@ const rtHisData = reactive([{}]);
 const dnHisData = reactive([{}]);
 const dnPriMin = ref(0);
 const dnPriMax = ref(0);
+const dnChart = reactive({});
 
 
 watch(() => props.code, async (newCode, oldCode) => {
@@ -69,7 +70,13 @@ function prepareRTHisData() {
 
 function createDnLine() {
   setTimeout(() => {
-    const myChart = echarts.init(document.getElementById('mainld'));
+    if (dnChart.value) {
+      echarts.dispose(dnChart.value);
+    }
+    dnChart.value = echarts.init(document.getElementById('mainld'));
+    window.addEventListener("resize", () => {
+      dnChart.value.resize();
+    })
     let option = {
       dataset: {
         dimensions: ['di', 'cp', 'hp', 'lp', 'ap', 'h', 'vol'],
@@ -99,8 +106,8 @@ function createDnLine() {
         {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
         {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
         {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'right', scale: true, alignTicks: true},
-        {type: 'value', position: 'right', scale: true, alignTicks: true},
+        {type: 'value', position: 'right', scale: true, min: 0, alignTicks: true},
+        {type: 'value', position: 'right', scale: true, min: 0, alignTicks: true},
       ],
       series: [
         {
@@ -198,6 +205,8 @@ function createDnLine() {
           label: {
             show: true,
             position: 'bottom',
+            rotate: -45,
+            offset: [20, 0],
           },
           emphasis: {
             focus: 'self',
@@ -225,7 +234,7 @@ function createDnLine() {
         }
       ]
     };
-    myChart.setOption(option);
+    dnChart.value.setOption(option);
   }, 0)
 }
 

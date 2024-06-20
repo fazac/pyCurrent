@@ -1,6 +1,7 @@
 package com.stock.pycurrent.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.stock.pycurrent.entity.annotation.RequestLimit;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
 import com.stock.pycurrent.service.EmDNStockService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author fzc
@@ -39,6 +41,10 @@ public class RealTimeController {
     private RealBarService realBarService;
 
     @GetMapping("findDataByCode")
+    @RequestLimit(key = "limit0",
+            permitsPerSecond = 1,
+            timeout = 500,
+            msg = "访问频率已超限制")
     public ObjectNode findDataByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
         List<DnVO> dnVOList = ArrayUtils.convertDnVO(emDNStockService.findByCodeCount(code, 30).reversed());

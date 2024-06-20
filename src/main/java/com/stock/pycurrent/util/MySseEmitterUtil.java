@@ -100,7 +100,7 @@ public class MySseEmitterUtil {
         SseEmitter.SseEventBuilder sendData = SseEmitter.event().id(id).data(data, MediaType.APPLICATION_JSON);
         try {
             sseEmitter.send(sendData);
-        } catch (IOException e) {
+        } catch (Exception e) {
             closeSseConnect(clientId);
         }
     }

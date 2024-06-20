@@ -1,7 +1,7 @@
 <script setup>
 import {reactive, ref, onMounted} from 'vue'
 import {ElTable} from 'element-plus'
-import LineChart from '../components/LineChart.vue'
+import DNLineChart from './DNLineChart.vue'
 
 
 const codeDateList = reactive([{}]);
@@ -57,10 +57,7 @@ onMounted(() => {
       </el-table-column>
     </el-table>
   </div>
-  <LineChart :code=code>
-
-  </LineChart>
-
+  <DNLineChart :code=code />
 </template>
 
 <style scoped>

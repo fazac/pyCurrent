@@ -12,7 +12,7 @@ const router = createRouter({
     {
       path: '/linechart',
       name: 'linechart',
-      component: () => import('../components/LineChart.vue')
+      component: () => import('../components/DNLineChart.vue')
     }
   ]
 })
