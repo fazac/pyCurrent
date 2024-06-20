@@ -1,97 +1,56 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, ref, watch} from 'vue';
-import {findDataByCode} from '@/api/backend.js'
-
+import {reactive, watch, shallowRef, ref} from 'vue';
 
 const props = defineProps(['code'])
 
 const rtHisData = reactive([{}]);
-const dnHisData = reactive([{}]);
-const dnPriMin = ref(0);
-const dnPriMax = ref(0);
-const dnChart = reactive({});
+const rtChart = reactive({});
+
+const handStep = ref(0);
 
 
 watch(() => props.code, async (newCode, oldCode) => {
-  if (newCode !== undefined && newCode !== null) {
-    prepareDnHisData();
+  if (newCode !== undefined && newCode !== null && newCode !== oldCode) {
     prepareRTHisData();
-
-    // createLine();
   }
 });
-
-function prepareDnHisData() {
-  findDataByCode(props.code).then(res => {
-    dnHisData.value = res.dnData;
-    dnPriMin.value = res.dnPriMin;
-    dnPriMax.value = res.dnPriMax;
-    createDnLine();
-  })
-}
 
 function prepareRTHisData() {
   const source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=" + props.code);
   source.onmessage = function (event) {
-    rtHisData.value = event.data;
+    if (event.lastEventId !== 'sse_client_id') {
+      rtHisData.value = JSON.parse(event.data);
+      let handFinal = rtHisData.value[rtHisData.value.length - 1].h;
+      handStep.value = Math.ceil(handFinal / 4);
+      createRTLine();
+    }
   }
 }
 
-//
-// function createLine() {
-//   setTimeout(() => {
-//     if (rtHisData.value !== undefined) {
-//       const myChart = echarts.init(document.getElementById('mainlc'));
-//       let option = {
-//         title: {},
-//         dataset: {
-//           dimensions: ['di', 'cp', 'h', 'rt', 'bar', 'cm', 'pe', 'vol'],
-//           source: rtHisData.value,
-//         },
-//         tooltip: {},
-//         legend: {
-//           data: ['p']
-//         },
-//         xAxis: {type: 'category'},
-//         yAxis: {},
-//         series: [
-//           {
-//             name: 'p',
-//             type: 'line',
-//             encode: {y: 'cp'},
-//           }
-//         ]
-//       };
-//       myChart.setOption(option);
-//     }
-//   })
-// }
-
-function createDnLine() {
+function createRTLine() {
   setTimeout(() => {
-    if (dnChart.value) {
-      echarts.dispose(dnChart.value);
+    if (rtChart.value) {
+      echarts.dispose(rtChart.value);
     }
-    dnChart.value = echarts.init(document.getElementById('mainld'));
+    rtChart.value = shallowRef(echarts.init(document.getElementById('mainlc')));
     window.addEventListener("resize", () => {
-      dnChart.value.resize();
+      rtChart.value.resize();
     })
     let option = {
       dataset: {
-        dimensions: ['di', 'cp', 'hp', 'lp', 'ap', 'h', 'vol'],
-        source: dnHisData.value
+        dimensions: ['di', 'cp', 'vs', 'h', 'rt', 'bar'],
+        source: rtHisData.value
       },
       legend: {
         type: 'plain',
-        data: ['cp', 'hp', 'lp', 'ap', 'vol', 'h'],
+        data: ['cp', 'vs', 'h', 'rt', 'bar'],
         selected: {
-          'cp': true,
-          'hp': true,
-          'lp': true,
-          'ap': true,
-          'vol': false,
+          'cp': false,
+          'vs': false,
           'h': true,
+          'rt': false,
+          'bar': false,
         },
         left: 'right',
         top: 'middle',
@@ -102,12 +61,11 @@ function createDnLine() {
         show: false
       },
       yAxis: [
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'right', scale: true, min: 0, alignTicks: true},
-        {type: 'value', position: 'right', scale: true, min: 0, alignTicks: true},
+        {type: 'value', position: 'left', scale: true,},
+        {type: 'value', position: 'right', scale: true, alignTicks: true},
+        {type: 'value', position: 'left', scale: true,},
+        {type: 'value', position: 'left', scale: true, show: false},
+        {type: 'value', position: 'right', scale: true, alignTicks: true, show: false},
       ],
       series: [
         {
@@ -121,107 +79,94 @@ function createDnLine() {
           itemStyle: {
             color: 'red'
           },
-          label: {
-            show: true,
+          symbol: "circle",
+          symbolSize: 3,
+          emphasis: {
+            disabled: true,
           },
+          markPoint: {
+            data: [{
+              type: "max",
+            }, {
+              type: "min",
+            }],
+            symbol: "pin",
+            label: {
+              color: 'black',
+            },
+            itemStyle: {
+              opacity: 0.4,
+            },
+          },
+          endLabel: {
+            show: true,
+            formatter: '{@cp}'
+          }
+        },
+        {
+          type: 'line',
+          name: 'rt',
+          encode: {y: 'rt'},
+          yAxisIndex: 1,
+          lineStyle: {
+            color: 'green',
+            opacity: 0.5,
+          },
+          itemStyle: {
+            color: 'green',
+            opacity: 0.5,
+          },
+          symbol: "circle",
+          symbolSize: 3,
           emphasis: {
             disabled: true,
           }
         },
         {
           type: 'line',
-          name: 'hp',
-          encode: {y: 'hp'},
-          yAxisIndex: 1,
-          areaStyle: {
-            color: "rgba(151, 187, 194, 1)",
-            opacity: 0.3,
-          },
+          name: 'h',
+          encode: {y: 'h'},
+          yAxisIndex: 2,
           lineStyle: {
-            color: 'green',
-            opacity: 0.5,
+            color: 'yellow',
           },
           itemStyle: {
-            color: 'green',
-            opacity: 0.5,
+            color: 'yellow',
           },
+          symbol: "circle",
           emphasis: {
-            focus: 'self',
-            label: {
-              show: true,
-            }
-          }
+            disabled: false,
+          },
+
         },
         {
           type: 'line',
-          name: 'lp',
-          encode: {y: 'lp'},
-          yAxisIndex: 2,
+          name: 'bar',
+          encode: {y: 'bar'},
+          yAxisIndex: 3,
+          symbol: "none",
+          emphasis: {
+            focus: 'self',
+            label: {
+              show: false,
+            }
+          },
           areaStyle: {
             color: "rgba(191, 192, 193, 1)",
             opacity: 0.3,
           },
           lineStyle: {
-            color: 'yellow',
-            opacity: 0.5,
-          },
-          itemStyle: {
-            color: 'yellow',
-            opacity: 0.5,
-          },
-          emphasis: {
-            label: {
-              show: true,
-              position: 'bottom',
-            },
-            focus: 'self',
-          }
-        },
-        {
-          type: 'line',
-          name: 'ap',
-          encode: {y: 'ap'},
-          yAxisIndex: 3,
-          emphasis: {
-            focus: 'self',
-            label: {
-              show: true,
-            }
-          },
-          lineStyle: {
             color: 'blue',
-            opacity: 0.5,
-          },
-          itemStyle: {
-            color: 'blue',
-            opacity: 0.5,
+            opacity: 0.3,
           },
         },
         {
-          name: 'vol',
+          name: 'vs',
           type: 'bar',
-          encode: {y: 'vol'},
+          encode: {y: 'vs'},
           yAxisIndex: 4,
           label: {
-            show: true,
-            position: 'bottom',
-            rotate: -45,
-            offset: [20, 0],
-          },
-          emphasis: {
-            focus: 'self',
-            disabled: false,
-          },
-          z: 2,
-        },
-        {
-          name: 'h',
-          type: 'bar',
-          encode: {y: 'h'},
-          yAxisIndex: 5,
-          label: {
-            show: true,
-            position: 'bottom',
+            show: false,
           },
           emphasis: {
             focus: 'self',
@@ -231,10 +176,10 @@ function createDnLine() {
             color: 'lightblue'
           },
           z: 2,
-        }
+        },
       ]
     };
-    dnChart.value.setOption(option);
+    rtChart.value.setOption(option);
   }, 0)
 }
 
@@ -242,8 +187,7 @@ function createDnLine() {
 
 <template>
   <div class="table-container mt-20">
-    <!--  <div id="mainlc" style="width: 600px;height:400px;"></div>-->
-    <div id="mainld" style="width: 100%;height:400px;"></div>
+    <div id="mainlc" style="width: 100%;height:400px;"></div>
   </div>
 </template>
 

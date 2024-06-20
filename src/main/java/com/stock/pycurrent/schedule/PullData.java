@@ -350,16 +350,16 @@ public class PullData implements CommandLineRunner {
         if (!curConcernCodeList.isEmpty()) {
             curConcernCodeService.saveList(curConcernCodeList);
             MySseEmitterUtil.sendMsgToClient(curConcernCodeList.stream().filter(CurConcernCode::isTableShow).collect(Collectors.toList()), SSEMsgEnum.RT_CURRENT);
-            if (!MySseEmitterUtil.codeCacheEmpty()) {
-                MySseEmitterUtil.codeSSECache.keySet().forEach(x -> {
-                    MySseEmitterUtil.sendMsgToClient(prepareRTHisData(x), SSEMsgEnum.RT_HIS);
-                });
-            }
+//            sendRTMsg();
         }
     }
 
-    public List<EmDNStock> prepareDNHisData(String code) {
-        return emDNStockService.findByCodeCount(code, 30).reversed();
+    private void sendRTMsg() {
+        if (!MySseEmitterUtil.codeCacheEmpty()) {
+            MySseEmitterUtil.codeSSECache.keySet().forEach(x -> {
+                MySseEmitterUtil.sendMsgToClient(prepareRTHisData(x), SSEMsgEnum.RT_HIS);
+            });
+        }
     }
 
     private List<RealTimeVO> prepareRTHisData(String code) {
