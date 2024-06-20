@@ -64,6 +64,9 @@ public class MySseEmitterUtil {
 
     @SuppressWarnings("rawtypes")
     public static void sendMsgToClient(List data, SSEMsgEnum sseMsgEnum) {
+        if (data == null || data.isEmpty()) {
+            return;
+        }
         switch (sseMsgEnum) {
             case SSEMsgEnum.RT_CURRENT:
                 if (clientSSECache.isEmpty()) {

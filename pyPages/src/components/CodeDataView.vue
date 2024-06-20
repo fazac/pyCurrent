@@ -40,7 +40,7 @@ onMounted(() => {
         highlight-current-row
         border
         stripe
-        style="width: 100%;text-align: center;max-width: 1200px"
+        class="txtc"
     >
       <el-table-column prop="mark" label="mark" class="txtr"/>
       <el-table-column prop="cp" label="cp" class="txtr"/>

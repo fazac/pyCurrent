@@ -45,7 +45,7 @@ public class PullData implements CommandLineRunner {
 
 
     private static final String CODE_TYPE = "F,A,R,C,L,H";
-    private static final String CODE_PRINT_TYPE = "F,A,C,L,H";
+    private static final String CODE_PRINT_TYPE = "F,R,A,C,L,H";
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
     @Resource
@@ -307,6 +307,10 @@ public class PullData implements CommandLineRunner {
                 if (highLimit) {
                     todayBoardCodes.add(tsCode);
                     sendNewNotification(notification, rt, tsCode);
+                    curConcernCode.setTableShow(true);
+                }
+                if (concerned || holds || yesterdayHigh || onboard) {
+                    curConcernCode.setTableShow(true);
                 }
                 curConcernCode.setTsCode(tsCode);
                 curConcernCode.setMark(type + " " + getPeekDesc(rt) + " " + tmpType);
@@ -324,7 +328,7 @@ public class PullData implements CommandLineRunner {
         String title = "|  I  |" + " T    CODE  |  " + fixLengthTitle(" RT ", 4) + fixLengthTitle(" H ", 3) + fixLengthTitle(" RR  ", 5) + fixLengthTitle(" BP ", 5) + fixLengthTitle(" CP ", 4) + fixLengthTitle("BAR", 6) + fixLengthTitle(" CM ", 6) + fixLengthTitle(" PE ", 6);
         log.warn(title.substring(0, title.length() - 2));
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
-//        printMapInfo(logsMap);
+        printMapInfo(logsMap);
         log.warn(StockUtils.concatChar("‾", CHAR_LENGTH));
         if (!valueCodeCountMap.isEmpty() && refreshRangeOverCode) {
             List<RangeOverCodeValue> valueList = valueCodeCountMap.entrySet().stream().map(x -> new RangeOverCodeValue(x.getKey(), x.getValue())).toList();
@@ -345,7 +349,7 @@ public class PullData implements CommandLineRunner {
         }
         if (!curConcernCodeList.isEmpty()) {
             curConcernCodeService.saveList(curConcernCodeList);
-            MySseEmitterUtil.sendMsgToClient(curConcernCodeList, SSEMsgEnum.RT_CURRENT);
+            MySseEmitterUtil.sendMsgToClient(curConcernCodeList.stream().filter(CurConcernCode::isTableShow).collect(Collectors.toList()), SSEMsgEnum.RT_CURRENT);
             if (!MySseEmitterUtil.codeCacheEmpty()) {
                 MySseEmitterUtil.codeSSECache.keySet().forEach(x -> {
                     MySseEmitterUtil.sendMsgToClient(prepareRTHisData(x), SSEMsgEnum.RT_HIS);

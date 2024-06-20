@@ -52,6 +52,9 @@ public class CurConcernCode {
     @Column(name = "pe", precision = 7, scale = 2)
     private BigDecimal pe;
 
+    @Transient
+    private boolean isTableShow;
+
 
     @Override
     public final boolean equals(Object o) {
