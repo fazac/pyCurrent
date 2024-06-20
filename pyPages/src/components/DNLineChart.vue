@@ -13,7 +13,7 @@ const dnChart = reactive({});
 
 
 watch(() => props.code, async (newCode, oldCode) => {
-  if (newCode !== undefined && newCode !== null) {
+  if (newCode !== undefined && newCode !== null && newCode !== oldCode) {
     prepareDnHisData();
   }
 });
