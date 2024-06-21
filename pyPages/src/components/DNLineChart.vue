@@ -201,9 +201,7 @@ function createDnLine() {
 </script>
 
 <template>
-  <div class="table-container mt-20">
-    <div id="mainld" style="width: 100%;height:400px;"></div>
-  </div>
+  <div id="mainld" class="table-container"></div>
 </template>
 
 <style scoped>

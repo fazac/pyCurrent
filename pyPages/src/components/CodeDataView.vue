@@ -9,6 +9,8 @@ const codeDateList = reactive([{}]);
 
 const code = ref('');
 
+const lineType = ref(true);
+
 const handleCurrentChange = (val) => {
   if (val !== null) {
     code.value = val.tsCode;
@@ -35,13 +37,15 @@ onMounted(() => {
 
 <template>
   <div class="table-container">
+    <el-switch v-model="lineType" size="large" inline-prompt active-text="dn" inactive-text="rt" class="type-switch"
+               style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
     <el-table
         @current-change="handleCurrentChange"
         :data="codeDateList.value" empty-text=" "
         highlight-current-row
         border
         stripe
-        class="txtc"
+        class="txtc main-table"
     >
       <el-table-column prop="mark" label="mark" class="txtr"/>
       <el-table-column prop="cp" label="cp" class="txtr"/>
@@ -58,8 +62,8 @@ onMounted(() => {
       </el-table-column>
     </el-table>
   </div>
-<!--  <DNLineChart :code=code></DNLineChart>-->
-  <RTLineChart :code=code></RTLineChart>
+  <DNLineChart :code=code v-if="lineType"></DNLineChart>
+  <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 </template>
 
 <style scoped>

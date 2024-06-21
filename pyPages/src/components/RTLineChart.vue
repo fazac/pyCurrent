@@ -1,14 +1,11 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, watch, shallowRef, ref} from 'vue';
+import {reactive, watch, shallowRef} from 'vue';
 
 const props = defineProps(['code'])
 
 const rtHisData = reactive([{}]);
 const rtChart = reactive({});
-
-const handStep = ref(0);
-
 
 watch(() => props.code, async (newCode, oldCode) => {
   if (newCode !== undefined && newCode !== null && newCode !== oldCode) {
@@ -21,14 +18,62 @@ function prepareRTHisData() {
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
       rtHisData.value = JSON.parse(event.data);
-      let handFinal = rtHisData.value[rtHisData.value.length - 1].h;
-      handStep.value = Math.ceil(handFinal / 4);
-      createRTLine();
+      let handsArr = rtHisData.value.map((item) => {
+        return item.h;
+      })
+      let handFinal = handsArr[handsArr.length - 1];
+      let handStep = Math.ceil(handFinal / 4);
+      let xArrFinal = calXPoint(handsArr, handStep);
+      createRTLine(xArrFinal);
     }
   }
 }
 
-function createRTLine() {
+function calXPoint(handsArr, handStep) {
+  let xArr = [];
+  let xArrFinal = [];
+  let colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666'];
+  handsArr.reduce(function (pre, cur, index) {
+    if (cur === handStep || cur === handStep * 2 || cur === handStep * 3) {
+      xArr.push(index);
+    }
+    if (pre < handStep && cur > handStep) {
+      xArr.push((1 - pre) / (cur - pre) + (index - 1))
+    }
+    if (pre < handStep * 2 && cur > handStep * 2) {
+      xArr.push((1 - pre) / (cur - pre) + (index - 1))
+    }
+    if (pre < handStep * 3 && cur > handStep * 3) {
+      xArr.push((1 - pre) / (cur - pre) + (index - 1))
+    }
+    return cur;
+  }, null);
+  xArr.push(handsArr.length - 1);
+  xArr.filter(function (item, index, arr) {
+    return arr.indexOf(item, 0) === index && item > 0;
+  }).sort((a, b) => a - b);
+  console.log(xArr);
+  xArr.reduce(function (pre, cur, index) {
+    if (pre === null) {
+      xArrFinal.push([{
+        xAxis: 0, itemStyle: {
+          color: colors[index], opacity: 0.2
+        }, name: handStep
+      }, {xAxis: cur}]);
+    } else {
+      xArrFinal.push([{
+        xAxis: pre, itemStyle: {
+          color: colors[index], opacity: 0.2
+        }, name: handStep * (index + 1)
+      }, {xAxis: cur}]);
+    }
+    return cur;
+  }, null);
+  console.log(xArrFinal);
+  return xArrFinal;
+}
+
+function createRTLine(xArr) {
   setTimeout(() => {
     if (rtChart.value) {
       echarts.dispose(rtChart.value);
@@ -46,11 +91,11 @@ function createRTLine() {
         type: 'plain',
         data: ['cp', 'vs', 'h', 'rt', 'bar'],
         selected: {
-          'cp': false,
-          'vs': false,
+          'cp': true,
+          'vs': true,
           'h': true,
           'rt': false,
-          'bar': false,
+          'bar': true,
         },
         left: 'right',
         top: 'middle',
@@ -63,9 +108,9 @@ function createRTLine() {
       yAxis: [
         {type: 'value', position: 'left', scale: true,},
         {type: 'value', position: 'right', scale: true, alignTicks: true},
-        {type: 'value', position: 'left', scale: true,},
         {type: 'value', position: 'left', scale: true, show: false},
-        {type: 'value', position: 'right', scale: true, alignTicks: true, show: false},
+        {type: 'value', position: 'left', scale: true, show: false},
+        {type: 'value', position: 'right', scale: true, show: false},
       ],
       series: [
         {
@@ -129,15 +174,22 @@ function createRTLine() {
           yAxisIndex: 2,
           lineStyle: {
             color: 'yellow',
+            opacity: 0.7,
           },
           itemStyle: {
             color: 'yellow',
           },
-          symbol: "circle",
+          symbol: "none",
           emphasis: {
             disabled: false,
           },
-
+          markArea: {
+            data: xArr,
+          },
+          endLabel: {
+            show: true,
+            formatter: '{@h}'
+          }
         },
         {
           type: 'line',
@@ -146,18 +198,19 @@ function createRTLine() {
           yAxisIndex: 3,
           symbol: "none",
           emphasis: {
-            focus: 'self',
-            label: {
-              show: false,
-            }
+            disabled: true,
+            // focus: 'self',
+            // label: {
+            //   show: false,
+            // }
           },
           areaStyle: {
             color: "rgba(191, 192, 193, 1)",
-            opacity: 0.3,
+            opacity: 0.2,
           },
           lineStyle: {
             color: 'blue',
-            opacity: 0.3,
+            opacity: 0.1,
           },
         },
         {
@@ -186,9 +239,7 @@ function createRTLine() {
 </script>
 
 <template>
-  <div class="table-container mt-20">
-    <div id="mainlc" style="width: 100%;height:400px;"></div>
-  </div>
+  <div id="mainlc" class="table-container"></div>
 </template>
 
 <style scoped>
