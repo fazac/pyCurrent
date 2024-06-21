@@ -20,7 +20,6 @@ watch(() => props.code, async (newCode, oldCode) => {
 
 function prepareDnHisData() {
   findDataByCode(props.code).then(res => {
-    console.log(res);
     dnHisData.value = res.dnData;
     dnPriMin.value = res.dnPriMin;
     dnPriMax.value = res.dnPriMax;

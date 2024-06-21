@@ -32,12 +32,17 @@ onMounted(() => {
 
 });
 
+function changeLineType() {
+  code.value = '';
+}
 
 </script>
 
 <template>
   <div class="table-container">
-    <el-switch v-model="lineType" size="large" inline-prompt active-text="dn" inactive-text="rt" class="type-switch"
+    <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
+               inactive-text="rt"
+               class="type-switch"
                style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
     <el-table
         @current-change="handleCurrentChange"

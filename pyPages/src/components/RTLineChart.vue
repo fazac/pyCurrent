@@ -1,11 +1,13 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, watch, shallowRef} from 'vue';
+import {reactive, watch, shallowRef, onUnmounted} from 'vue';
 
 const props = defineProps(['code'])
 
 const rtHisData = reactive([{}]);
 const rtChart = reactive({});
+
+const sourceList = [];
 
 watch(() => props.code, async (newCode, oldCode) => {
   if (newCode !== undefined && newCode !== null && newCode !== oldCode) {
@@ -14,6 +16,12 @@ watch(() => props.code, async (newCode, oldCode) => {
 });
 
 function prepareRTHisData() {
+  if (sourceList !== undefined && sourceList.length > 0) {
+    sourceList.forEach((item) => {
+      item.close();
+    })
+    sourceList.length = 0;
+  }
   const source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=" + props.code);
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
@@ -27,6 +35,7 @@ function prepareRTHisData() {
       createRTLine(xArrFinal);
     }
   }
+  sourceList.push(source);
 }
 
 function calXPoint(handsArr, handStep) {
@@ -52,7 +61,6 @@ function calXPoint(handsArr, handStep) {
   xArr.filter(function (item, index, arr) {
     return arr.indexOf(item, 0) === index && item > 0;
   }).sort((a, b) => a - b);
-  console.log(xArr);
   xArr.reduce(function (pre, cur, index) {
     if (pre === null) {
       xArrFinal.push([{
@@ -69,7 +77,6 @@ function calXPoint(handsArr, handStep) {
     }
     return cur;
   }, null);
-  console.log(xArrFinal);
   return xArrFinal;
 }
 
@@ -235,6 +242,15 @@ function createRTLine(xArr) {
     rtChart.value.setOption(option);
   }, 0)
 }
+
+onUnmounted(() => {
+  if (sourceList !== undefined && sourceList.length > 0) {
+    sourceList.forEach((item) => {
+      item.close();
+    })
+    sourceList.length = 0;
+  }
+})
 
 </script>
 
