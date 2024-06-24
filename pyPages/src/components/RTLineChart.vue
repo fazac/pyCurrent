@@ -74,14 +74,10 @@ function calXPoint(handsArr, handStep) {
     if (cur === handStep || cur === handStep * 2 || cur === handStep * 3) {
       xArr.push(index);
     }
-    if (pre < handStep && cur > handStep) {
-      xArr.push((1 - pre) / (cur - pre) + (index - 1))
-    }
-    if (pre < handStep * 2 && cur > handStep * 2) {
-      xArr.push((1 - pre) / (cur - pre) + (index - 1))
-    }
-    if (pre < handStep * 3 && cur > handStep * 3) {
-      xArr.push((1 - pre) / (cur - pre) + (index - 1))
+    if (pre < handStep && cur > handStep
+        || pre < handStep * 2 && cur > handStep * 2
+        || pre < handStep * 3 && cur > handStep * 3) {
+      xArr.push((index - 1))
     }
     return cur;
   }, null);
@@ -242,7 +238,7 @@ function createRTLine(xArr, xArrFinal, maxHand) {
             label: {
               show: true,
             },
-            symbolOffset:[0,'-50%'],
+            symbolOffset: [0, '-50%'],
             itemStyle: {
               opacity: 0.4,
             },
