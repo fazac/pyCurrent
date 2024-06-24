@@ -49,8 +49,8 @@ function changeLineType() {
       <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
                  inactive-text="rt"
                  style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
-      <el-switch v-model="isDarkType" @change="toggleDark()" size="large" inline-prompt active-text="开"
-                 inactive-text="关" class="ml-20"
+      <el-switch v-model="isDarkType" @change="toggleDark()" size="large" inline-prompt active-text="off"
+                 inactive-text="on" class="ml-20"
                  style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
     </span>
     <el-table

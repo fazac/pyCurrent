@@ -43,10 +43,11 @@ function calXIndex(handsArr, handStep) {
   let xArr = [];
   let xArrFinal = [];
   handsArr.reduce(function (pre, cur, index) {
-    if (cur === handStep || cur === handStep * 2 || cur === handStep * 3) {
+    if (cur !== pre && (cur === handStep || cur === handStep * 2 || cur === handStep * 3)) {
       xArr.push(index);
-    }
-    if (pre < handStep && cur > handStep || pre < handStep * 2 && cur > handStep * 2 || pre < handStep * 3 && cur > handStep * 3) {
+    } else if (pre < handStep && cur > handStep
+        || pre < handStep * 2 && cur > handStep * 2
+        || pre < handStep * 3 && cur > handStep * 3) {
       xArr.push(index - 1)
     }
     return cur;
@@ -71,10 +72,9 @@ function calXPoint(handsArr, handStep) {
   let xArrFinal = [];
   let colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666'];
   handsArr.reduce(function (pre, cur, index) {
-    if (cur === handStep || cur === handStep * 2 || cur === handStep * 3) {
+    if (cur !== pre && (cur === handStep || cur === handStep * 2 || cur === handStep * 3)) {
       xArr.push(index);
-    }
-    if (pre < handStep && cur > handStep
+    } else if (pre < handStep && cur > handStep
         || pre < handStep * 2 && cur > handStep * 2
         || pre < handStep * 3 && cur > handStep * 3) {
       xArr.push((index - 1))
@@ -148,11 +148,41 @@ function createRTLine(xArr, xArrFinal, maxHand) {
         // }
       },
       yAxis: [
-        {type: 'value', position: 'left', scale: true,},
-        {type: 'value', position: 'right', scale: true, alignTicks: true},
-        {type: 'value', position: 'left', scale: true, max: maxHand, min: 0, show: false},
-        {type: 'value', position: 'left', scale: true, show: false},
-        {type: 'value', position: 'right', scale: true, show: false},
+        {
+          type: 'value', position: 'left', scale: true, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'right', scale: true, alignTicks: true, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'left', scale: true, max: maxHand, min: 0, show: false, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'left', scale: true, show: false, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'right', scale: true, show: false, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
       ],
       series: [
         {
@@ -183,7 +213,8 @@ function createRTLine(xArr, xArrFinal, maxHand) {
             }],
             symbol: "pin",
             label: {
-              color: 'black',
+              color: '#bbff33',
+              opacity: 0.8,
             },
             itemStyle: {
               opacity: 0.4,
@@ -237,10 +268,14 @@ function createRTLine(xArr, xArrFinal, maxHand) {
             data: xArr,
             label: {
               show: true,
+              color: '#ff00ff',
+              // color: 'yellow',
+              opacity: 1,
+              fontWeight:'bolder'
             },
             symbolOffset: [0, '-50%'],
             itemStyle: {
-              opacity: 0.4,
+              opacity: 0.1,
             },
           },
           endLabel: {
@@ -283,7 +318,8 @@ function createRTLine(xArr, xArrFinal, maxHand) {
             disabled: false,
           },
           itemStyle: {
-            color: 'lightblue'
+            color: '#ff6666',
+            opacity: 0.3,
           },
           z: 2,
         },

@@ -25,15 +25,16 @@ const createWindow = () => {
             nodeIntegrationInWorker: true,
             preload: path.join(__dirname, 'preload.js'),
             // webSecurity: false, false 是 控制台会报警告, 不太喜欢, 就设置为了 true
-            webSecurity: true
+            webSecurity: false
         }
     })
-    win.setMenu(null)// 不展示菜单
+    // win.setMenu(null)// 不展示菜单
+    console.log(__dirname);
     if (app.isPackaged) {
         win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`)
     } else {
         win.loadURL('http://localhost:5173/')
-        win.webContents.openDevTools()// 打开调试工具, 上线时这行是要注释掉的
+        // win.webContents.openDevTools()// 打开调试工具, 上线时这行是要注释掉的
     }
     globalShortcut.register('CommandOrControl+Shift+i', function () {
         win.webContents.openDevTools()

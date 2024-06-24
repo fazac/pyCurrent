@@ -61,12 +61,53 @@ function createDnLine() {
         show: false
       },
       yAxis: [
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value},
-        {type: 'value', position: 'right', scale: true, min: 0, alignTicks: true},
-        {type: 'value', position: 'right', scale: true, min: 0, alignTicks: true},
+        {
+          type: 'value',
+          position: 'left',
+          scale: true,
+          min: dnPriMin.value,
+          max: dnPriMax.value,
+          splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'left', scale: true, min: dnPriMin.value, max: dnPriMax.value, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'right', scale: true, min: 0, alignTicks: true, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value', position: 'right', scale: true, min: 0, alignTicks: true, splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
       ],
       series: [
         {
@@ -75,13 +116,15 @@ function createDnLine() {
           encode: {y: 'cp'},
           yAxisIndex: 0,
           lineStyle: {
-            color: 'red'
+            color: 'red',
           },
           itemStyle: {
             color: 'red'
           },
           label: {
             show: true,
+            color: '#ff00ff',
+            fontWeight:'600',
           },
           emphasis: {
             disabled: true,
@@ -91,10 +134,18 @@ function createDnLine() {
           type: 'line',
           name: 'hp',
           encode: {y: 'hp'},
+          label: {
+            show: true,
+            opacity: 1,
+            distance: 13,
+            color: '#ff00ff',
+            fontWeight:'bolder',
+          },
           yAxisIndex: 1,
           areaStyle: {
-            color: "rgba(151, 187, 194, 1)",
+            color: "rgba(191, 192, 193, 1)",
             opacity: 0.3,
+            origin: 'end',
           },
           lineStyle: {
             color: 'green',
@@ -108,7 +159,8 @@ function createDnLine() {
             focus: 'self',
             label: {
               show: true,
-            }
+              opacity: 1,
+            },
           }
         },
         {
@@ -116,22 +168,31 @@ function createDnLine() {
           name: 'lp',
           encode: {y: 'lp'},
           yAxisIndex: 2,
+          label: {
+            show: true,
+            opacity: 1,
+            distance: 13,
+            position: 'bottom',
+            color: '#ff00ff',
+            fontWeight:'bolder',
+          },
           areaStyle: {
             color: "rgba(191, 192, 193, 1)",
             opacity: 0.3,
           },
           lineStyle: {
-            color: 'yellow',
+            color: 'green',
             opacity: 0.5,
           },
           itemStyle: {
-            color: 'yellow',
+            color: 'green',
             opacity: 0.5,
           },
           emphasis: {
             label: {
               show: true,
               position: 'bottom',
+              opacity: 1,
             },
             focus: 'self',
           }
@@ -145,6 +206,7 @@ function createDnLine() {
             focus: 'self',
             label: {
               show: true,
+              opacity: 1,
             }
           },
           lineStyle: {
@@ -171,6 +233,10 @@ function createDnLine() {
             focus: 'self',
             disabled: false,
           },
+          itemStyle: {
+            color: '#ff6666',
+            opacity: 0.3,
+          },
           z: 2,
         },
         {
@@ -181,13 +247,15 @@ function createDnLine() {
           label: {
             show: true,
             position: 'bottom',
+            opacity: 1,
           },
           emphasis: {
             focus: 'self',
             disabled: false,
           },
           itemStyle: {
-            color: 'lightblue'
+            color: '#ff6666',
+            opacity: 0.3,
           },
           z: 2,
         }

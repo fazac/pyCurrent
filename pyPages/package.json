@@ -24,5 +24,68 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "electron": "^31.0.2",
     "vite": "^5.2.8"
+  },
+  "build": {
+    "appId": "pycur-001",
+    "copyright": "fa-pycur-001",
+    "productName": "pycur",
+    "directories": {
+      "buildResources": "build",
+      "output": "electron_dist"
+    },
+    "nsis": {
+      "oneClick": false,
+      "language": "2052",
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
+    },
+    "dmg": {
+      "background": "build/background.png",
+      "icon": "build/icons/icon.icns",
+      "iconSize": 100,
+      "contents": [
+        {
+          "x": 380,
+          "y": 180,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 180,
+          "type": "file"
+        }
+      ],
+      "window": {
+        "x": 100,
+        "y": 100,
+        "width": 500,
+        "height": 300
+      }
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "build/icons/food.png",
+      "target": {
+        "target": "nsis",
+        "arch": [
+          "x64",
+          "ia32"
+        ]
+      }
+    },
+    "asar": true,
+    "files": [
+      "./dist",
+      "./electron",
+      "!**/node_modules/**"
+    ],
+    "extends": null
   }
 }

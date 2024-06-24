@@ -8,11 +8,6 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
-    },
-    {
-      path: '/linechart',
-      name: 'linechart',
-      component: () => import('../components/DNLineChart.vue')
     }
   ]
 })
