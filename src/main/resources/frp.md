@@ -35,49 +35,49 @@ frpc.exe -c frpc.ini
 
 ### 3.  文件
 
-###  frps.ini 
+### frps.ini
 
-   ```
-   [common]
-   # 客户端运行报错添加
-   vhost_http_port = 7001
-   # frp监听的端口，默认是7000，可以改成其他的
-   bind_port = 7000
-   # 授权码,token之后在客户端会用到
-   token = adfe338$3f3(34rfsef3
-   subdomain_host = www.pycur.com
-   # frp管理后台端口，请按自己需求更改
-   dashboard_port = 7900
-   # frp管理后台用户名和密码，请改成自己的
-   dashboard_user = admin
-   dashboard_pwd = admin_524
-   enable_prometheus = true
-   
-   # frp日志配置
-   log_file = /var/log/frps.log
-   log_level = info
-   log_max_days = 3
-   ```
+```
+[common]
+# 客户端运行报错添加
+vhost_http_port = 7001
+# frp监听的端口，默认是7000，可以改成其他的
+bind_port = 7000
+# 授权码,token之后在客户端会用到
+token = adfe338$3f3(34rfsef3
+subdomain_host = www.pycur.com
+# frp管理后台端口，请按自己需求更改
+dashboard_port = 7900
+# frp管理后台用户名和密码，请改成自己的
+dashboard_user = admin
+dashboard_pwd = admin_524
+enable_prometheus = true
 
-   ### frps.service
+# frp日志配置
+log_file = /var/log/frps.log
+log_level = info
+log_max_days = 3
+```
 
-   ```
-   [Unit]
-   # 服务名称，可自定义
-   Description = frp server
-   After = network.target syslog.target
-   Wants = network.target
-   
-   [Service]
-   Type = simple
-   # 启动frps的命令，需修改为您的frps的安装路径
-   ExecStart = /usr/bin/frps -c /etc/frp/frps.ini
-   
-   [Install]
-   WantedBy = multi-user.target
-   ```
+### frps.service
 
-###  frpc.ini
+```
+[Unit]
+# 服务名称，可自定义
+Description = frp server
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+# 启动frps的命令，需修改为您的frps的安装路径
+ExecStart = /usr/bin/frps -c /etc/frp/frps.ini
+
+[Install]
+WantedBy = multi-user.target
+```
+
+### frpc.ini
 
 ```
 [common]
@@ -101,6 +101,3 @@ local_port = 19093
 remote_port = 7800
 custom_domains = 139.84.194.82
 ```
-
-
-

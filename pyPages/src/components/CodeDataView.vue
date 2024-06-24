@@ -24,7 +24,7 @@ const handleCurrentChange = (val) => {
 
 onMounted(() => {
   if (!!window.EventSource) {
-    window.source = new EventSource("http://139.84.194.82:7800/sse/createSSEConnect?clientId=");
+    window.source = new EventSource("http://139.84.194.82:7001/sse/createSSEConnect?clientId=");
     window.source.addEventListener('open', function (e) {
       console.log("建立连接");
     })
