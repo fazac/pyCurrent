@@ -409,52 +409,57 @@ public class PullData implements CommandLineRunner {
     }
 
     private BigDecimal calBar(String tsCode, String tradeDate, BigDecimal curPri) {
-        RealBar newBar = new RealBar();
-        RealBar lastBar = realBarService.findOne(tradeDate, tsCode);
-        if (curPri == null || lastBar == null || lastBar.getShortSmaPrice() == null) {
-            List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findRBarStockByCode(tsCode);
-            if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
-                BigDecimal lastBarValue = BigDecimal.ZERO;
-                EmRealTimeStock cur = emRealTimeStockList.get(0);
-                newBar.setShortSmaPrice(cur.getCurrentPri());
-                newBar.setLongSmaPrice(cur.getCurrentPri());
-                newBar.setDif(BigDecimal.ZERO);
-                newBar.setDea(BigDecimal.ZERO);
-                newBar.setBar(BigDecimal.ZERO);
-                newBar.setCurPri(cur.getCurrentPri());
-                newBar.setTradeDate(cur.getTradeDate());
-                newBar.setTsCode(tsCode);
-                realBarService.save(newBar);
-                if (emRealTimeStockList.size() > 1) {
-                    for (int i = 1; i < emRealTimeStockList.size(); i++) {
-                        cur = emRealTimeStockList.get(i);
-                        lastBarValue = calBar(tsCode, cur.getTradeDate(), cur.getCurrentPri());
+        try {
+            RealBar newBar = new RealBar();
+            RealBar lastBar = realBarService.findOne(tradeDate, tsCode);
+            if (curPri == null || lastBar == null || lastBar.getShortSmaPrice() == null) {
+                List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findRBarStockByCode(tsCode);
+                if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
+                    BigDecimal lastBarValue = BigDecimal.ZERO;
+                    EmRealTimeStock cur = emRealTimeStockList.get(0);
+                    newBar.setShortSmaPrice(cur.getCurrentPri());
+                    newBar.setLongSmaPrice(cur.getCurrentPri());
+                    newBar.setDif(BigDecimal.ZERO);
+                    newBar.setDea(BigDecimal.ZERO);
+                    newBar.setBar(BigDecimal.ZERO);
+                    newBar.setCurPri(cur.getCurrentPri());
+                    newBar.setTradeDate(cur.getTradeDate());
+                    newBar.setTsCode(tsCode);
+                    realBarService.save(newBar);
+                    if (emRealTimeStockList.size() > 1) {
+                        for (int i = 1; i < emRealTimeStockList.size(); i++) {
+                            cur = emRealTimeStockList.get(i);
+                            lastBarValue = calBar(tsCode, cur.getTradeDate(), cur.getCurrentPri());
+                        }
                     }
+                    return lastBarValue;
+                } else {
+                    newBar.setShortSmaPrice(curPri);
+                    newBar.setLongSmaPrice(curPri);
+                    newBar.setDif(BigDecimal.ZERO);
+                    newBar.setDea(BigDecimal.ZERO);
+                    newBar.setBar(BigDecimal.ZERO);
+                    newBar.setCurPri(curPri);
+                    newBar.setTradeDate(tradeDate);
+                    newBar.setTsCode(tsCode);
+                    lastBar = realBarService.save(newBar);
+                    return lastBar.getBar();
                 }
-                return lastBarValue;
             } else {
-                newBar.setShortSmaPrice(curPri);
-                newBar.setLongSmaPrice(curPri);
-                newBar.setDif(BigDecimal.ZERO);
-                newBar.setDea(BigDecimal.ZERO);
-                newBar.setBar(BigDecimal.ZERO);
+                newBar.setShortSmaPrice(CalculateUtils.calShortEMANext(curPri, lastBar.getShortSmaPrice()));
+                newBar.setLongSmaPrice(CalculateUtils.calLongEMANext(curPri, lastBar.getLongSmaPrice()));
+                newBar.setDif(newBar.getShortSmaPrice().subtract(newBar.getLongSmaPrice()));
+                newBar.setDea(CalculateUtils.calMidEMANext(newBar.getDif(), lastBar.getDif()));
+                newBar.setBar(newBar.getDif().subtract(newBar.getDea()).multiply(BigDecimal.TWO));
                 newBar.setCurPri(curPri);
                 newBar.setTradeDate(tradeDate);
                 newBar.setTsCode(tsCode);
-                lastBar = realBarService.save(newBar);
-                return lastBar.getBar();
+                return realBarService.save(newBar).getBar();
             }
-        } else {
-            newBar.setShortSmaPrice(CalculateUtils.calShortEMANext(curPri, lastBar.getShortSmaPrice()));
-            newBar.setLongSmaPrice(CalculateUtils.calLongEMANext(curPri, lastBar.getLongSmaPrice()));
-            newBar.setDif(newBar.getShortSmaPrice().subtract(newBar.getLongSmaPrice()));
-            newBar.setDea(CalculateUtils.calMidEMANext(newBar.getDif(), lastBar.getDif()));
-            newBar.setBar(newBar.getDif().subtract(newBar.getDea()).multiply(BigDecimal.TWO));
-            newBar.setCurPri(curPri);
-            newBar.setTradeDate(tradeDate);
-            newBar.setTsCode(tsCode);
-            return realBarService.save(newBar).getBar();
+        } catch (Exception e) {
+            log.error("calculate bar error", e);
         }
+        return null;
     }
 
     private String getPeekDesc(EmRealTimeStock rt) {
