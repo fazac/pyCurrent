@@ -182,3 +182,4 @@ build/
 /pyPages/electron_dist/builder-effective-config.yaml
 /pyPages/electron_dist/pycur Setup 0.0.0.exe
 /pyPages/electron_dist/pycur Setup 0.0.0.exe.blockmap
+/pyPages/package-lock.json

@@ -22,7 +22,7 @@ function prepareRTHisData() {
     })
     sourceList.length = 0;
   }
-  const source = new EventSource("http://localhost:19093/sse/createSSEConnect?clientId=" + props.code);
+  const source = new EventSource("http://139.84.194.82:7800/sse/createSSEConnect?clientId=" + props.code);
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
       rtHisData.value = JSON.parse(event.data);
