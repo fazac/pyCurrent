@@ -98,6 +98,6 @@ remote_port = 21328
 type = http
 local_ip = 127.0.0.1
 local_port = 19093
-remote_port = 7800
+remote_port = 7001
 custom_domains = 139.84.194.82
 ```
