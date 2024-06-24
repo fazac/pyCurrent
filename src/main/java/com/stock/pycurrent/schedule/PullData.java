@@ -411,7 +411,7 @@ public class PullData implements CommandLineRunner {
     private BigDecimal calBar(String tsCode, String tradeDate, BigDecimal curPri) {
         RealBar newBar = new RealBar();
         RealBar lastBar = realBarService.findOne(tradeDate, tsCode);
-        if (curPri == null || lastBar == null) {
+        if (curPri == null || lastBar == null || lastBar.getShortSmaPrice() == null) {
             List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findRBarStockByCode(tsCode);
             if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
                 BigDecimal lastBarValue = BigDecimal.ZERO;
