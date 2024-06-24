@@ -1,6 +1,6 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, ref, watch} from 'vue';
+import {reactive, ref, watch, shallowRef} from 'vue';
 import {findDataByCode} from '@/api/backend.js'
 
 
@@ -32,7 +32,7 @@ function createDnLine() {
     if (dnChart.value) {
       echarts.dispose(dnChart.value);
     }
-    dnChart.value = echarts.init(document.getElementById('mainld'));
+    dnChart.value = shallowRef(echarts.init(document.getElementById('mainld')));
     window.addEventListener("resize", () => {
       dnChart.value.resize();
     })

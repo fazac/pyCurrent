@@ -28,12 +28,12 @@ const createWindow = () => {
             webSecurity: true
         }
     })
-    // win.setMenu(null)// 不展示菜单
+    win.setMenu(null)// 不展示菜单
     if (app.isPackaged) {
         win.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`)
     } else {
         win.loadURL('http://localhost:5173/')
-        // win.webContents.openDevTools()// 打开调试工具, 上线时这行是要注释掉的
+        win.webContents.openDevTools()// 打开调试工具, 上线时这行是要注释掉的
     }
     globalShortcut.register('CommandOrControl+Shift+i', function () {
         win.webContents.openDevTools()

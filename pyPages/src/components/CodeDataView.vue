@@ -1,9 +1,14 @@
 <script setup>
 import {reactive, ref, onMounted} from 'vue'
+import {useDark, useToggle} from '@vueuse/core'
 import {ElTable} from 'element-plus'
 import DNLineChart from './DNLineChart.vue'
 import RTLineChart from './RTLineChart.vue'
 
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
+
+const isDarkType = ref(true);
 
 const codeDateList = reactive([{}]);
 
@@ -40,10 +45,14 @@ function changeLineType() {
 
 <template>
   <div class="table-container">
-    <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
-               inactive-text="rt"
-               class="type-switch"
-               style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
+    <span class="type-switch">
+      <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
+                 inactive-text="rt"
+                 style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
+      <el-switch v-model="isDarkType" @change="toggleDark()" size="large" inline-prompt active-text="开"
+                 inactive-text="关" class="ml-20"
+                 style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
+    </span>
     <el-table
         @current-change="handleCurrentChange"
         :data="codeDateList.value" empty-text=" "
@@ -72,5 +81,10 @@ function changeLineType() {
 </template>
 
 <style scoped>
-
+.fixed-height-icon {
+  height: 50px;
+  line-height: 50px;
+  width: auto;
+  text-align: center;
+}
 </style>

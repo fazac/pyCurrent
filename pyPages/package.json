@@ -3,11 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "main": "electron/main.js",
+  "author": "fazac",
+  "description": "pycurwin",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite | nodemon --exec electron . --watch ./ --ext .js,.html,.css,.vue"
+    "start": "vite | nodemon --exec electron . --watch ./ --ext .js,.html,.css,.vue",
+    "electron:build": "vite build && electron-builder"
   },
   "dependencies": {
     "axios": "^1.7.2",

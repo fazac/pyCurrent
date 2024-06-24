@@ -23,7 +23,7 @@ body {
     flex-grow: 0;
 }
 
-.el-switch.type-switch {
+.type-switch {
     display: flex;
     justify-content: center;
 }
@@ -40,5 +40,9 @@ body {
 
 .txtc {
     text-align: center;
+}
+
+.ml-20{
+    margin-left: 20px;
 }
 
