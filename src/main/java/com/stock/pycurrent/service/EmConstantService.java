@@ -21,6 +21,10 @@ public class EmConstantService {
         return emConstantRepo.findAll();
     }
 
+    public void updateOne(EmConstant emConstant) {
+        emConstantRepo.saveAndFlush(emConstant);
+    }
+
     public EmConstant findOneByKey() {
         return emConstantRepo.findByKey("NOTIFICATION");
     }

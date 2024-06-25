@@ -20,4 +20,8 @@ public class CurConcernCodeService {
     public void saveList(List<CurConcernCode> concernCodeList) {
         curConcernCodeRepo.saveAllAndFlush(concernCodeList);
     }
+
+    public List<CurConcernCode> findLast() {
+        return curConcernCodeRepo.findLast();
+    }
 }

@@ -33,4 +33,8 @@ public class Constants {
 
     public static BigDecimal FOUR_BILLION = BigDecimal.valueOf(4000000000L);
 
+    public static BigDecimal ONE_HUNDRED_MILLION = BigDecimal.valueOf(100000000L);
+
+    public static BigDecimal PE_LIMIT = BigDecimal.valueOf(25);
+
 }

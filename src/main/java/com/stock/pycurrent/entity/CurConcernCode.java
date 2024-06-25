@@ -14,7 +14,6 @@ import java.util.Objects;
 @Table(name = "cur_concern_code")
 @IdClass(CurConcernCodePK.class)
 @ToString
-@NoArgsConstructor
 @AllArgsConstructor
 public class CurConcernCode {
     @Column(name = "trade_date", length = 32)
@@ -52,9 +51,12 @@ public class CurConcernCode {
     @Column(name = "pe", precision = 7, scale = 2)
     private BigDecimal pe;
 
-    @Transient
+    @Column(name = "tabel_show")
     private boolean isTableShow;
 
+    public CurConcernCode() {
+        this.isTableShow = false;
+    }
 
     @Override
     public final boolean equals(Object o) {

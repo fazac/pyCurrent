@@ -311,6 +311,8 @@ public class PullData implements CommandLineRunner {
                 }
                 if (concerned || holds || yesterdayHigh || onboard) {
                     curConcernCode.setTableShow(true);
+                } else if (curConcernCode.getPe() != null && curConcernCode.getPe().compareTo(Constants.PE_LIMIT) < 0) {
+                    curConcernCode.setTableShow(true);
                 }
                 curConcernCode.setTsCode(tsCode);
                 curConcernCode.setMark(type + " " + getPeekDesc(rt) + " " + tmpType);

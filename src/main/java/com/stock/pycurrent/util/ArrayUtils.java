@@ -4,6 +4,7 @@ import com.stock.pycurrent.entity.EmDNStock;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
+import com.stock.pycurrent.entity.vo.OpenVO;
 import com.stock.pycurrent.entity.vo.RealTimeVO;
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -86,4 +87,40 @@ public class ArrayUtils {
         }
         return Collections.emptyList();
     }
+
+    public static List<OpenVO> convertOpenVO(List<EmRealTimeStock> emRealTimeStocks) {
+        if (emRealTimeStocks != null && !emRealTimeStocks.isEmpty()) {
+            List<OpenVO> res = new ArrayList<>();
+            for (EmRealTimeStock emRealTimeStock : emRealTimeStocks) {
+                OpenVO openVO = new OpenVO();
+                openVO.setTs_code(emRealTimeStock.getTsCode());
+                openVO.setName(emRealTimeStock.getName());
+                openVO.setPct_chg(emRealTimeStock.getPctChg());
+                openVO.setChange_hand(emRealTimeStock.getChangeHand());
+                openVO.setPe(emRealTimeStock.getPe());
+                openVO.setPb(emRealTimeStock.getPb());
+                openVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+                if (emRealTimeStock.getPriClosePre() != null) {
+                    openVO.setOpen(emRealTimeStock.getPriOpen().subtract(emRealTimeStock.getPriClosePre()).multiply(Constants.HUNDRED)
+                            .divide(emRealTimeStock.getPriClosePre(), 3, RoundingMode.HALF_UP));
+                    openVO.setLow(emRealTimeStock.getPriLow().subtract(emRealTimeStock.getPriClosePre()).multiply(Constants.HUNDRED)
+                            .divide(emRealTimeStock.getPriClosePre(), 3, RoundingMode.HALF_UP));
+                    openVO.setHigh(emRealTimeStock.getPriHigh().subtract(emRealTimeStock.getPriClosePre()).multiply(Constants.HUNDRED)
+                            .divide(emRealTimeStock.getPriClosePre(), 3, RoundingMode.HALF_UP));
+                } else {
+                    openVO.setOpen(emRealTimeStock.getPriOpen());
+                    openVO.setLow(emRealTimeStock.getPriLow());
+                    openVO.setHigh(emRealTimeStock.getPriHigh());
+                }
+                openVO.setCurrent_pri(emRealTimeStock.getCurrentPri());
+                openVO.setAvg_pri(emRealTimeStock.getAmount()
+                        .divide(BigDecimal.valueOf(emRealTimeStock.getVol()).multiply(Constants.HUNDRED), 3, RoundingMode.HALF_UP));
+                openVO.setPri_pre(emRealTimeStock.getPriClosePre());
+                res.add(openVO);
+            }
+            return res;
+        }
+        return Collections.emptyList();
+    }
+
 }

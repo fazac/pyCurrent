@@ -26,6 +26,7 @@ body {
 .type-switch {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 
@@ -42,7 +43,62 @@ body {
     text-align: center;
 }
 
-.ml-20{
+.ml-20 {
     margin-left: 20px;
 }
 
+.mt-2 {
+    margin-top: 2rem;
+}
+
+.gap-2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    border: 1px solid rgba(84, 120, 196, 1);
+}
+
+.gap-2 .el-tag {
+    margin: 0.5rem 0.6rem;
+}
+
+.radio-group {
+    width: 50%;
+}
+
+.el-radio-button {
+    flex: 1
+}
+
+.el-radio-button__inner {
+    width: 100%;
+}
+
+.big-btn.el-button--small {
+    font-size: 1.2rem;
+}
+
+.el-popper.is-dark {
+    background: var(--cus-el-text-color-primary) !important;
+    border: 1px solid var(--cus-el-border-color-light) !important;
+    color: var(--cus-el-bg-color) !important;
+}
+
+.el-popper.is-dark .el-popper__arrow:before {
+    background: var(--cus-el-text-color-primary) !important;
+    border: 1px solid var(--cus-el-border-color-light) !important;
+    right: 0 !important;
+}
+
+html.dark {
+    --cus-el-border-color-light: #303133;
+    --cus-el-text-color-primary: #303133;
+    --cus-el-bg-color: #e4e7ed;
+}
+
+html {
+    --cus-el-border-color-light: #e4e7ed;
+    --cus-el-text-color-primary: #e4e7ed;
+    --cus-el-bg-color: #303133;
+}

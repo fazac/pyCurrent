@@ -372,3 +372,6 @@ create table `cur_concern_code`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
+
+-- 20240625
+alter table cur_concern_code add column `tabel_show` tinyint(1) default '0';

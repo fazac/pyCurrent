@@ -2,10 +2,8 @@ package com.stock.pycurrent.entity;
 
 import com.stock.pycurrent.entity.jsonvalue.EmConstantValue;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
@@ -28,8 +26,10 @@ public class EmConstant {
     private String cValue;
 
     @Column(columnDefinition = "jsonb", name = "multi_value")
-    @Type(JsonBinaryType.class)
+    @Type(JsonType.class)
     private List<EmConstantValue> multiValue;
+    @Transient
+    private String multiValueStr;
 
     @Override
     public boolean equals(Object o) {

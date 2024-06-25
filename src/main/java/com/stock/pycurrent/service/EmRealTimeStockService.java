@@ -3,6 +3,7 @@ package com.stock.pycurrent.service;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.emum.PyFuncEnum;
 import com.stock.pycurrent.entity.model.Constants;
+import com.stock.pycurrent.entity.vo.OpenVO;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.PythonScriptUtils;
 import jakarta.persistence.EntityManager;
@@ -12,7 +13,9 @@ import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @CommonsLog
@@ -62,6 +65,16 @@ public class EmRealTimeStockService {
         return ((Long) entityManager.createNativeQuery(sql)
                 .setParameter("tsCode", tsCode)
                 .getSingleResult()).intValue();
+    }
+
+    public List<EmRealTimeStock> findOpenByCode(String tsCode) {
+        String tableName = "em_real_time_stock_" + DateUtils.now();
+        String sql = "select * " +
+                     "    from " + tableName
+                     + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
+        return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
+                .setParameter("tsCode", tsCode)
+                .getResultList();
     }
 
     @Transactional

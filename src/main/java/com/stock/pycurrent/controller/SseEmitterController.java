@@ -4,15 +4,18 @@ package com.stock.pycurrent.controller;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
 import com.stock.pycurrent.entity.emum.SSEMsgEnum;
 import com.stock.pycurrent.entity.vo.RealTimeVO;
+import com.stock.pycurrent.service.CurConcernCodeService;
 import com.stock.pycurrent.service.EmRealTimeStockService;
 import com.stock.pycurrent.service.RealBarService;
 import com.stock.pycurrent.util.ArrayUtils;
+import com.stock.pycurrent.util.ExecutorUtils;
 import com.stock.pycurrent.util.MySseEmitterUtil;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author fzc
@@ -20,13 +23,14 @@ import java.util.List;
  * @description
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/sse")
 public class SseEmitterController {
     @Resource
     private RealBarService realBarService;
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
+    @Resource
+    private CurConcernCodeService curConcernCodeService;
 
 
     @GetMapping("/createSSEConnect")
@@ -37,9 +41,15 @@ public class SseEmitterController {
     public SseEmitter createSSEConnect(@RequestParam(value = "clientId", required = false) String clientId) {
         SseEmitter sseEmitter = MySseEmitterUtil.createSseConnect(clientId);
         if (!clientId.isEmpty()) {
-            sendRTMsg();
+            ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendRTMsg, 2, TimeUnit.SECONDS);
+        } else {
+            ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendConcernMsg, 2, TimeUnit.SECONDS);
         }
         return sseEmitter;
+    }
+
+    private void sendConcernMsg() {
+        MySseEmitterUtil.sendMsgToClient(curConcernCodeService.findLast(), SSEMsgEnum.RT_CURRENT);
     }
 
     private void sendRTMsg() {
@@ -52,6 +62,5 @@ public class SseEmitterController {
         return ArrayUtils.convertRealTimeVO(
                 emRealTimeStockService.findRBarStockByCode(code), realBarService.findIntradayBar(code));
     }
-
 
 }

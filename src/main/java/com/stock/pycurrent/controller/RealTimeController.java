@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
-import com.stock.pycurrent.service.EmDNStockService;
-import com.stock.pycurrent.service.EmRealTimeStockService;
-import com.stock.pycurrent.service.RealBarService;
+import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.JSONUtils;
 import jakarta.annotation.Resource;
@@ -19,8 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author fzc
@@ -31,14 +30,21 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("rt")
 @CommonsLog
-@CrossOrigin
 public class RealTimeController {
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
     @Resource
     private EmDNStockService emDNStockService;
     @Resource
-    private RealBarService realBarService;
+    private BoardIndustryConService boardIndustryConService;
+    @Resource
+    private BoardConceptConService boardConceptConService;
+    @Resource
+
+    private RocModelService rocModelService;
+
+    public RealTimeController() {
+    }
 
     @GetMapping("findDataByCode")
     @RequestLimit(key = "limit0",
@@ -46,6 +52,22 @@ public class RealTimeController {
             timeout = 500,
             msg = "访问频率已超限制")
     public ObjectNode findDataByCode(@Param("code") String code) {
+        ObjectNode objectNode = JSONUtils.getNode();
+        List<String> labels = new ArrayList<>(Arrays.asList(boardConceptConService.findConceptByCode(code).split(",")));
+        labels.addFirst(boardIndustryConService.findIndustryByCode(code));
+        objectNode.putPOJO("label", labels);
+        objectNode.putPOJO("open", ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByCode(code)));
+        objectNode.putPOJO("dnDetail", emDNStockService.findByCodeCount(code, 30));
+        objectNode.putPOJO("roc", rocModelService.findRocByCode(code));
+        return objectNode;
+    }
+
+    @GetMapping("findDataLineByCode")
+    @RequestLimit(key = "limit1",
+            permitsPerSecond = 1,
+            timeout = 500,
+            msg = "访问频率已超限制")
+    public ObjectNode findDataLineByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
         List<DnVO> dnVOList = ArrayUtils.convertDnVO(emDNStockService.findByCodeCount(code, 30).reversed());
         objectNode.putPOJO("dnData", dnVOList);

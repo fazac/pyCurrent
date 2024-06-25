@@ -1,7 +1,7 @@
 <script setup>
 import echarts from '@/echarts';
 import {reactive, ref, watch, shallowRef} from 'vue';
-import {findDataByCode} from '@/api/backend.js'
+import {findDataLineByCode} from '@/api/backend.js'
 
 
 const props = defineProps(['code'])
@@ -19,7 +19,7 @@ watch(() => props.code, async (newCode, oldCode) => {
 });
 
 function prepareDnHisData() {
-  findDataByCode(props.code).then(res => {
+  findDataLineByCode(props.code).then(res => {
     dnHisData.value = res.dnData;
     dnPriMin.value = res.dnPriMin;
     dnPriMax.value = res.dnPriMax;

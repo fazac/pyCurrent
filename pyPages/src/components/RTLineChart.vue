@@ -1,6 +1,7 @@
 <script setup>
 import echarts from '@/echarts';
 import {reactive, watch, shallowRef, onUnmounted} from 'vue';
+import axios from "@/api/http.js";
 
 const props = defineProps(['code'])
 
@@ -22,7 +23,7 @@ function prepareRTHisData() {
     })
     sourceList.length = 0;
   }
-  const source = new EventSource("http://139.84.194.82:7001/sse/createSSEConnect?clientId=" + props.code);
+  const source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=" + props.code);
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
       rtHisData.value = JSON.parse(event.data);
@@ -201,6 +202,14 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           emphasis: {
             disabled: true,
           },
+          markLine: {
+            precision:2,
+            symbol:'none',
+            data:[{type:'average'}],
+            label:{
+              offset: [25,0],
+            }
+          },
           markPoint: {
             data: [{
               type: "max",
@@ -271,17 +280,17 @@ function createRTLine(xArr, xArrFinal, maxHand) {
               color: '#ff00ff',
               // color: 'yellow',
               opacity: 1,
-              fontWeight:'bolder'
+              fontWeight: 'bolder'
             },
             symbolOffset: [0, '-50%'],
             itemStyle: {
               opacity: 0.1,
             },
           },
-          endLabel: {
-            show: true,
-            formatter: '{@h}'
-          }
+          // endLabel: {
+          //   show: true,
+          //   formatter: '{@h}'
+          // }
         },
         {
           type: 'line',
