@@ -70,7 +70,6 @@ BEGIN
             DEALLOCATE PREPARE stmt;
             SET queryCondition = SUBSTRING(queryCondition, LENGTH(element) + 2);
             SET cmd = concat('python C:/Users/fa/Desktop/py/data2chart.py --emcode=', SUBSTRING(element, 2, 6));
-            SET @result = sys_exec(cmd);
         END WHILE;
 end
 $$

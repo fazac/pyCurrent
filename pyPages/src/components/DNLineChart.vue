@@ -124,7 +124,7 @@ function createDnLine() {
           label: {
             show: true,
             color: '#ff00ff',
-            fontWeight:'600',
+            fontWeight: '600',
           },
           emphasis: {
             disabled: true,
@@ -139,7 +139,7 @@ function createDnLine() {
             opacity: 1,
             distance: 13,
             color: '#ff00ff',
-            fontWeight:'bolder',
+            fontWeight: 'bolder',
           },
           yAxisIndex: 1,
           areaStyle: {
@@ -174,7 +174,7 @@ function createDnLine() {
             distance: 13,
             position: 'bottom',
             color: '#ff00ff',
-            fontWeight:'bolder',
+            fontWeight: 'bolder',
           },
           areaStyle: {
             color: "rgba(191, 192, 193, 1)",
@@ -227,7 +227,9 @@ function createDnLine() {
             show: true,
             position: 'bottom',
             rotate: -45,
-            offset: [20, 0],
+            offset: [20, 20],
+            fontWeight: "bolder",
+            color: '#ff6666'
           },
           emphasis: {
             focus: 'self',
@@ -248,6 +250,9 @@ function createDnLine() {
             show: true,
             position: 'bottom',
             opacity: 1,
+            offset: [0, 20],
+            fontWeight: "bolder",
+            color: '#ff6666'
           },
           emphasis: {
             focus: 'self',

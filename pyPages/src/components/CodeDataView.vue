@@ -44,7 +44,7 @@ function handleColumnClick(item) {
 onMounted(() => {
   if (!!window.EventSource) {
     window.source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=");
-    window.source.addEventListener('open', function (e) {
+    window.source.addEventListener('open', function () {
       console.log("建立连接");
     })
     window.source.onmessage = function (event) {
@@ -52,6 +52,9 @@ onMounted(() => {
         codeDateList.value = JSON.parse(event.data);
       }
     }
+    window.source.onerror = function () {
+      window.source.close();
+    };
   }
 
 });
@@ -114,7 +117,7 @@ function onSubmit() {
 
 <template>
   <div class="table-container">
-    <span class="type-switch">
+    <span class="type-switch" >
       <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
                  inactive-text="rt"
                  style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
@@ -158,7 +161,7 @@ function onSubmit() {
   <DNLineChart :code=code v-if="lineType"></DNLineChart>
   <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 
-  <el-dialog v-model="dialogTableVisible" :show-close="false" lock-scroll draggable destroy-on-close width="1000">
+  <el-dialog v-model="dialogTableVisible"  :show-close="false" lock-scroll draggable destroy-on-close width="1000">
     <div class="type-switch">
       <el-radio-group class="radio-group" v-model="dialogType" size="large">
         <el-radio-button label="open" value="open"/>
@@ -244,7 +247,7 @@ function onSubmit() {
         <el-form-item label="cval" label-width="88px">
           <el-input v-model="selectConstant.value.cvalue" autocomplete="off" type="textarea"/>
         </el-form-item>
-        <el-form-item label="mval"  label-width="88px">
+        <el-form-item label="mval" label-width="88px">
           <el-input v-model="selectConstant.value.multiValueStr" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea">
           </el-input>
         </el-form-item>

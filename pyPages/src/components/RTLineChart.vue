@@ -37,6 +37,9 @@ function prepareRTHisData() {
       createRTLine(xArr, xArrFinal, handStep * 4);
     }
   }
+  source.onerror = function () {
+    source.close();
+  };
   sourceList.push(source);
 }
 
@@ -208,6 +211,7 @@ function createRTLine(xArr, xArrFinal, maxHand) {
             data:[{type:'average'}],
             label:{
               offset: [25,0],
+              color:'red',
             }
           },
           markPoint: {
@@ -231,6 +235,7 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           },
           endLabel: {
             show: true,
+            color:'red',
             formatter: '{@cp}'
           }
         },
@@ -251,7 +256,26 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           symbolSize: 3,
           emphasis: {
             disabled: true,
-          }
+          },
+          markPoint: {
+            data: [{
+              type: "max",
+            }, {
+              type: "min",
+              symbolRotate: 180,
+              label: {
+                offset: [0, 12]
+              }
+            }],
+            symbol: "pin",
+            label: {
+              color: 'green',
+              opacity: 0.8,
+            },
+            itemStyle: {
+              opacity: 0.4,
+            },
+          },
         },
         {
           type: 'line',
