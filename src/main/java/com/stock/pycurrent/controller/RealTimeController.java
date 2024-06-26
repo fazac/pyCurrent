@@ -1,6 +1,7 @@
 package com.stock.pycurrent.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.stock.pycurrent.entity.CurConcernCode;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
@@ -40,8 +41,9 @@ public class RealTimeController {
     @Resource
     private BoardConceptConService boardConceptConService;
     @Resource
-
     private RocModelService rocModelService;
+    @Resource
+    private CurConcernCodeService curConcernCodeService;
 
     public RealTimeController() {
     }
@@ -74,6 +76,11 @@ public class RealTimeController {
         objectNode.putPOJO("dnPriMin", findPriMin(dnVOList));
         objectNode.putPOJO("dnPriMax", findPriMax(dnVOList));
         return objectNode;
+    }
+
+    @GetMapping("findOtherList")
+    public List<CurConcernCode> findOtherList() {
+        return curConcernCodeService.findLast("0");
     }
 
     public BigDecimal findPriMin(List<DnVO> dnVOList) {

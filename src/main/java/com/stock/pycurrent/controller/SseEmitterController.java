@@ -55,7 +55,7 @@ public class SseEmitterController {
     }
 
     private void sendConcernMsg() {
-        MySseEmitterUtil.sendMsgToClient(curConcernCodeService.findLast(), SSEMsgEnum.RT_CURRENT);
+        MySseEmitterUtil.sendMsgToClient(curConcernCodeService.findLast("1"), SSEMsgEnum.RT_CURRENT);
     }
 
     private void sendRTMsg() {

@@ -24,4 +24,8 @@ export function findCurcc() {
     return axios.get('/curcount/findLastAll');
 }
 
+export function findOtherConcernList() {
+    return axios.get('/rt/findOtherList');
+}
+
 

@@ -45,7 +45,7 @@ public class PullData implements CommandLineRunner {
 
 
     private static final String CODE_TYPE = "F,A,R,C,L,H";
-    private static final String CODE_PRINT_TYPE = "F,R,A,C,L,H";
+    private static final String CODE_PRINT_TYPE = "F,R,C,L,H";
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
     @Resource
@@ -217,11 +217,12 @@ public class PullData implements CommandLineRunner {
             String tsCode = rt.getTsCode();
             holds = codes[2].contains(tsCode) || (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode));
             concerned = !holds && (codes[0].contains(tsCode) || (stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode)));
+            boolean threeLinked = true;
             if (tsCode.startsWith("30")) {
                 boolean peFlag = rt.getPe() == null || rt.getPe().compareTo(BigDecimal.ZERO) < 0;
                 boolean cmFlag = rt.getCirculationMarketCap() == null || rt.getCirculationMarketCap().compareTo(Constants.FOUR_BILLION) < 0;
                 if ((peFlag || cmFlag) && !concerned && !holds) {
-                    continue;
+                    threeLinked = false;
                 }
             }
             String tsName = rt.getName();
@@ -234,11 +235,6 @@ public class PullData implements CommandLineRunner {
 
             yesterdayHigh = limitCodeMap.containsKey(tsCode);
 
-            if (!tsCode.startsWith("30") && !concerned && !holds) {
-                continue;
-            }
-
-
             if (rt.getCurrentPri() != null
                 && (tsCode.startsWith("0") || tsCode.startsWith("60"))
                 && !tsName.contains("退")
@@ -250,6 +246,16 @@ public class PullData implements CommandLineRunner {
                 if (!holds && !concerned) {
                     sendNewNotification(notification, rt, tsCode);
                 }
+                CurConcernCode curConcernCode = new CurConcernCode();
+                curConcernCode.setTsCode(tsCode);
+                curConcernCode.setMark("A");
+                curConcernCode.setRt(rt.getPctChg());
+                curConcernCode.setH(rt.getChangeHand());
+                curConcernCode.setCp(rt.getCurrentPri());
+                curConcernCode.setCm(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP));
+                curConcernCode.setPe(rt.getPe());
+                curConcernCode.setTradeDate(curTradeDate);
+                curConcernCodeList.add(curConcernCode);
             }
 
             if (!tsName.contains("退") && tsCode.startsWith("3") && !noConcerned && rt.getPctChg() != null && checkOverLimit) {
@@ -302,7 +308,10 @@ public class PullData implements CommandLineRunner {
                 if (rt.getVol() != null && checkOverLimit) {
                     tmpBar = deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR);
                 }
-                logsMap.get(type).add(getPeekDesc(rt) + tmpType + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? tmpBar : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                if (threeLinked) {
+                    logsMap.get(type).add(getPeekDesc(rt) + tmpType + " " + tsCode.substring(2, 6) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + holdRemark + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? tmpBar : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
+                    curConcernCode.setTableShow(true);
+                }
 
                 if (highLimit) {
                     todayBoardCodes.add(tsCode);

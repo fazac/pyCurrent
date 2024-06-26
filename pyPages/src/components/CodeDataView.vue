@@ -6,7 +6,7 @@ import DNLineChart from './DNLineChart.vue'
 import RTLineChart from './RTLineChart.vue'
 import axios from "@/api/http.js";
 import {Search, Edit, Histogram, Compass, SwitchButton, List} from '@element-plus/icons-vue'
-import {findDataByCode, findConstants, updateConstant, findCurcc} from '@/api/backend.js'
+import {findDataByCode, findConstants, updateConstant, findCurcc, findOtherConcernList} from '@/api/backend.js'
 import {isEmpty} from '@/api/util'
 import {ElNotification} from 'element-plus'
 
@@ -30,12 +30,15 @@ const constantsDial = ref(false);
 const constantsDialInner = ref(false);
 const selectConstant = reactive({});
 
-const curccVisibile = ref(false);
-const curccTableData = reactive({});
-const curtype = ref('');
+const curCountVisible = ref(false);
+const curCountTableData = reactive({});
+const curType = ref('');
 
-const searchVisibile = ref(false);
+const searchVisible = ref(false);
 const searchCode = reactive({code: '',});
+
+const otherConcernVisible = ref(false);
+const otherConcernTableData = reactive({});
 
 function handleRowClick(row, column, event) {
   if (column && column.label === '详情') {
@@ -146,14 +149,14 @@ function onSubmit() {
 
 function showCurccDial() {
   findCurcc().then(res => {
-    curccVisibile.value = true;
-    curccTableData.value = res;
-    curtype.value = '3';
+    curCountVisible.value = true;
+    curCountTableData.value = res;
+    curType.value = '3';
   })
 }
 
 function showSearchDial() {
-  searchVisibile.value = true;
+  searchVisible.value = true;
 }
 
 function onSearchSubmit() {
@@ -168,14 +171,17 @@ function onSearchSubmit() {
       dialogTableVisible.value = true;
       codeTableData.value = res;
       dialogType.value = 'open';
-      searchVisibile.value = false;
+      searchVisible.value = false;
     });
   }
 }
 
 
 function showOtherConcernDial() {
-
+  findOtherConcernList().then(res => {
+    otherConcernTableData.value = res;
+    otherConcernVisible.value = true;
+  })
 }
 
 </script>
@@ -235,7 +241,8 @@ function showOtherConcernDial() {
   <DNLineChart :code=code v-if="lineType"></DNLineChart>
   <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 
-  <el-dialog v-model="dialogTableVisible" :show-close="false" lock-scroll draggable destroy-on-close width="1000">
+  <el-dialog v-model="dialogTableVisible" title="DETAIL" :show-close="false" lock-scroll draggable destroy-on-close
+             width="1000">
     <div class="type-switch">
       <el-radio-group class="radio-group" v-model="dialogType" size="large">
         <el-radio-button label="open" value="open"/>
@@ -300,7 +307,7 @@ function showOtherConcernDial() {
 
   </el-dialog>
 
-  <el-dialog v-model="constantsDial" title="CONSTANTS"
+  <el-dialog v-model="constantsDial" title="CONSTANT"
              :show-close="false" lock-scroll center draggable destroy-on-close width="1000">
     <el-table :data="constants.value" class="mt-2" max-height="400px"
               :cell-style="{'text-align': 'center'}"
@@ -337,19 +344,19 @@ function showOtherConcernDial() {
     </el-dialog>
   </el-dialog>
 
-  <el-dialog v-model="curccVisibile" title="CURCC"
+  <el-dialog v-model="curCountVisible" title="CURCOUNT"
              :show-close="false" lock-scroll center draggable destroy-on-close width="1000">
     <div class="type-switch">
-      <el-radio-group class="radio-group" v-model="curtype" size="large">
+      <el-radio-group class="radio-group" v-model="curType" size="large">
         <el-radio-button label="3" value="3"/>
         <el-radio-button label="6" value="6"/>
         <el-radio-button label="0" value="0"/>
       </el-radio-group>
     </div>
-    <el-table :data="curccTableData.value" class="mt-2" max-height="400px"
+    <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
               :cell-style="{'text-align': 'center'}" stripe
               :header-cell-style="{'text-align': 'center'}"
-              v-if="curtype==='3'"
+              v-if="curType==='3'"
     >
       <el-table-column prop="c30a" label="a"/>
       <el-table-column prop="c30u" label="u"/>
@@ -362,10 +369,10 @@ function showOtherConcernDial() {
       <el-table-column prop="c3037d" label="37d"/>
       <el-table-column prop="c307d" label="7d"/>
     </el-table>
-    <el-table :data="curccTableData.value" class="mt-2" max-height="400px"
+    <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
               :cell-style="{'text-align': 'center'}" stripe
               :header-cell-style="{'text-align': 'center'}"
-              v-if="curtype==='6'"
+              v-if="curType==='6'"
     >
       <el-table-column prop="c60a" label="a"/>
       <el-table-column prop="c60u" label="u"/>
@@ -378,10 +385,10 @@ function showOtherConcernDial() {
       <el-table-column prop="c6037d" label="37d"/>
       <el-table-column prop="c607d" label="7d"/>
     </el-table>
-    <el-table :data="curccTableData.value" class="mt-2" max-height="400px"
+    <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
               :cell-style="{'text-align': 'center'}" stripe
               :header-cell-style="{'text-align': 'center'}"
-              v-if="curtype==='0'"
+              v-if="curType==='0'"
     >
       <el-table-column prop="c00a" label="a"/>
       <el-table-column prop="c00u" label="u"/>
@@ -397,7 +404,7 @@ function showOtherConcernDial() {
     </el-table>
   </el-dialog>
 
-  <el-dialog v-model="searchVisibile" title="SEARCH" align-center
+  <el-dialog v-model="searchVisible" title="SEARCH"
              :show-close="false" lock-scroll center draggable destroy-on-close width="360">
     <el-form :model="searchCode">
       <el-form-item>
@@ -406,12 +413,43 @@ function showOtherConcernDial() {
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="searchVisibile = false">Cancel</el-button>
+        <el-button @click="searchVisible = false">Cancel</el-button>
         <el-button type="primary" icon="Search" @click="onSearchSubmit">
           Search
         </el-button>
       </div>
     </template>
+  </el-dialog>
+
+  <el-dialog v-model="otherConcernVisible" title="OTHER"
+             :show-close="false" lock-scroll center draggable destroy-on-close width="1000">
+    <el-table
+        :data="otherConcernTableData.value" empty-text=" "
+        border
+        stripe
+        :cell-style="cellStyle"
+        :header-cell-style="headerCellStyle"
+    >
+      <el-table-column prop="mark" label="mark"/>
+      <el-table-column prop="cp" label="cp"/>
+      <el-table-column prop="rt" label="rt"/>
+      <el-table-column prop="h" label="h"/>
+      <el-table-column prop="bp" label="bp"/>
+      <el-table-column prop="rr" label="rr"/>
+      <el-table-column prop="cm" label="cm"/>
+      <el-table-column prop="pe" label="pe"/>
+      <el-table-column prop="tsCode" label="code">
+        <template #default="scope">
+          <span>{{ scope.row.tsCode.substring(0, 1).concat(scope.row.tsCode.substring(2, 6)) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="详情">
+        <template #default="scope">
+          <el-button type="info" @click.native.stop="handleRowClick" round
+                     @click="handleColumnClick(scope.row)" :icon="List"></el-button>
+        </template>
+      </el-table-column>
+    </el-table>
   </el-dialog>
 </template>
 

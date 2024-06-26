@@ -21,7 +21,7 @@ public class CurConcernCodeService {
         curConcernCodeRepo.saveAllAndFlush(concernCodeList);
     }
 
-    public List<CurConcernCode> findLast() {
-        return curConcernCodeRepo.findLast();
+    public List<CurConcernCode> findLast(String type) {
+        return curConcernCodeRepo.findLast(type);
     }
 }
