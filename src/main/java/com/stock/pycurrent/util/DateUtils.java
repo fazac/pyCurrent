@@ -27,6 +27,10 @@ public class DateUtils {
         return date == null ? LocalDateTime.now() : date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
+    public static String convertMillisecond(long millisecond) {
+        return toLocalDateTime(new Date(millisecond)).format(DATE_TIME_FORMAT);
+    }
+
 
     public static long getDayInterval(Date start, Date end) {
         return DAYS.between(toLocalDateTime(start), toLocalDateTime(end));

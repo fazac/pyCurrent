@@ -2,25 +2,31 @@ package com.stock.pycurrent.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.stock.pycurrent.entity.CurConcernCode;
+import com.stock.pycurrent.entity.EmRealTimeStock;
+import com.stock.pycurrent.entity.LimitCode;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
+import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
+import com.stock.pycurrent.entity.vo.LimitCodeVO;
 import com.stock.pycurrent.entity.vo.OpenVO;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
+import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.JSONUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -47,6 +53,8 @@ public class RealTimeController {
     private CurConcernCodeService curConcernCodeService;
     @Resource
     private RealBarService realBarService;
+    @Resource
+    private LimitCodeService limitCodeService;
 
     public RealTimeController() {
     }
@@ -59,15 +67,7 @@ public class RealTimeController {
     public ObjectNode findDataByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
         List<OpenVO> openVOList = ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByCode(code));
-        String conceptLabel = boardConceptConService.findConceptByCode(code);
-        List<String> labels = new ArrayList<>();
-        if (conceptLabel != null && !conceptLabel.isEmpty()) {
-            labels.addAll(Arrays.asList(conceptLabel.split(",")));
-        }
-        String industryLabel = boardIndustryConService.findIndustryByCode(code);
-        if (industryLabel != null && !industryLabel.isEmpty()) {
-            labels.addFirst(industryLabel);
-        }
+        List<String> labels = getLabelsByCode(code);
         labels.addFirst(openVOList.get(0).getName());
         objectNode.putPOJO("label", labels);
         objectNode.putPOJO("open", openVOList);
@@ -95,6 +95,71 @@ public class RealTimeController {
     @GetMapping("findOtherList")
     public List<CurConcernCode> findOtherList() {
         return curConcernCodeService.findLast("0");
+    }
+
+    @GetMapping("searchSome")
+    public ObjectNode searchSome(@RequestParam(value = "code", required = false) String code,
+                                 @RequestParam(value = "name", required = false) String name,
+                                 @RequestParam(value = "searchDate", required = false) Long searchDate,
+                                 @RequestParam(value = "hand", required = false) Double hand,
+                                 @RequestParam(value = "pch", required = false) Double pch,
+                                 @RequestParam(value = "count", required = false) Integer count,
+                                 @RequestParam(value = "type") String type) {
+        ObjectNode objectNode = JSONUtils.getNode();
+
+        switch (type) {
+            //code
+            case "1" -> objectNode = findDataByCode(code);
+            //realName
+            case "2" -> {
+                List<OpenVO> openVOList = ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByName(name));
+                objectNode.putPOJO("openVOList", openVOList);
+            }
+            //limit
+            case "3" -> {
+                LimitCode limitCode = limitCodeService.findByDate(DateUtils.convertMillisecond(searchDate));
+                List<LimitCodeVO> limitCodeVOList = new ArrayList<>();
+                if (limitCode != null && limitCode.getCodeValue() != null && !limitCode.getCodeValue().isEmpty()) {
+                    List<LimitCodeValue> tmp = limitCode.getCodeValue();
+                    tmp.sort(Comparator.comparing(LimitCodeValue::getCount));
+                    tmp = tmp.reversed();
+                    tmp.forEach(x -> {
+                        LimitCodeVO limitCodeVO = new LimitCodeVO();
+                        limitCodeVO.setCode(x.getCode());
+                        limitCodeVO.setCount(x.getCount());
+                        EmRealTimeStock emRealTimeStock = emRealTimeStockService.findOpenByCode(code).get(0);
+                        limitCodeVO.setPe(emRealTimeStock.getPe());
+                        limitCodeVO.setPb(emRealTimeStock.getPb());
+                        limitCodeVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+                        List<String> labels = getLabelsByCode(code);
+                        labels.addFirst(emRealTimeStock.getName());
+                        limitCodeVO.setLabels(String.join(",", labels));
+                        limitCodeVOList.add(limitCodeVO);
+                    });
+                }
+                objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
+            }
+            //ophc
+            case "4" -> {
+                emDNStockService.findOPHC(count,
+                        hand != null ? BigDecimal.valueOf(hand) : null,
+                        pch != null ? BigDecimal.valueOf(pch) : null);
+            }
+        }
+        return objectNode;
+    }
+
+    private List<String> getLabelsByCode(@RequestParam(value = "code", required = false) String code) {
+        List<String> labels = new ArrayList<>();
+        String conceptLabel = boardConceptConService.findConceptByCode(code);
+        if (conceptLabel != null && !conceptLabel.isEmpty()) {
+            labels.addAll(Arrays.asList(conceptLabel.split(",")));
+        }
+        String industryLabel = boardIndustryConService.findIndustryByCode(code);
+        if (industryLabel != null && !industryLabel.isEmpty()) {
+            labels.addFirst(industryLabel);
+        }
+        return labels;
     }
 
     public BigDecimal findPriMin(List<DnVO> dnVOList) {

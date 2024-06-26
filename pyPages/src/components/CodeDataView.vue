@@ -99,6 +99,12 @@ function changeLineType() {
 }
 
 
+function rowStyleClass(row) {
+  if (!isEmpty(row) && row.row.mark.charAt(0) === 'R') {
+    return 'row-high-light';
+  }
+}
+
 function cellStyle(row) {
   if (row.columnIndex === 0 || row.columnIndex === 8 || row.columnIndex === 9) {
     return {'text-align': 'center'};
@@ -217,6 +223,7 @@ function showOtherConcernDial() {
         class="main-table"
         :cell-style="cellStyle"
         :header-cell-style="headerCellStyle"
+        :row-class-name="rowStyleClass"
     >
       <el-table-column prop="mark" label="mark"/>
       <el-table-column prop="cp" label="cp"/>
@@ -442,6 +449,7 @@ function showOtherConcernDial() {
         :data="otherConcernTableData.value" empty-text=" " max-height="600"
         border
         stripe
+        :row-class-name="rowStyleClass"
         :cell-style="cellStyle"
         :header-cell-style="headerCellStyle"
     >

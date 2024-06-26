@@ -92,14 +92,20 @@ body {
     right: 0 !important;
 }
 
+.row-high-light > * {
+    background-color: var(--cus-row-highlight) !important;
+}
+
 html.dark {
     --cus-el-border-color-light: #303133;
     --cus-el-text-color-primary: #303133;
     --cus-el-bg-color: #e4e7ed;
+    --cus-row-highlight: #330000;
 }
 
 html {
     --cus-el-border-color-light: #e4e7ed;
     --cus-el-text-color-primary: #e4e7ed;
     --cus-el-bg-color: #303133;
+    --cus-row-highlight: #e5fff5;
 }

@@ -77,6 +77,16 @@ public class EmRealTimeStockService {
                 .getResultList();
     }
 
+    public List<EmRealTimeStock> findOpenByName(String name) {
+        String tableName = "em_real_time_stock_" + DateUtils.now();
+        String sql = "select * " +
+                     "    from " + tableName
+                     + " t where t.name like :name and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
+        return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
+                .setParameter("name", "%" + name + "%")
+                .getResultList();
+    }
+
     @Transactional
     @Modifying
     public void createTable() {
