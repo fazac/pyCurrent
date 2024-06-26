@@ -23,7 +23,7 @@ function prepareRTHisData() {
     })
     sourceList.length = 0;
   }
-  const source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=" + props.code);
+  const source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=" + props.code + "&type=2");
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
       rtHisData.value = JSON.parse(event.data);
@@ -206,12 +206,12 @@ function createRTLine(xArr, xArrFinal, maxHand) {
             disabled: true,
           },
           markLine: {
-            precision:2,
-            symbol:'none',
-            data:[{type:'average'}],
-            label:{
-              offset: [25,0],
-              color:'red',
+            precision: 2,
+            symbol: 'none',
+            data: [{type: 'average'}],
+            label: {
+              offset: [25, 0],
+              color: 'red',
             }
           },
           markPoint: {
@@ -235,7 +235,7 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           },
           endLabel: {
             show: true,
-            color:'red',
+            color: 'red',
             formatter: '{@cp}'
           }
         },

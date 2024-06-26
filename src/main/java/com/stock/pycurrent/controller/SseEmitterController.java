@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,12 +39,17 @@ public class SseEmitterController {
             permitsPerSecond = 3,
             timeout = 10,
             msg = "访问频率已超限制")
-    public SseEmitter createSSEConnect(@RequestParam(value = "clientId", required = false) String clientId) {
-        SseEmitter sseEmitter = MySseEmitterUtil.createSseConnect(clientId);
-        if (!clientId.isEmpty()) {
-            ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendRTMsg, 2, TimeUnit.SECONDS);
-        } else {
-            ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendConcernMsg, 2, TimeUnit.SECONDS);
+    public SseEmitter createSSEConnect(@RequestParam(value = "clientId", required = false) String clientId,
+                                       @RequestParam(value = "type") String type) {
+        SSEMsgEnum sseMsgEnum = Objects.requireNonNull(SSEMsgEnum.fromType(type));
+        SseEmitter sseEmitter = MySseEmitterUtil.createSseConnect(clientId, sseMsgEnum);
+        switch (sseMsgEnum) {
+            case RT_CURRENT -> {
+                ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendConcernMsg, 2, TimeUnit.SECONDS);
+            }
+            case RT_HIS -> {
+                ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendRTMsg, 2, TimeUnit.SECONDS);
+            }
         }
         return sseEmitter;
     }

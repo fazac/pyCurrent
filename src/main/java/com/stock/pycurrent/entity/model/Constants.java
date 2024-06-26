@@ -15,7 +15,7 @@ public class Constants {
 
     public static String SSE_RT_LIST = "sse_rt_list";
     public static String SSE_RT_HIS = "sse_rt_his";
-    public static String SSE_DN_HIS = "sse_dn_his";
+    public static String SSE_MSG_HIS = "sse_msg_his";
     public static String CLIENT_ID = "sse_client_id";
     public static BigDecimal HUNDRED = BigDecimal.valueOf(100);
     public static BigDecimal EIGHT = BigDecimal.valueOf(8);

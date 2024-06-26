@@ -1,5 +1,6 @@
 package com.stock.pycurrent.util;
 
+import com.stock.pycurrent.entity.emum.SSEMsgEnum;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
@@ -8,6 +9,7 @@ import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 
 import java.awt.*;
+import java.util.Arrays;
 
 /**
  * @author fzc
@@ -39,7 +41,7 @@ public class MessageUtil {
 
     @SneakyThrows
     public static void sendNotificationMsg(String title, String code) {
-        if (!PARAMS.BAK_MODE) {
+        if (PARAMS.BAK_MODE) {
             sendMessage("New Message");
             SystemTray tray = SystemTray.getSystemTray();
             Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
@@ -48,6 +50,8 @@ public class MessageUtil {
             trayIcon.setToolTip("System tray icon demo");
             tray.add(trayIcon);
             trayIcon.displayMessage(title, code.substring(2, 6), TrayIcon.MessageType.INFO);
+        } else {
+            MySseEmitterUtil.sendMsgToClient(Arrays.asList(title, code), SSEMsgEnum.RT_NOTIFICATION);
         }
         log.warn(title + " " + code);
     }

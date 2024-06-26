@@ -27,20 +27,29 @@ public class MySseEmitterUtil {
      */
     public static final Map<String, SseEmitter> clientSSECache = new ConcurrentHashMap<>();
     public static final Map<String, SseEmitter> codeSSECache = new ConcurrentHashMap<>();
+    public static final Map<String, SseEmitter> notificationSSECache = new ConcurrentHashMap<>();
 
     public static boolean codeCacheEmpty() {
         return codeSSECache.isEmpty();
     }
 
-    public static SseEmitter createSseConnect(String clientId) {
+    public static SseEmitter createSseConnect(String clientId, SSEMsgEnum sseMsgEnum) {
         SseEmitter sseEmitter = new SseEmitter(0L);
-        if (clientId.isBlank()) {
-            closeMapConnect(clientSSECache);
-            clientId = UUID.randomUUID().toString();
-            clientSSECache.put(clientId, sseEmitter);
-        } else {
-            closeMapConnect(codeSSECache);
-            codeSSECache.put(clientId, sseEmitter);
+        switch (sseMsgEnum) {
+            case RT_CURRENT -> {
+                closeMapConnect(clientSSECache);
+                clientId = UUID.randomUUID().toString();
+                clientSSECache.put(clientId, sseEmitter);
+            }
+            case RT_HIS -> {
+                closeMapConnect(codeSSECache);
+                codeSSECache.put(clientId, sseEmitter);
+            }
+            case RT_NOTIFICATION -> {
+                clientId = UUID.randomUUID().toString();
+                closeMapConnect(notificationSSECache);
+                notificationSSECache.put(clientId, sseEmitter);
+            }
         }
         sseEmitter.onCompletion(completionCallBack(clientId));
         try {
@@ -48,8 +57,6 @@ public class MySseEmitterUtil {
         } catch (IOException e) {
             log.error("MySseEmitterService[createSseConnect]: 创建长链接异常，客户端ID:" + clientId, e);
         }
-        log.warn("ClientSSECacheSize: " + clientSSECache.size());
-        log.warn("CodeSSECacheSize: " + clientSSECache.size());
         return sseEmitter;
     }
 
@@ -68,22 +75,30 @@ public class MySseEmitterUtil {
             return;
         }
         switch (sseMsgEnum) {
-            case SSEMsgEnum.RT_CURRENT:
+            case RT_CURRENT -> {
                 if (clientSSECache.isEmpty()) {
                     return;
                 }
                 for (Map.Entry<String, SseEmitter> entry : clientSSECache.entrySet()) {
                     sendMsgToClientByClientId(entry.getKey(), Constants.SSE_RT_LIST, data, entry.getValue());
                 }
-                break;
-            case SSEMsgEnum.RT_HIS:
+            }
+            case RT_HIS -> {
                 if (codeSSECache.isEmpty()) {
                     return;
                 }
                 for (Map.Entry<String, SseEmitter> entry : codeSSECache.entrySet()) {
                     sendMsgToClientByClientId(entry.getKey(), Constants.SSE_RT_HIS, data, entry.getValue());
                 }
-                break;
+            }
+            case RT_NOTIFICATION -> {
+                if (notificationSSECache.isEmpty()) {
+                    return;
+                }
+                for (Map.Entry<String, SseEmitter> entry : notificationSSECache.entrySet()) {
+                    sendMsgToClientByClientId(entry.getKey(), Constants.SSE_MSG_HIS, data, entry.getValue());
+                }
+            }
         }
     }
 

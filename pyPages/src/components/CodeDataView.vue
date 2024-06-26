@@ -43,17 +43,33 @@ function handleColumnClick(item) {
 
 onMounted(() => {
   if (!!window.EventSource) {
-    window.source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=");
-    window.source.addEventListener('open', function () {
-      console.log("建立连接");
+    const tabelSource = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=&type=1");
+    tabelSource.addEventListener('open', function () {
+      console.log("建立table连接");
     })
-    window.source.onmessage = function (event) {
+    tabelSource.onmessage = function (event) {
       if (event.lastEventId !== 'sse_client_id') {
         codeDateList.value = JSON.parse(event.data);
       }
     }
-    window.source.onerror = function () {
-      window.source.close();
+    tabelSource.onerror = function () {
+      tabelSource.source.close();
+    };
+    const msgSource = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=&type=3");
+    msgSource.addEventListener('open', function () {
+      console.log("建立msg连接");
+    })
+    msgSource.onmessage = function (event) {
+      if (event.lastEventId !== 'sse_client_id') {
+        ElNotification({
+          title: event.data[0],
+          message: event.data[1],
+          type: 'success',
+        })
+      }
+    }
+    msgSource.onerror = function () {
+      msgSource.source.close();
     };
   }
 
@@ -117,7 +133,7 @@ function onSubmit() {
 
 <template>
   <div class="table-container">
-    <span class="type-switch" >
+    <span class="type-switch">
       <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
                  inactive-text="rt"
                  style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
@@ -161,7 +177,7 @@ function onSubmit() {
   <DNLineChart :code=code v-if="lineType"></DNLineChart>
   <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 
-  <el-dialog v-model="dialogTableVisible"  :show-close="false" lock-scroll draggable destroy-on-close width="1000">
+  <el-dialog v-model="dialogTableVisible" :show-close="false" lock-scroll draggable destroy-on-close width="1000">
     <div class="type-switch">
       <el-radio-group class="radio-group" v-model="dialogType" size="large">
         <el-radio-button label="open" value="open"/>
