@@ -36,21 +36,21 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
     @Query(value = "select * from em_d_n_stock where ts_code = :code order by trade_date desc limit :count ", nativeQuery = true)
     List<EmDNStock> findByCodeCount(@Param("code") String code, @Param("count") int count);
 
+    @Query(value = "select min(t.trade_date) from (select distinct trade_date from em_d_n_stock order by trade_date desc limit :count) t", nativeQuery = true)
+    String findMinTradeDateByCount(@Param("count") Integer count);
+
     @Query(value = """
-                select ts_code, hand, c, md
+                select ts_code, hand, c
                 from (select ts_code,
                              sum(change_hand)                                              as hand,
-                             round((max(pri_high) - min(pri_low)) / min(pri_low) * 100, 2) as c,
-                             min(trade_date)                                               as md
+                             round((max(pri_high) - min(pri_low)) / min(pri_low) * 100, 2) as c
                       from em_d_n_stock
-                      where trade_date >=
-                            (select min(t.trade_date)
-                             from (select distinct trade_date from em_d_n_stock order by trade_date desc limit :count) t)
+                      where trade_date >= :tradeDate
                       group by ts_code) t1
                 where (hand >= :hand or :hand is null)
                   and (c >= :pch or :pch is null);
             """, nativeQuery = true)
-    List<Object> findOPHC(@Param("count") Integer count, @Param("hand") BigDecimal hand, @Param("pch") BigDecimal pch);
+    List<Object> findOPHC(@Param("tradeDate") String tradeDate, @Param("hand") BigDecimal hand, @Param("pch") BigDecimal pch);
 
     @Query(value = """
                     select t2.ts_code,

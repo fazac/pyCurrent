@@ -375,3 +375,8 @@ create table `cur_concern_code`
 
 -- 20240625
 alter table cur_concern_code add column `tabel_show` tinyint(1) default '0';
+
+-- 20240626
+ALTER TABLE `board_concept_con` ADD INDEX index_code_date (`ts_code`, `trade_date`);
+ALTER TABLE `board_industry_con` ADD INDEX index_code_date (`ts_code`, `trade_date`);
+

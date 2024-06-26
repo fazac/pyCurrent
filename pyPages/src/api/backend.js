@@ -28,4 +28,17 @@ export function findOtherConcernList() {
     return axios.get('/rt/findOtherList');
 }
 
+export function searchSome(type, code, name, searchDate, hand, pch, count) {
+    return axios.get('/rt/searchSome', {
+        params: {
+            code: code,
+            name: name,
+            searchDate: searchDate,
+            hand: hand,
+            pch: pch,
+            count: count,
+            type: type,
+        }
+    });
+}
 

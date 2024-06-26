@@ -6,7 +6,14 @@ import DNLineChart from './DNLineChart.vue'
 import RTLineChart from './RTLineChart.vue'
 import axios from "@/api/http.js";
 import {Search, Edit, Histogram, Compass, SwitchButton, List} from '@element-plus/icons-vue'
-import {findDataByCode, findConstants, updateConstant, findCurcc, findOtherConcernList} from '@/api/backend.js'
+import {
+  findDataByCode,
+  findConstants,
+  updateConstant,
+  findCurcc,
+  findOtherConcernList,
+  searchSome
+} from '@/api/backend.js'
 import {isEmpty} from '@/api/util'
 import {ElNotification} from 'element-plus'
 
@@ -35,10 +42,33 @@ const curCountTableData = reactive({});
 const curType = ref('');
 
 const searchVisible = ref(false);
-const searchCode = reactive({code: '',});
+const searchObj = reactive(
+    {
+      code: '',
+      name: '',
+      searchDate: null,
+      hand: null,
+      pch: null,
+      dayCount: null,
+      type: '',
+    }
+);
 
 const otherConcernVisible = ref(false);
 const otherConcernTableData = reactive({});
+
+const sOpenVOVisible = ref(false);
+const sOpenVOTableData = reactive({});
+
+const sLimitVOVisible = ref(false);
+const sLimitVOType = ref('');
+const sLimitVOTableData = reactive({});
+
+
+function txtCenter() {
+  return {'text-align': 'center'};
+}
+
 
 function handleRowClick(row, column, event) {
   if (column && column.label === '详情') {
@@ -48,7 +78,7 @@ function handleRowClick(row, column, event) {
 }
 
 function handleColumnClick(item) {
-  findDataByCode(item.tsCode).then(res => {
+  findDataByCode(item).then(res => {
     dialogTableVisible.value = true;
     codeTableData.value = res;
     dialogType.value = 'open';
@@ -107,14 +137,14 @@ function rowStyleClass(row) {
 
 function cellStyle(row) {
   if (row.columnIndex === 0 || row.columnIndex === 8 || row.columnIndex === 9) {
-    return {'text-align': 'center'};
+    return txtCenter;
   } else {
     return {'text-align': 'right'};
   }
 }
 
 function headerCellStyle() {
-  return {'text-align': 'center'};
+  return txtCenter;
 }
 
 function showConstantsDial() {
@@ -164,22 +194,60 @@ function showCurccDial() {
 
 function showSearchDial() {
   searchVisible.value = true;
+  searchObj.type = '1';
+  searchObj.searchDate = new Date();
 }
 
 function onSearchSubmit() {
-  if (isEmpty(searchCode) || isEmpty(searchCode.code)) {
+  if (isEmpty(searchObj)) {
     ElNotification({
-      title: 'no code',
-      message: 'code is required',
+      title: 'input error',
+      message: 'some info miss',
       type: 'warning',
     })
   } else {
-    findDataByCode(searchCode.code).then(res => {
-      dialogTableVisible.value = true;
-      codeTableData.value = res;
-      dialogType.value = 'open';
-      searchVisible.value = false;
-    });
+    switch (searchObj.type) {
+      case "1":
+        searchSome("1", searchObj.code).then(res => {
+          dialogTableVisible.value = true;
+          codeTableData.value = res;
+          dialogType.value = 'open';
+          searchVisible.value = false;
+        });
+        break;
+      case "2":
+        searchSome("2", null, searchObj.name).then(res => {
+          sOpenVOVisible.value = true;
+          sOpenVOTableData.value = res;
+          searchVisible.value = false;
+        });
+        break;
+      case "3":
+        searchSome("3", null, null, searchObj.searchDate.getTime()).then(res => {
+          sLimitVOVisible.value = true;
+          sLimitVOTableData.value = res;
+          sLimitVOType.value = '3';
+          searchVisible.value = false;
+        })
+        break;
+      case "4":
+        if (isEmpty(searchObj.dayCount)) {
+          ElNotification({
+            title: 'input error',
+            message: 'dayCount miss',
+            type: 'warning',
+          })
+          return;
+        }
+        searchSome("4", null, null, null, searchObj.hand, searchObj.pch, searchObj.dayCount).then(res => {
+          sLimitVOVisible.value = true;
+          sLimitVOTableData.value = res;
+          sLimitVOType.value = '4';
+          searchVisible.value = false;
+        })
+        break;
+    }
+
   }
 }
 
@@ -241,7 +309,7 @@ function showOtherConcernDial() {
       <el-table-column label="详情">
         <template #default="scope">
           <el-button type="info" @click.native.stop="handleRowClick" round
-                     @click="handleColumnClick(scope.row)" :icon="List"></el-button>
+                     @click="handleColumnClick(scope.row.tsCode)" :icon="List"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -262,8 +330,8 @@ function showOtherConcernDial() {
     </div>
 
     <el-table :data="codeTableData.value.open" class="mt-2" v-if="dialogType==='open'"
-              :cell-style="{'text-align': 'center'}"
-              :header-cell-style="{'text-align': 'center'}">
+              :cell-style="txtCenter"
+              :header-cell-style="txtCenter">
       <el-table-column property="pct_chg" label="pch"/>
       <el-table-column property="change_hand" label="hand"/>
       <el-table-column property="pe" label="pe"/>
@@ -278,8 +346,8 @@ function showOtherConcernDial() {
     </el-table>
 
     <el-table :data="codeTableData.value.dnDetail" class="mt-2" max-height="400px" stripe v-if="dialogType==='dn'"
-              :cell-style="{'text-align': 'center'}"
-              :header-cell-style="{'text-align': 'center'}">
+              :cell-style="txtCenter"
+              :header-cell-style="txtCenter">
       <el-table-column prop="tradeDate" sortable label="date"/>
       <el-table-column prop="pctChg" label="pch"/>
       <el-table-column prop="changeHand" label="hand"/>
@@ -303,8 +371,8 @@ function showOtherConcernDial() {
     </div>
 
     <el-table :data="codeTableData.value.roc" class="mt-2" max-height="400px" stripe v-if="dialogType==='roc'"
-              :cell-style="{'text-align': 'center'}"
-              :header-cell-style="{'text-align': 'center'}">
+              :cell-style="txtCenter"
+              :header-cell-style="txtCenter">
       <el-table-column property="startDate" label="startDate"/>
       <el-table-column property="endDate" label="endDate"/>
       <el-table-column property="count" label="count"/>
@@ -314,8 +382,9 @@ function showOtherConcernDial() {
     </el-table>
 
     <el-table :data="codeTableData.value.current" class="mt-2" max-height="400px" stripe v-if="dialogType==='current'"
-              :cell-style="{'text-align': 'center'}"
-              :header-cell-style="{'text-align': 'center'}">
+              :cell-style="txtCenter"
+              :header-cell-style="txtCenter">
+      <el-table-column property="di" label="di"/>
       <el-table-column property="rt" label="rt"/>
       <el-table-column property="h" label="h"/>
       <el-table-column prop="bar" label="bar">
@@ -332,8 +401,8 @@ function showOtherConcernDial() {
   <el-dialog v-model="constantsDial" title="CONSTANT"
              :show-close="false" center draggable destroy-on-close width="1000">
     <el-table :data="constants.value" class="mt-2" max-height="400px"
-              :cell-style="{'text-align': 'center'}"
-              :header-cell-style="{'text-align': 'center'}"
+              :cell-style="txtCenter"
+              :header-cell-style="txtCenter"
               @row-click="handelSelectConstantRow"
     >
       <el-table-column property="ckey" label="ckey"/>
@@ -366,7 +435,7 @@ function showOtherConcernDial() {
     </el-dialog>
   </el-dialog>
 
-  <el-dialog v-model="curCountVisible" title="CURCOUNT"
+  <el-dialog v-model="curCountVisible" title="CUR-COUNT"
              :show-close="false" center draggable destroy-on-close width="1000">
     <div class="type-switch">
       <el-radio-group class="radio-group" v-model="curType" size="large">
@@ -376,8 +445,8 @@ function showOtherConcernDial() {
       </el-radio-group>
     </div>
     <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
-              :cell-style="{'text-align': 'center'}" stripe
-              :header-cell-style="{'text-align': 'center'}"
+              :cell-style="txtCenter" stripe
+              :header-cell-style="txtCenter"
               v-if="curType==='3'"
     >
       <el-table-column prop="c30a" label="a"/>
@@ -392,8 +461,8 @@ function showOtherConcernDial() {
       <el-table-column prop="c307d" label="7d"/>
     </el-table>
     <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
-              :cell-style="{'text-align': 'center'}" stripe
-              :header-cell-style="{'text-align': 'center'}"
+              :cell-style="txtCenter" stripe
+              :header-cell-style="txtCenter"
               v-if="curType==='6'"
     >
       <el-table-column prop="c60a" label="a"/>
@@ -408,8 +477,8 @@ function showOtherConcernDial() {
       <el-table-column prop="c607d" label="7d"/>
     </el-table>
     <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
-              :cell-style="{'text-align': 'center'}" stripe
-              :header-cell-style="{'text-align': 'center'}"
+              :cell-style="txtCenter" stripe
+              :header-cell-style="txtCenter"
               v-if="curType==='0'"
     >
       <el-table-column prop="c00a" label="a"/>
@@ -427,12 +496,41 @@ function showOtherConcernDial() {
   </el-dialog>
 
   <el-dialog v-model="searchVisible" title="SEARCH"
-             :show-close="false" center draggable destroy-on-close width="360">
-    <el-form :model="searchCode">
-      <el-form-item>
-        <el-input v-model="searchCode.code" autocomplete="off" placeholder="please input code"/>
-      </el-form-item>
-    </el-form>
+             :show-close="false" center draggable destroy-on-close width="800">
+    <div class="type-switch">
+      <el-radio-group class="radio-group" v-model="searchObj.type" size="large">
+        <el-radio-button label="code" value="1"/>
+        <el-radio-button label="name" value="2"/>
+        <el-radio-button label="limit" value="3"/>
+        <el-radio-button label="ophc" value="4"/>
+      </el-radio-group>
+    </div>
+    <div class="type-switch mt-2">
+      <el-form :model="searchObj">
+        <el-form-item v-if="searchObj.type === '1'">
+          <el-input v-model="searchObj.code" autocomplete="off" placeholder="please input code"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '2'">
+          <el-input v-model="searchObj.name" autocomplete="off" placeholder="please input name"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '3'">
+          <el-date-picker
+              v-model="searchObj.searchDate"
+              type="date"
+              placeholder="Pick a day"
+          />
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '4'">
+          <el-input-number v-model="searchObj.hand" autocomplete="off" placeholder=" hand limit"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '4'">
+          <el-input-number v-model="searchObj.pch" autocomplete="off" placeholder=" pch limit"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '4'">
+          <el-input-number v-model="searchObj.dayCount" autocomplete="off" placeholder=" count"/>
+        </el-form-item>
+      </el-form>
+    </div>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="searchVisible = false">Cancel</el-button>
@@ -469,7 +567,53 @@ function showOtherConcernDial() {
       <el-table-column label="详情">
         <template #default="scope">
           <el-button type="info" @click.native.stop="handleRowClick" round
-                     @click="handleColumnClick(scope.row)" :icon="List"></el-button>
+                     @click="handleColumnClick(scope.row.tsCode)" :icon="List"></el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </el-dialog>
+
+  <el-dialog v-model="sOpenVOVisible" title="NAME-SEARCH" :show-close="false" draggable destroy-on-close
+             width="1000">
+    <el-table :data="sOpenVOTableData.value.openVOList" class="mt-2"
+              :cell-style="txtCenter"
+              :header-cell-style="txtCenter">
+      <el-table-column property="pct_chg" label="pch"/>
+      <el-table-column property="change_hand" label="hand"/>
+      <el-table-column property="pe" label="pe"/>
+      <el-table-column property="pb" label="pb"/>
+      <el-table-column property="cap" label="cap"/>
+      <el-table-column property="current_pri" label="cp"/>
+      <el-table-column property="avg_pri" label="ap"/>
+      <el-table-column property="pri_pre" label="pp"/>
+      <el-table-column label="详情">
+        <template #default="scope">
+          <el-button type="info"
+                     @click="handleColumnClick(scope.row.ts_code)" :icon="List"></el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </el-dialog>
+
+  <el-dialog v-model="sLimitVOVisible" title="LIMIT-SEARCH" :show-close="false" draggable destroy-on-close
+             width="1000">
+    <el-table :data="sLimitVOTableData.value.limitCodeVOList" class="mt-2"
+              :cell-style="txtCenter" max-height="400" stripe
+              :header-cell-style="txtCenter">
+      <el-table-column property="code" label="code"/>
+      <el-table-column property="labels" min-width="110px" show-overflow-tooltip label="labels"/>
+      <el-table-column property="count" v-if="sLimitVOType==='3'" sortable label="count"/>
+      <el-table-column property="hlc" v-if="sLimitVOType==='4'" sortable label="hlc"/>
+      <el-table-column property="hand" v-if="sLimitVOType==='4'" sortable label="hand"/>
+      <el-table-column property="ac" v-if="sLimitVOType==='4'" sortable label="ac"/>
+      <el-table-column property="cc" v-if="sLimitVOType==='4'" sortable label="cc"/>
+      <el-table-column property="cap" sortable label="cap"/>
+      <el-table-column property="pe" sortable label="pe"/>
+      <el-table-column property="pb" sortable label="pb"/>
+      <el-table-column label="详情">
+        <template #default="scope">
+          <el-button type="info"
+                     @click="handleColumnClick(scope.row.code)" :icon="List"></el-button>
         </template>
       </el-table-column>
     </el-table>

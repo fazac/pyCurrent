@@ -24,10 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author fzc
@@ -68,7 +65,7 @@ public class RealTimeController {
         ObjectNode objectNode = JSONUtils.getNode();
         List<OpenVO> openVOList = ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByCode(code));
         List<String> labels = getLabelsByCode(code);
-        labels.addFirst(openVOList.get(0).getName());
+        labels.addFirst(openVOList.getFirst().getName());
         objectNode.putPOJO("label", labels);
         objectNode.putPOJO("open", openVOList);
         objectNode.putPOJO("dnDetail", emDNStockService.findByCodeCount(code, 30));
@@ -119,6 +116,7 @@ public class RealTimeController {
             case "3" -> {
                 LimitCode limitCode = limitCodeService.findByDate(DateUtils.convertMillisecond(searchDate));
                 List<LimitCodeVO> limitCodeVOList = new ArrayList<>();
+                log.warn(new Date().getTime());
                 if (limitCode != null && limitCode.getCodeValue() != null && !limitCode.getCodeValue().isEmpty()) {
                     List<LimitCodeValue> tmp = limitCode.getCodeValue();
                     tmp.sort(Comparator.comparing(LimitCodeValue::getCount));
@@ -127,26 +125,35 @@ public class RealTimeController {
                         LimitCodeVO limitCodeVO = new LimitCodeVO();
                         limitCodeVO.setCode(x.getCode());
                         limitCodeVO.setCount(x.getCount());
-                        EmRealTimeStock emRealTimeStock = emRealTimeStockService.findOpenByCode(code).get(0);
-                        limitCodeVO.setPe(emRealTimeStock.getPe());
-                        limitCodeVO.setPb(emRealTimeStock.getPb());
-                        limitCodeVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
-                        List<String> labels = getLabelsByCode(code);
-                        labels.addFirst(emRealTimeStock.getName());
-                        limitCodeVO.setLabels(String.join(",", labels));
+                        convertLimitVO(x.getCode(), limitCodeVO);
                         limitCodeVOList.add(limitCodeVO);
                     });
                 }
+                log.warn(new Date().getTime());
                 objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
             }
             //ophc
             case "4" -> {
-                emDNStockService.findOPHC(count,
+                List<LimitCodeVO> limitCodeVOList = emDNStockService.findOPHC(count,
                         hand != null ? BigDecimal.valueOf(hand) : null,
                         pch != null ? BigDecimal.valueOf(pch) : null);
+                if (limitCodeVOList != null && !limitCodeVOList.isEmpty()) {
+                    limitCodeVOList.forEach(x -> convertLimitVO(x.getCode(), x));
+                }
+                objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
             }
         }
         return objectNode;
+    }
+
+    private void convertLimitVO(@RequestParam(value = "code", required = false) String code, LimitCodeVO limitCodeVO) {
+        EmRealTimeStock emRealTimeStock = emRealTimeStockService.findOpenByCode(code).getFirst();
+        limitCodeVO.setPe(emRealTimeStock.getPe());
+        limitCodeVO.setPb(emRealTimeStock.getPb());
+        limitCodeVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+        List<String> labels = getLabelsByCode(code);
+        labels.addFirst(emRealTimeStock.getName());
+        limitCodeVO.setLabels(String.join(",", labels));
     }
 
     private List<String> getLabelsByCode(@RequestParam(value = "code", required = false) String code) {

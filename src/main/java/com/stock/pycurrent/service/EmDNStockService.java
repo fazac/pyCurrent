@@ -7,8 +7,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author fzc
@@ -25,8 +24,9 @@ public class EmDNStockService {
     }
 
     public List<LimitCodeVO> findOPHC(Integer count, BigDecimal hand, BigDecimal pch) {
-        List<LimitCodeVO> res = new ArrayList<>();
-        List<Object> tmp = emDNStockRepo.findOPHC(count, hand, pch);
+        Map<String, LimitCodeVO> res = new HashMap<>();
+        String tradeDate = emDNStockRepo.findMinTradeDateByCount(count);
+        List<Object> tmp = emDNStockRepo.findOPHC(tradeDate, hand, pch);
         if (tmp != null && !tmp.isEmpty()) {
             tmp.forEach(x -> {
                 Object[] tmpArr = (Object[]) x;
@@ -34,9 +34,25 @@ public class EmDNStockService {
                 limitCodeVO.setCode(tmpArr[0].toString());
                 limitCodeVO.setHand(new BigDecimal(tmpArr[1].toString()));
                 limitCodeVO.setHlc(new BigDecimal(tmpArr[2].toString()));
-                res.add(limitCodeVO);
+                res.put(limitCodeVO.getCode(), limitCodeVO);
             });
+            List<Object> tmp2 = emDNStockRepo.findStatisticByCodes(res.keySet().stream().toList(), tradeDate, count);
+            if (tmp2 != null && !tmp2.isEmpty()) {
+                tmp2.forEach(x -> {
+                    Object[] tmpArr = (Object[]) x;
+                    if (tmpArr != null) {
+                        String code = tmpArr[0].toString();
+                        LimitCodeVO limitCodeVO = res.get(code);
+                        if (tmpArr[2] != null) {
+                            limitCodeVO.setAc(new BigDecimal(tmpArr[2].toString()));
+                        }
+                        if (tmpArr[1] != null) {
+                            limitCodeVO.setCc(new BigDecimal(tmpArr[1].toString()));
+                        }
+                    }
+                });
+            }
         }
-        return res;
+        return res.values().stream().sorted(Comparator.comparing(LimitCodeVO::getHlc)).toList().reversed();
     }
 }

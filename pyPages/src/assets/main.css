@@ -84,6 +84,7 @@ body {
     background: var(--cus-el-text-color-primary) !important;
     border: 1px solid var(--cus-el-border-color-light) !important;
     color: var(--cus-el-bg-color) !important;
+    max-width: 420px;
 }
 
 .el-popper.is-dark .el-popper__arrow:before {
