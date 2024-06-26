@@ -5,6 +5,8 @@ import com.stock.pycurrent.repo.CurCountRepo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author fzc
  * @date 2024/1/29 10:52
@@ -17,6 +19,10 @@ public class CurCountService {
 
     public void saveOne(CurCount curCount) {
         curCountRepo.saveAndFlush(curCount);
+    }
+
+    public List<CurCount> findLastAll() {
+        return curCountRepo.findLastAll();
     }
 
 }

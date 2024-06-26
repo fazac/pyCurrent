@@ -20,4 +20,8 @@ export function updateConstant(constant) {
     });
 }
 
+export function findCurcc() {
+    return axios.get('/curcount/findLastAll');
+}
+
 
