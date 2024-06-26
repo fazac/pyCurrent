@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface CurConcernCodeRepo extends JpaRepository<CurConcernCode, String> {
-    @Query(value = " select * from cur_concern_code where trade_date = (select max(trade_date) from cur_concern_code) and tabel_show = :type ", nativeQuery = true)
+    @Query(value = " select * from cur_concern_code where trade_date = (select max(trade_date) from cur_concern_code) and tabel_show = :type order by mark desc", nativeQuery = true)
     List<CurConcernCode> findLast(@Param("type") String type);
 
 }

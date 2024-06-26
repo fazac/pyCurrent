@@ -5,6 +5,7 @@ import com.stock.pycurrent.entity.CurConcernCode;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
+import com.stock.pycurrent.entity.vo.OpenVO;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.JSONUtils;
@@ -44,6 +45,8 @@ public class RealTimeController {
     private RocModelService rocModelService;
     @Resource
     private CurConcernCodeService curConcernCodeService;
+    @Resource
+    private RealBarService realBarService;
 
     public RealTimeController() {
     }
@@ -55,12 +58,23 @@ public class RealTimeController {
             msg = "访问频率已超限制")
     public ObjectNode findDataByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
-        List<String> labels = new ArrayList<>(Arrays.asList(boardConceptConService.findConceptByCode(code).split(",")));
-        labels.addFirst(boardIndustryConService.findIndustryByCode(code));
+        List<OpenVO> openVOList = ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByCode(code));
+        String conceptLabel = boardConceptConService.findConceptByCode(code);
+        List<String> labels = new ArrayList<>();
+        if (conceptLabel != null && !conceptLabel.isEmpty()) {
+            labels.addAll(Arrays.asList(conceptLabel.split(",")));
+        }
+        String industryLabel = boardIndustryConService.findIndustryByCode(code);
+        if (industryLabel != null && !industryLabel.isEmpty()) {
+            labels.addFirst(industryLabel);
+        }
+        labels.addFirst(openVOList.get(0).getName());
         objectNode.putPOJO("label", labels);
-        objectNode.putPOJO("open", ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByCode(code)));
+        objectNode.putPOJO("open", openVOList);
         objectNode.putPOJO("dnDetail", emDNStockService.findByCodeCount(code, 30));
         objectNode.putPOJO("roc", rocModelService.findRocByCode(code));
+        objectNode.putPOJO("current", ArrayUtils.convertRealTimeVO(
+                emRealTimeStockService.findRBarStockByCode(code), realBarService.findIntradayBar(code)).reversed());
         return objectNode;
     }
 

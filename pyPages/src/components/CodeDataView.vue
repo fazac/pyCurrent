@@ -77,9 +77,10 @@ onMounted(() => {
     })
     msgSource.onmessage = function (event) {
       if (event.lastEventId !== 'sse_client_id') {
+        let msgArr = JSON.parse(event.data);
         ElNotification({
-          title: event.data[0],
-          message: event.data[1],
+          title: msgArr[0],
+          message: msgArr[1],
           type: 'success',
         })
       }
@@ -210,7 +211,7 @@ function showOtherConcernDial() {
     <el-table
         @row-click="handleRowClick"
         :data="codeDateList.value" empty-text=" "
-        highlight-current-row
+        highlight-current-row max-height="300"
         border
         stripe
         class="main-table"
@@ -241,7 +242,7 @@ function showOtherConcernDial() {
   <DNLineChart :code=code v-if="lineType"></DNLineChart>
   <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 
-  <el-dialog v-model="dialogTableVisible" title="DETAIL" :show-close="false" lock-scroll draggable destroy-on-close
+  <el-dialog v-model="dialogTableVisible" title="DETAIL" :show-close="false" draggable destroy-on-close
              width="1000">
     <div class="type-switch">
       <el-radio-group class="radio-group" v-model="dialogType" size="large">
@@ -249,6 +250,7 @@ function showOtherConcernDial() {
         <el-radio-button label="dn" value="dn"/>
         <el-radio-button label="label" value="label"/>
         <el-radio-button label="roc" value="roc"/>
+        <el-radio-button label="current" value="current"/>
       </el-radio-group>
     </div>
 
@@ -258,7 +260,6 @@ function showOtherConcernDial() {
       <el-table-column property="pct_chg" label="pch"/>
       <el-table-column property="change_hand" label="hand"/>
       <el-table-column property="pe" label="pe"/>
-      <el-table-column property="pb" label="pb"/>
       <el-table-column property="pb" label="pb"/>
       <el-table-column property="cap" label="cap"/>
       <el-table-column property="open" label="open"/>
@@ -288,7 +289,7 @@ function showOtherConcernDial() {
 
     <div class="gap-2 mt-2" v-if="dialogType==='label'">
       <el-tag v-for="(item,index) in codeTableData.value.label"
-              :type="index === 0 ? 'success' :'primary'"
+              :type="index === 0 || index === 1? 'success' :'primary'"
               :size="index === 0 ? 'large' :'default'">
         {{ item }}
       </el-tag>
@@ -305,10 +306,24 @@ function showOtherConcernDial() {
       <el-table-column property="curClosePri" label="closePri"/>
     </el-table>
 
+    <el-table :data="codeTableData.value.current" class="mt-2" max-height="400px" stripe v-if="dialogType==='current'"
+              :cell-style="{'text-align': 'center'}"
+              :header-cell-style="{'text-align': 'center'}">
+      <el-table-column property="rt" label="rt"/>
+      <el-table-column property="h" label="h"/>
+      <el-table-column prop="bar" label="bar">
+        <template #default="scope">
+          <span>{{ (scope.row.bar * 1000).toFixed(1) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column property="vs" label="vs"/>
+      <el-table-column property="cp" label="cp"/>
+    </el-table>
+
   </el-dialog>
 
   <el-dialog v-model="constantsDial" title="CONSTANT"
-             :show-close="false" lock-scroll center draggable destroy-on-close width="1000">
+             :show-close="false" center draggable destroy-on-close width="1000">
     <el-table :data="constants.value" class="mt-2" max-height="400px"
               :cell-style="{'text-align': 'center'}"
               :header-cell-style="{'text-align': 'center'}"
@@ -345,7 +360,7 @@ function showOtherConcernDial() {
   </el-dialog>
 
   <el-dialog v-model="curCountVisible" title="CURCOUNT"
-             :show-close="false" lock-scroll center draggable destroy-on-close width="1000">
+             :show-close="false" center draggable destroy-on-close width="1000">
     <div class="type-switch">
       <el-radio-group class="radio-group" v-model="curType" size="large">
         <el-radio-button label="3" value="3"/>
@@ -405,7 +420,7 @@ function showOtherConcernDial() {
   </el-dialog>
 
   <el-dialog v-model="searchVisible" title="SEARCH"
-             :show-close="false" lock-scroll center draggable destroy-on-close width="360">
+             :show-close="false" center draggable destroy-on-close width="360">
     <el-form :model="searchCode">
       <el-form-item>
         <el-input v-model="searchCode.code" autocomplete="off" placeholder="please input code"/>
@@ -422,9 +437,9 @@ function showOtherConcernDial() {
   </el-dialog>
 
   <el-dialog v-model="otherConcernVisible" title="OTHER"
-             :show-close="false" lock-scroll center draggable destroy-on-close width="1000">
+             :show-close="false" center draggable destroy-on-close width="1000">
     <el-table
-        :data="otherConcernTableData.value" empty-text=" "
+        :data="otherConcernTableData.value" empty-text=" " max-height="600"
         border
         stripe
         :cell-style="cellStyle"
