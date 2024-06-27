@@ -23,6 +23,7 @@ public class BoardIndustryConService {
         PythonScriptUtils.execThreadPY(Constants.AKSHARE_EM_HIS, PyFuncEnum.EM_BOARD_INDUSTRY_CON + EMSymbolEnum.EM_INDUSTRY.toString(), null);
     }
 
+    @SuppressWarnings("unused")
     public String findIndustryByCode(String code) {
         return boardIndustryConRepo.findByCode(code);
     }

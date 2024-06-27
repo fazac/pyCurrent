@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author fzc
  * @date 2024/6/25 10:33
@@ -16,4 +18,12 @@ import org.springframework.stereotype.Repository;
 public interface BoardIndustryConRepo extends JpaRepository<BoardIndustryCon, BasicStockPK> {
     @Query(value = "select group_concat(symbol) from board_industry_con where ts_code = :code and  trade_date = (select max(trade_date) from board_industry_con) group by ts_code ", nativeQuery = true)
     String findByCode(@Param("code") String code);
+
+    @Query(value = """
+                select ts_code, group_concat(symbol)
+                from board_industry_con
+                where trade_date = (select max(trade_date) from board_industry_con)
+                group by ts_code;
+            """, nativeQuery = true)
+    List<Object> findLast();
 }

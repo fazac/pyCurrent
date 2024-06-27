@@ -1,24 +1,20 @@
 <script setup>
 import {reactive, ref, onMounted} from 'vue'
-import {useDark, useToggle} from '@vueuse/core'
 import {ElTable} from 'element-plus'
 import DNLineChart from './DNLineChart.vue'
 import RTLineChart from './RTLineChart.vue'
+import ToolPanel from './ToolPanel.vue'
 import axios from "@/api/http.js";
-import {Search, Edit, Histogram, Compass, SwitchButton, List} from '@element-plus/icons-vue'
+import {Search, Histogram, Compass, List} from '@element-plus/icons-vue'
 import {
   findDataByCode,
-  findConstants,
-  updateConstant,
   findCurcc,
   findOtherConcernList,
   searchSome
 } from '@/api/backend.js'
-import {isEmpty} from '@/api/util'
+import {isEmpty, nullArr, txtCenter} from '@/api/util'
 import {ElNotification} from 'element-plus'
 
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
 
 const isDarkType = ref(true);
 
@@ -32,10 +28,6 @@ const dialogTableVisible = ref(false);
 const codeTableData = reactive({});
 const dialogType = ref('');
 
-const constants = reactive({});
-const constantsDial = ref(false);
-const constantsDialInner = ref(false);
-const selectConstant = reactive({});
 
 const curCountVisible = ref(false);
 const curCountTableData = reactive({});
@@ -50,6 +42,10 @@ const searchObj = reactive(
       hand: null,
       pch: null,
       dayCount: null,
+      r2LowLimit: null,
+      r2HighLimit: null,
+      r1LowLimit: null,
+      r1HighLimit: null,
       type: '',
     }
 );
@@ -64,9 +60,12 @@ const sLimitVOVisible = ref(false);
 const sLimitVOType = ref('');
 const sLimitVOTableData = reactive({});
 
-
-function txtCenter() {
-  return {'text-align': 'center'};
+function nfc(title, message, type) {
+  ElNotification({
+    title: title,
+    message: message,
+    type: isEmpty(type) ? 'success' : type,
+  })
 }
 
 
@@ -108,11 +107,7 @@ onMounted(() => {
     msgSource.onmessage = function (event) {
       if (event.lastEventId !== 'sse_client_id') {
         let msgArr = JSON.parse(event.data);
-        ElNotification({
-          title: msgArr[0],
-          message: msgArr[1],
-          type: 'success',
-        })
+        nfc(msgArr[0], msgArr[1]);
       }
     }
     msgSource.onerror = function () {
@@ -147,43 +142,6 @@ function headerCellStyle() {
   return txtCenter;
 }
 
-function showConstantsDial() {
-  findConstants().then(res => {
-    constants.value = res;
-    constantsDial.value = true;
-  })
-}
-
-function handelSelectConstantRow(row) {
-  selectConstant.value = row;
-  if (selectConstant.value.multiValue !== null) {
-    selectConstant.value.multiValueStr = JSON.stringify(selectConstant.value.multiValue);
-  }
-  constantsDialInner.value = true;
-}
-
-function onSubmit() {
-  // if (selectConstant.value.multiValueStr !== undefined
-  //     && selectConstant.value.multiValueStr !== "null"
-  //     && selectConstant.value.multiValueStr.trim() !== '') {
-  //   selectConstant.value.multiValue = JSON.parse(selectConstant.value.multiValueStr);
-  // }
-  // console.log(selectConstant.value);
-  updateConstant(selectConstant.value).then(res => {
-    if ("ok" === res) {
-      constantsDialInner.value = false;
-      findConstants().then(res => {
-        constants.value = res;
-      })
-      ElNotification({
-        title: 'Success',
-        message: 'constant update success',
-        type: 'success',
-      })
-    }
-  });
-}
-
 function showCurccDial() {
   findCurcc().then(res => {
     curCountVisible.value = true;
@@ -200,14 +158,14 @@ function showSearchDial() {
 
 function onSearchSubmit() {
   if (isEmpty(searchObj)) {
-    ElNotification({
-      title: 'input error',
-      message: 'some info miss',
-      type: 'warning',
-    })
+    nfc('input error', 'some info miss', 'warning')
   } else {
     switch (searchObj.type) {
       case "1":
+        if (isEmpty(searchObj.code)) {
+          nfc('input error', 'code miss', 'warning')
+          return;
+        }
         searchSome("1", searchObj.code).then(res => {
           dialogTableVisible.value = true;
           codeTableData.value = res;
@@ -216,6 +174,10 @@ function onSearchSubmit() {
         });
         break;
       case "2":
+        if (isEmpty(searchObj.name)) {
+          nfc('input error', 'name miss', 'warning')
+          return;
+        }
         searchSome("2", null, searchObj.name).then(res => {
           sOpenVOVisible.value = true;
           sOpenVOTableData.value = res;
@@ -223,7 +185,11 @@ function onSearchSubmit() {
         });
         break;
       case "3":
-        searchSome("3", null, null, searchObj.searchDate.getTime()).then(res => {
+        if (isEmpty(searchObj.searchDate)) {
+          nfc('input error', 'searchDate miss', 'warning')
+          return;
+        }
+        searchSome("3", ...nullArr(2), searchObj.searchDate.getTime()).then(res => {
           sLimitVOVisible.value = true;
           sLimitVOTableData.value = res;
           sLimitVOType.value = '3';
@@ -232,17 +198,29 @@ function onSearchSubmit() {
         break;
       case "4":
         if (isEmpty(searchObj.dayCount)) {
-          ElNotification({
-            title: 'input error',
-            message: 'dayCount miss',
-            type: 'warning',
-          })
+          nfc('input error', 'dayCount miss', 'warning')
           return;
         }
-        searchSome("4", null, null, null, searchObj.hand, searchObj.pch, searchObj.dayCount).then(res => {
+        searchSome("4", ...nullArr(3), searchObj.hand, searchObj.pch, searchObj.dayCount).then(res => {
           sLimitVOVisible.value = true;
           sLimitVOTableData.value = res;
           sLimitVOType.value = '4';
+          searchVisible.value = false;
+        })
+        break;
+      case "5":
+        if (isEmpty(searchObj.r2LowLimit)
+            && isEmpty(searchObj.r2HighLimit)
+            && isEmpty(searchObj.r1LowLimit)
+            && isEmpty(searchObj.r1HighLimit)
+        ) {
+          nfc('input error', 'limit miss', 'warning')
+          return;
+        }
+        searchSome("5", ...nullArr(6), searchObj.r2LowLimit, searchObj.r2HighLimit, searchObj.r1LowLimit, searchObj.r1HighLimit).then(res => {
+          sLimitVOVisible.value = true;
+          sLimitVOTableData.value = res;
+          sLimitVOType.value = '5';
           searchVisible.value = false;
         })
         break;
@@ -262,64 +240,67 @@ function showOtherConcernDial() {
 </script>
 
 <template>
-  <div class="table-container">
-    <span class="type-switch">
+  <el-container>
+    <el-aside width="60px">
+      <ToolPanel/>
+    </el-aside>
+    <el-main>
+      <!--    <div class="table-container">-->
+      <!--    <span class="center-panel">-->
+
+      <!--    </span>-->
+      <el-table
+          @row-click="handleRowClick"
+          :data="codeDateList.value" empty-text=" "
+          highlight-current-row max-height="300"
+          border
+          stripe
+          class="main-table"
+          :cell-style="cellStyle"
+          :header-cell-style="headerCellStyle"
+          :row-class-name="rowStyleClass"
+      >
+        <el-table-column prop="mark" label="mark"/>
+        <el-table-column prop="rt" label="rt"/>
+        <el-table-column prop="h" label="h"/>
+        <el-table-column prop="cp" label="cp"/>
+        <el-table-column prop="bp" label="bp"/>
+        <el-table-column prop="rr" label="rr"/>
+        <el-table-column prop="cm" label="cm"/>
+        <el-table-column prop="pe" label="pe"/>
+        <el-table-column prop="tsCode" label="code">
+          <template #default="scope">
+            <span>{{ scope.row.tsCode.substring(2, 6) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="详情">
+          <template #default="scope">
+            <el-button type="info" @click.native.stop="handleRowClick" round
+                       @click="handleColumnClick(scope.row.tsCode)" :icon="List"></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-main>
+    <el-aside width="60px">
       <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
                  inactive-text="rt"
                  style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
-      <!--      <el-switch v-model="isDarkType" @change="toggleDark()" size="large" inline-prompt active-text="off"-->
-      <!--                 inactive-text="on"-->
-      <!--                 style="&#45;&#45;el-switch-on-color:  #006699; &#45;&#45;el-switch-off-color: #47476b"></el-switch>-->
-      <el-button type="primary" size="small" class="big-btn"
-                 @click="toggleDark()" :icon="SwitchButton" round></el-button>
       <el-button type="success" size="small" class="big-btn"
                  @click="showOtherConcernDial" :icon="Compass" round></el-button>
       <el-button type="success" size="small" class="big-btn"
                  @click="showCurccDial" :icon="Histogram" round></el-button>
       <el-button type="primary" size="small" class="big-btn"
-                 @click="showConstantsDial" :icon="Edit" round></el-button>
-      <el-button type="primary" size="small" class="big-btn"
                  @click="showSearchDial" :icon="Search" round></el-button>
+    </el-aside>
+  </el-container>
+  <!--    </div>-->
 
-    </span>
-    <el-table
-        @row-click="handleRowClick"
-        :data="codeDateList.value" empty-text=" "
-        highlight-current-row max-height="300"
-        border
-        stripe
-        class="main-table"
-        :cell-style="cellStyle"
-        :header-cell-style="headerCellStyle"
-        :row-class-name="rowStyleClass"
-    >
-      <el-table-column prop="mark" label="mark"/>
-      <el-table-column prop="cp" label="cp"/>
-      <el-table-column prop="rt" label="rt"/>
-      <el-table-column prop="h" label="h"/>
-      <el-table-column prop="bp" label="bp"/>
-      <el-table-column prop="rr" label="rr"/>
-      <el-table-column prop="cm" label="cm"/>
-      <el-table-column prop="pe" label="pe"/>
-      <el-table-column prop="tsCode" label="code">
-        <template #default="scope">
-          <span>{{ scope.row.tsCode.substring(2, 6) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="详情">
-        <template #default="scope">
-          <el-button type="info" @click.native.stop="handleRowClick" round
-                     @click="handleColumnClick(scope.row.tsCode)" :icon="List"></el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
   <DNLineChart :code=code v-if="lineType"></DNLineChart>
   <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 
   <el-dialog v-model="dialogTableVisible" title="DETAIL" :show-close="false" draggable destroy-on-close
              width="1000">
-    <div class="type-switch">
+    <div class="center-panel">
       <el-radio-group class="radio-group" v-model="dialogType" size="large">
         <el-radio-button label="open" value="open"/>
         <el-radio-button label="dn" value="dn"/>
@@ -398,46 +379,9 @@ function showOtherConcernDial() {
 
   </el-dialog>
 
-  <el-dialog v-model="constantsDial" title="CONSTANT"
-             :show-close="false" center draggable destroy-on-close width="1000">
-    <el-table :data="constants.value" class="mt-2" max-height="400px"
-              :cell-style="txtCenter"
-              :header-cell-style="txtCenter"
-              @row-click="handelSelectConstantRow"
-    >
-      <el-table-column property="ckey" label="ckey"/>
-      <el-table-column property="cvalue" label="cvalue"/>
-      <el-table-column prop="mv" show-overflow-tooltip label="multiValue">
-        <template #default="scope">
-          <span>{{ scope.row.multiValue !== null ? JSON.stringify(scope.row.multiValue) : '' }}</span>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-dialog v-model="constantsDialInner" align-center center destroy-on-close
-               :show-close="false" width="600">
-      <el-form :model="selectConstant">
-        <el-form-item label="cval" label-width="88px">
-          <el-input v-model="selectConstant.value.cvalue" autocomplete="off" type="textarea"/>
-        </el-form-item>
-        <el-form-item label="mval" label-width="88px">
-          <el-input v-model="selectConstant.value.multiValueStr" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea">
-          </el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="constantsDialInner = false">Cancel</el-button>
-          <el-button type="primary" @click="onSubmit">
-            Confirm
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
-  </el-dialog>
-
   <el-dialog v-model="curCountVisible" title="CUR-COUNT"
              :show-close="false" center draggable destroy-on-close width="1000">
-    <div class="type-switch">
+    <div class="center-panel">
       <el-radio-group class="radio-group" v-model="curType" size="large">
         <el-radio-button label="3" value="3"/>
         <el-radio-button label="6" value="6"/>
@@ -497,15 +441,16 @@ function showOtherConcernDial() {
 
   <el-dialog v-model="searchVisible" title="SEARCH"
              :show-close="false" center draggable destroy-on-close width="800">
-    <div class="type-switch">
+    <div class="center-panel">
       <el-radio-group class="radio-group" v-model="searchObj.type" size="large">
         <el-radio-button label="code" value="1"/>
         <el-radio-button label="name" value="2"/>
         <el-radio-button label="limit" value="3"/>
         <el-radio-button label="ophc" value="4"/>
+        <el-radio-button label="roc" value="5"/>
       </el-radio-group>
     </div>
-    <div class="type-switch mt-2">
+    <div class="center-panel mt-2">
       <el-form :model="searchObj">
         <el-form-item v-if="searchObj.type === '1'">
           <el-input v-model="searchObj.code" autocomplete="off" placeholder="please input code"/>
@@ -528,6 +473,18 @@ function showOtherConcernDial() {
         </el-form-item>
         <el-form-item v-if="searchObj.type === '4'">
           <el-input-number v-model="searchObj.dayCount" autocomplete="off" placeholder=" count"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '5'">
+          <el-input-number v-model="searchObj.r2LowLimit" autocomplete="off" placeholder=" - r2 low"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '5'">
+          <el-input-number v-model="searchObj.r2HighLimit" autocomplete="off" placeholder=" - r2 high"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '5'">
+          <el-input-number v-model="searchObj.r1LowLimit" autocomplete="off" placeholder=" r1 low"/>
+        </el-form-item>
+        <el-form-item v-if="searchObj.type === '5'">
+          <el-input-number v-model="searchObj.r1HighLimit" autocomplete="off" placeholder=" r1 high"/>
         </el-form-item>
       </el-form>
     </div>
@@ -552,9 +509,9 @@ function showOtherConcernDial() {
         :header-cell-style="headerCellStyle"
     >
       <el-table-column prop="mark" label="mark"/>
-      <el-table-column prop="cp" label="cp"/>
       <el-table-column prop="rt" label="rt"/>
       <el-table-column prop="h" label="h"/>
+      <el-table-column prop="cp" label="cp"/>
       <el-table-column prop="bp" label="bp"/>
       <el-table-column prop="rr" label="rr"/>
       <el-table-column prop="cm" label="cm"/>
@@ -607,6 +564,8 @@ function showOtherConcernDial() {
       <el-table-column property="hand" v-if="sLimitVOType==='4'" sortable label="hand"/>
       <el-table-column property="ac" v-if="sLimitVOType==='4'" sortable label="ac"/>
       <el-table-column property="cc" v-if="sLimitVOType==='4'" sortable label="cc"/>
+      <el-table-column property="r1" v-if="sLimitVOType==='5'" sortable label="last1"/>
+      <el-table-column property="r2" v-if="sLimitVOType==='5'" sortable label="last2"/>
       <el-table-column property="cap" sortable label="cap"/>
       <el-table-column property="pe" sortable label="pe"/>
       <el-table-column property="pb" sortable label="pb"/>

@@ -380,3 +380,22 @@ alter table cur_concern_code add column `tabel_show` tinyint(1) default '0';
 ALTER TABLE `board_concept_con` ADD INDEX index_code_date (`ts_code`, `trade_date`);
 ALTER TABLE `board_industry_con` ADD INDEX index_code_date (`ts_code`, `trade_date`);
 
+-- 20240627
+create table `code_label`
+(
+    `trade_date` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `ts_code`    varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `name`       varchar(16),
+    `industry`   varchar(16),
+    `concept`    varchar(512),
+    KEY `idx_cl_code` (`ts_code`) USING BTREE,
+    KEY `idx_cl_date` (`trade_date`) USING BTREE,
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
+
+alter table `code_label` add index idx_date_code(`ts_code`,`trade_date`);
+
+alter table `code_label` drop column `name`;
+

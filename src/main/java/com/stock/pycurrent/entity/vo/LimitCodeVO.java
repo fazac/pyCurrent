@@ -15,15 +15,20 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 public class LimitCodeVO {
+    //common
     private String code;
-    private int count;
     private String labels;
     private BigDecimal pe;
     private BigDecimal pb;
     private BigDecimal cap;
-
+    //limit
+    private int count;
+    //ophc
     private BigDecimal hand;
     private BigDecimal hlc;
     private BigDecimal ac;
     private BigDecimal cc;
+    //roc
+    private BigDecimal r1;
+    private BigDecimal r2;
 }

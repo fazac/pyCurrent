@@ -23,6 +23,7 @@ public class BoardConceptConService {
         PythonScriptUtils.execThreadPY(Constants.AKSHARE_EM_HIS, PyFuncEnum.EM_BOARD_CONCEPT_CON + EMSymbolEnum.EM_CONCEPT.toString(), null);
     }
 
+    @SuppressWarnings("unused")
     public String findConceptByCode(String code) {
         return boardConceptConRepo.findByCode(code);
     }

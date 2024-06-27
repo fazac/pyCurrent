@@ -1,6 +1,7 @@
 package com.stock.pycurrent.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.stock.pycurrent.entity.CodeLabel;
 import com.stock.pycurrent.entity.CurConcernCode;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.LimitCode;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author fzc
@@ -52,6 +55,8 @@ public class RealTimeController {
     private RealBarService realBarService;
     @Resource
     private LimitCodeService limitCodeService;
+    @Resource
+    private CodeLabelService codeLabelService;
 
     public RealTimeController() {
     }
@@ -101,6 +106,10 @@ public class RealTimeController {
                                  @RequestParam(value = "hand", required = false) Double hand,
                                  @RequestParam(value = "pch", required = false) Double pch,
                                  @RequestParam(value = "count", required = false) Integer count,
+                                 @RequestParam(value = "r2LowLimit", required = false) Double r2LowLimit,
+                                 @RequestParam(value = "r2HighLimit", required = false) Double r2HighLimit,
+                                 @RequestParam(value = "r1LowLimit", required = false) Double r1LowLimit,
+                                 @RequestParam(value = "r1HighLimit", required = false) Double r1HighLimit,
                                  @RequestParam(value = "type") String type) {
         ObjectNode objectNode = JSONUtils.getNode();
 
@@ -135,11 +144,26 @@ public class RealTimeController {
             //ophc
             case "4" -> {
                 List<LimitCodeVO> limitCodeVOList = emDNStockService.findOPHC(count,
-                        hand != null ? BigDecimal.valueOf(hand) : null,
-                        pch != null ? BigDecimal.valueOf(pch) : null);
+                        hand == null ? null : BigDecimal.valueOf(hand),
+                        pch == null ? null : BigDecimal.valueOf(pch));
                 if (limitCodeVOList != null && !limitCodeVOList.isEmpty()) {
                     limitCodeVOList.forEach(x -> convertLimitVO(x.getCode(), x));
                 }
+                objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
+            }
+            //roc
+            case "5" -> {
+                List<LimitCodeVO> limitCodeVOList = rocModelService.findRocByLimit(
+                        r2HighLimit == null ? null : BigDecimal.valueOf(r2HighLimit).negate(),
+                        r2LowLimit == null ? null : BigDecimal.valueOf(r2LowLimit).negate(),
+                        r1LowLimit == null ? null : BigDecimal.valueOf(r1LowLimit).negate(),
+                        r1HighLimit == null ? null : BigDecimal.valueOf(r1HighLimit).negate()
+                );
+                if (limitCodeVOList != null && !limitCodeVOList.isEmpty()) {
+                    convertROCLimitVO(limitCodeVOList);
+                    limitCodeVOList = limitCodeVOList.stream().filter(x -> x.getCap() != null).toList();
+                }
+                log.warn("5: " + new Date().getTime());
                 objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
             }
         }
@@ -150,21 +174,45 @@ public class RealTimeController {
         EmRealTimeStock emRealTimeStock = emRealTimeStockService.findOpenByCode(code).getFirst();
         limitCodeVO.setPe(emRealTimeStock.getPe());
         limitCodeVO.setPb(emRealTimeStock.getPb());
-        limitCodeVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+        if (emRealTimeStock.getCirculationMarketCap() != null) {
+            limitCodeVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+        }
         List<String> labels = getLabelsByCode(code);
         labels.addFirst(emRealTimeStock.getName());
         limitCodeVO.setLabels(String.join(",", labels));
     }
 
+    private void convertROCLimitVO(List<LimitCodeVO> limitCodeVOS) {
+        if (limitCodeVOS == null || limitCodeVOS.isEmpty()) {
+            return;
+        }
+        List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findLast();
+        if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
+            Map<String, EmRealTimeStock> emRealTimeStockMap = emRealTimeStockList.stream().collect(Collectors.toMap(EmRealTimeStock::getTsCode, Function.identity()));
+            limitCodeVOS.forEach(x -> {
+                EmRealTimeStock emRealTimeStock = emRealTimeStockMap.get(x.getCode());
+                x.setPe(emRealTimeStock.getPe());
+                x.setPb(emRealTimeStock.getPb());
+                if (emRealTimeStock.getCirculationMarketCap() != null) {
+                    x.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+                }
+                List<String> labels = getLabelsByCode(x.getCode());
+                labels.addFirst(emRealTimeStock.getName());
+                x.setLabels(String.join(",", labels));
+            });
+        }
+    }
+
     private List<String> getLabelsByCode(@RequestParam(value = "code", required = false) String code) {
         List<String> labels = new ArrayList<>();
-        String conceptLabel = boardConceptConService.findConceptByCode(code);
-        if (conceptLabel != null && !conceptLabel.isEmpty()) {
-            labels.addAll(Arrays.asList(conceptLabel.split(",")));
-        }
-        String industryLabel = boardIndustryConService.findIndustryByCode(code);
-        if (industryLabel != null && !industryLabel.isEmpty()) {
-            labels.addFirst(industryLabel);
+        CodeLabel codeLabel = codeLabelService.findByCode(code);
+        if (codeLabel != null) {
+            if (codeLabel.getConcept() != null && !codeLabel.getConcept().isEmpty()) {
+                labels.addAll(Arrays.asList(codeLabel.getConcept().split(",")));
+            }
+            if (codeLabel.getIndustry() != null && !codeLabel.getIndustry().isEmpty()) {
+                labels.addFirst(codeLabel.getIndustry());
+            }
         }
         return labels;
     }

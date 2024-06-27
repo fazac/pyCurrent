@@ -15,6 +15,21 @@ body {
     overflow-y: hidden;
 }
 
+.el-aside {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+}
+
+.el-button + .el-button {
+    margin-left: 0 !important;
+}
+
+button i.el-icon {
+    font-size: 20px;
+}
+
 .table-container {
     justify-content: center;
     flex: 1;
@@ -24,7 +39,7 @@ body {
     flex-grow: 0;
 }
 
-.type-switch {
+.center-panel {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -32,7 +47,6 @@ body {
 
 
 .el-table.main-table {
-    margin: 0 5rem;
     width: auto;
 }
 
@@ -50,6 +64,10 @@ body {
 
 .mt-2 {
     margin-top: 2rem;
+}
+
+.mt-1 {
+    margin-top: 1rem;
 }
 
 .gap-2 {

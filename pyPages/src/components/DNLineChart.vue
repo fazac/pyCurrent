@@ -95,14 +95,14 @@ function createDnLine() {
           }
         },
         {
-          type: 'value', position: 'right', scale: true, min: 0, alignTicks: true, splitLine: {
+          type: 'value', position: 'right', scale: true, min: 0, splitLine: {
             lineStyle: {
               opacity: 0.1,
             }
           }
         },
         {
-          type: 'value', position: 'right', scale: true, min: 0, alignTicks: true, splitLine: {
+          type: 'value', position: 'right', scale: true, min: 0, splitLine: {
             lineStyle: {
               opacity: 0.1,
             }

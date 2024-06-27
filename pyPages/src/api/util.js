@@ -1,6 +1,15 @@
+export function nullArr(length) {
+    return Array(length).fill(null);
+}
+
+export function txtCenter() {
+    return {'text-align': 'center'};
+}
+
 export function isEmpty(value) {
     return value === undefined || value === null || value === '';
 }
+
 
 // 判断对象是否为空
 function isObjectEmpty(obj) {
@@ -16,3 +25,4 @@ function isStringEmpty(str) {
 function isArrayEmpty(arr) {
     return !arr || arr.length === 0;
 }
+

@@ -99,8 +99,10 @@ public class ArrayUtils {
                 openVO.setChange_hand(emRealTimeStock.getChangeHand());
                 openVO.setPe(emRealTimeStock.getPe());
                 openVO.setPb(emRealTimeStock.getPb());
-                openVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
-                if (emRealTimeStock.getPriClosePre() != null) {
+                if (emRealTimeStock.getCirculationMarketCap() != null) {
+                    openVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
+                }
+                if (emRealTimeStock.getPriClosePre() != null && emRealTimeStock.getPriOpen() != null) {
                     openVO.setOpen(emRealTimeStock.getPriOpen().subtract(emRealTimeStock.getPriClosePre()).multiply(Constants.HUNDRED)
                             .divide(emRealTimeStock.getPriClosePre(), 3, RoundingMode.HALF_UP));
                     openVO.setLow(emRealTimeStock.getPriLow().subtract(emRealTimeStock.getPriClosePre()).multiply(Constants.HUNDRED)
@@ -113,8 +115,10 @@ public class ArrayUtils {
                     openVO.setHigh(emRealTimeStock.getPriHigh());
                 }
                 openVO.setCurrent_pri(emRealTimeStock.getCurrentPri());
-                openVO.setAvg_pri(emRealTimeStock.getAmount()
-                        .divide(BigDecimal.valueOf(emRealTimeStock.getVol()).multiply(Constants.HUNDRED), 3, RoundingMode.HALF_UP));
+                if (emRealTimeStock.getAmount() != null) {
+                    openVO.setAvg_pri(emRealTimeStock.getAmount()
+                            .divide(BigDecimal.valueOf(emRealTimeStock.getVol()).multiply(Constants.HUNDRED), 3, RoundingMode.HALF_UP));
+                }
                 openVO.setPri_pre(emRealTimeStock.getPriClosePre());
                 res.add(openVO);
             }

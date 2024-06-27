@@ -28,7 +28,7 @@ export function findOtherConcernList() {
     return axios.get('/rt/findOtherList');
 }
 
-export function searchSome(type, code, name, searchDate, hand, pch, count) {
+export function searchSome(type, code, name, searchDate, hand, pch, count, negativeLimit, positiveLimit) {
     return axios.get('/rt/searchSome', {
         params: {
             code: code,
@@ -37,6 +37,8 @@ export function searchSome(type, code, name, searchDate, hand, pch, count) {
             hand: hand,
             pch: pch,
             count: count,
+            negativeLimit: negativeLimit,
+            positiveLimit: positiveLimit,
             type: type,
         }
     });

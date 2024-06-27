@@ -33,6 +33,8 @@ public class PrepareData implements CommandLineRunner {
     private ContinuousUpService continuousUpService;
     @Resource
     private LimitCodeService limitCodeService;
+    @Resource
+    private CodeLabelService codeLabelService;
 
     @Override
     public void run(String... args) {
@@ -65,6 +67,9 @@ public class PrepareData implements CommandLineRunner {
                 log.warn("continuousUp-ENTER");
                 continuousUpService.initContinuousUp();
                 log.warn("continuousUp-OVER");
+                log.warn("LABEL-ENTER");
+                codeLabelService.createLabels();
+                log.warn("LABEL-OVER");
             }
             log.warn("createLimitCode-ENTER");
             stockService.createLimitCode();
