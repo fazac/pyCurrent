@@ -389,7 +389,7 @@ create table `code_label`
     `industry`   varchar(16),
     `concept`    varchar(512),
     KEY `idx_cl_code` (`ts_code`) USING BTREE,
-    KEY `idx_cl_date` (`trade_date`) USING BTREE,
+    KEY `idx_cl_date` (`trade_date`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
