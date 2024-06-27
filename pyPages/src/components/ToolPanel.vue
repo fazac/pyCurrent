@@ -3,7 +3,7 @@ import {reactive, ref} from 'vue'
 import {useDark, useToggle} from '@vueuse/core'
 import {SwitchButton, Refresh, Edit} from '@element-plus/icons-vue'
 import {findConstants, updateConstant} from '@/api/backend.js'
-import {txtCenter} from '@/api/util'
+import {txtCenter, nfc} from '@/api/util'
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
@@ -55,11 +55,11 @@ function onSubmit() {
 </script>
 
 <template>
-  <el-button type="primary" size="large" class="big-btn"
-             @click="toggleDark()" :icon="SwitchButton" ></el-button>
-  <el-button type="primary" size="large" class="big-btn"
+  <el-button type="info" size="large" class="big-btn"
+             @click="toggleDark()" :icon="SwitchButton"></el-button>
+  <el-button type="info" size="large" class="big-btn"
              @click="reloadPage()" :icon="Refresh"></el-button>
-  <el-button type="primary" size="large" class="big-btn"
+  <el-button type="info" size="large" class="big-btn"
              @click="showConstantsDial" :icon="Edit"></el-button>
   <el-dialog v-model="constantsDial" title="CONSTANT"
              :show-close="false" center draggable destroy-on-close width="1000">

@@ -133,8 +133,8 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           'rt': false,
           'bar': true,
         },
-        left: 'right',
-        top: 'middle',
+        right: '10',
+        bottom:'10',
         orient: 'vertical',
       },
       xAxis: {
@@ -374,7 +374,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="mainlc" class="table-container"></div>
+  <div id="mainlc" class="line-chart"></div>
 </template>
 
 <style scoped>

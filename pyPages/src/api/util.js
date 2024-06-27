@@ -1,3 +1,14 @@
+import {ElNotification} from 'element-plus'
+
+
+export function nfc(title, message, type) {
+    ElNotification({
+        title: title,
+        message: message,
+        type: isEmpty(type) ? 'success' : type,
+    })
+}
+
 export function nullArr(length) {
     return Array(length).fill(null);
 }

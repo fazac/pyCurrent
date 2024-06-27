@@ -28,7 +28,7 @@ export function findOtherConcernList() {
     return axios.get('/rt/findOtherList');
 }
 
-export function searchSome(type, code, name, searchDate, hand, pch, count, negativeLimit, positiveLimit) {
+export function searchSome(type, code, name, searchDate, hand, pch, count, r2LowLimit, r2HighLimit, r1LowLimit, r1HighLimit) {
     return axios.get('/rt/searchSome', {
         params: {
             code: code,
@@ -37,8 +37,10 @@ export function searchSome(type, code, name, searchDate, hand, pch, count, negat
             hand: hand,
             pch: pch,
             count: count,
-            negativeLimit: negativeLimit,
-            positiveLimit: positiveLimit,
+            r2LowLimit: r2LowLimit,
+            r2HighLimit: r2HighLimit,
+            r1LowLimit: r1LowLimit,
+            r1HighLimit: r1HighLimit,
             type: type,
         }
     });

@@ -52,8 +52,8 @@ function createDnLine() {
           'vol': false,
           'h': true,
         },
-        left: 'right',
-        top: 'middle',
+        right: '10',
+        bottom:'10',
         orient: 'vertical',
       },
       xAxis: {
@@ -250,7 +250,8 @@ function createDnLine() {
             show: true,
             position: 'bottom',
             opacity: 1,
-            offset: [0, 20],
+            rotate: -45,
+            offset: [20, 20],
             fontWeight: "bolder",
             color: '#ff6666'
           },
@@ -273,7 +274,7 @@ function createDnLine() {
 </script>
 
 <template>
-  <div id="mainld" class="table-container"></div>
+  <div id="mainld" class="line-chart"></div>
 </template>
 
 <style scoped>

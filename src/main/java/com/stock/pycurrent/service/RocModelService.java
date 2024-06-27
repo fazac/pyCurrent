@@ -2,15 +2,14 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.RocModel;
 import com.stock.pycurrent.entity.vo.LimitCodeVO;
+import com.stock.pycurrent.exception.MyException;
 import com.stock.pycurrent.repo.RocModelRepo;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,7 +35,7 @@ public class RocModelService {
         List<Object> tmpRes = rocModelRepo.findByLimit(r2LowLimit, r2HighLimit, r1LowLimit, r1HighLimit);
         if (tmpRes != null && !tmpRes.isEmpty()) {
             if (tmpRes.size() >= 250) {
-                throw new RuntimeException("结果超过250条");
+                throw new MyException("结果超过250条");
             }
             tmpRes.forEach(x -> {
                 Object[] tmpArr = (Object[]) x;

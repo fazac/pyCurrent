@@ -61,6 +61,11 @@ public class RealTimeController {
     public RealTimeController() {
     }
 
+    @GetMapping("hi")
+    public String hello() {
+        return "hello world";
+    }
+
     @GetMapping("findDataByCode")
     @RequestLimit(key = "limit0",
             permitsPerSecond = 1,
@@ -156,8 +161,8 @@ public class RealTimeController {
                 List<LimitCodeVO> limitCodeVOList = rocModelService.findRocByLimit(
                         r2HighLimit == null ? null : BigDecimal.valueOf(r2HighLimit).negate(),
                         r2LowLimit == null ? null : BigDecimal.valueOf(r2LowLimit).negate(),
-                        r1LowLimit == null ? null : BigDecimal.valueOf(r1LowLimit).negate(),
-                        r1HighLimit == null ? null : BigDecimal.valueOf(r1HighLimit).negate()
+                        r1LowLimit == null ? null : BigDecimal.valueOf(r1LowLimit),
+                        r1HighLimit == null ? null : BigDecimal.valueOf(r1HighLimit)
                 );
                 if (limitCodeVOList != null && !limitCodeVOList.isEmpty()) {
                     convertROCLimitVO(limitCodeVOList);

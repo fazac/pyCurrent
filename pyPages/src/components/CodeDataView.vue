@@ -5,15 +5,14 @@ import DNLineChart from './DNLineChart.vue'
 import RTLineChart from './RTLineChart.vue'
 import ToolPanel from './ToolPanel.vue'
 import axios from "@/api/http.js";
-import {Search, Histogram, Compass, List} from '@element-plus/icons-vue'
+import {Search, Histogram, Compass, List, TrendCharts, Flag} from '@element-plus/icons-vue'
 import {
   findDataByCode,
   findCurcc,
   findOtherConcernList,
   searchSome
 } from '@/api/backend.js'
-import {isEmpty, nullArr, txtCenter} from '@/api/util'
-import {ElNotification} from 'element-plus'
+import {isEmpty, nullArr, txtCenter, nfc} from '@/api/util'
 
 
 const isDarkType = ref(true);
@@ -59,14 +58,6 @@ const sOpenVOTableData = reactive({});
 const sLimitVOVisible = ref(false);
 const sLimitVOType = ref('');
 const sLimitVOTableData = reactive({});
-
-function nfc(title, message, type) {
-  ElNotification({
-    title: title,
-    message: message,
-    type: isEmpty(type) ? 'success' : type,
-  })
-}
 
 
 function handleRowClick(row, column, event) {
@@ -120,13 +111,18 @@ onMounted(() => {
 });
 
 function changeLineType() {
+  lineType.value = !lineType.value;
   code.value = '';
 }
 
 
 function rowStyleClass(row) {
-  if (!isEmpty(row) && row.row.mark.charAt(0) === 'R') {
-    return 'row-high-light';
+  if (!isEmpty(row)) {
+    if (!isEmpty(row.row) && !isEmpty(row.row.mark) && row.row.mark.indexOf('H') > 0) {
+      return 'row-hold-mark';
+    } else if (row.row.mark.charAt(0) === 'R') {
+      return 'row-high-light';
+    }
   }
 }
 
@@ -217,11 +213,14 @@ function onSearchSubmit() {
           nfc('input error', 'limit miss', 'warning')
           return;
         }
-        searchSome("5", ...nullArr(6), searchObj.r2LowLimit, searchObj.r2HighLimit, searchObj.r1LowLimit, searchObj.r1HighLimit).then(res => {
-          sLimitVOVisible.value = true;
-          sLimitVOTableData.value = res;
-          sLimitVOType.value = '5';
-          searchVisible.value = false;
+        searchSome("5", ...nullArr(6), searchObj.r2LowLimit, searchObj.r2HighLimit, searchObj.r1LowLimit, searchObj.r1HighLimit)
+            .then(res => {
+              sLimitVOVisible.value = true;
+              sLimitVOTableData.value = res;
+              sLimitVOType.value = '5';
+              searchVisible.value = false;
+            }).catch(e => {
+          nfc('result error', e, 'error')
         })
         break;
     }
@@ -244,18 +243,14 @@ function showOtherConcernDial() {
     <el-aside width="60px">
       <ToolPanel/>
     </el-aside>
-    <el-main>
-      <!--    <div class="table-container">-->
-      <!--    <span class="center-panel">-->
-
-      <!--    </span>-->
+    <el-main class="flex-column">
       <el-table
           @row-click="handleRowClick"
           :data="codeDateList.value" empty-text=" "
           highlight-current-row max-height="300"
           border
           stripe
-          class="main-table"
+          class="flex-grow-0"
           :cell-style="cellStyle"
           :header-cell-style="headerCellStyle"
           :row-class-name="rowStyleClass"
@@ -280,23 +275,20 @@ function showOtherConcernDial() {
           </template>
         </el-table-column>
       </el-table>
+      <DNLineChart :code=code v-if="lineType"></DNLineChart>
+      <RTLineChart :code=code v-if="!lineType"></RTLineChart>
     </el-main>
     <el-aside width="60px">
-      <el-switch v-model="lineType" @change="changeLineType" size="large" inline-prompt active-text="dn"
-                 inactive-text="rt"
-                 style="--el-switch-on-color:  #006699; --el-switch-off-color: #47476b"></el-switch>
-      <el-button type="success" size="small" class="big-btn"
-                 @click="showOtherConcernDial" :icon="Compass" round></el-button>
-      <el-button type="success" size="small" class="big-btn"
-                 @click="showCurccDial" :icon="Histogram" round></el-button>
-      <el-button type="primary" size="small" class="big-btn"
-                 @click="showSearchDial" :icon="Search" round></el-button>
+      <el-button type="primary" @click="changeLineType" size="large"
+                 :icon="lineType?'Flag':'TrendCharts'"></el-button>
+      <el-button type="success" size="large"
+                 @click="showOtherConcernDial" :icon="Compass"></el-button>
+      <el-button type="success" size="large"
+                 @click="showCurccDial" :icon="Histogram"></el-button>
+      <el-button type="primary" size="large"
+                 @click="showSearchDial" :icon="Search"></el-button>
     </el-aside>
   </el-container>
-  <!--    </div>-->
-
-  <DNLineChart :code=code v-if="lineType"></DNLineChart>
-  <RTLineChart :code=code v-if="!lineType"></RTLineChart>
 
   <el-dialog v-model="dialogTableVisible" title="DETAIL" :show-close="false" draggable destroy-on-close
              width="1000">
@@ -514,8 +506,8 @@ function showOtherConcernDial() {
       <el-table-column prop="cp" label="cp"/>
       <el-table-column prop="bp" label="bp"/>
       <el-table-column prop="rr" label="rr"/>
-      <el-table-column prop="cm" label="cm"/>
-      <el-table-column prop="pe" label="pe"/>
+      <el-table-column prop="cm" sortable label="cm"/>
+      <el-table-column prop="pe" sortable label="pe"/>
       <el-table-column prop="tsCode" label="code">
         <template #default="scope">
           <span>{{ scope.row.tsCode.substring(0, 1).concat(scope.row.tsCode.substring(2, 6)) }}</span>
