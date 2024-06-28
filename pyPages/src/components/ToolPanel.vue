@@ -4,6 +4,8 @@ import {useDark, useToggle} from '@vueuse/core'
 import {SwitchButton, Refresh, Edit} from '@element-plus/icons-vue'
 import {findConstants, updateConstant} from '@/api/backend.js'
 import {txtCenter, nfc} from '@/api/util'
+import router from "@/router";
+
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
@@ -51,6 +53,13 @@ function onSubmit() {
   });
 }
 
+function openNewPage(event) {
+  event.preventDefault(); // 阻止默认的链接行为
+  // window.electronAPI.openUrl('/board')
+  // window.open('board', '_blank');
+  router.push('board');
+}
+
 
 </script>
 
@@ -61,6 +70,9 @@ function onSubmit() {
              @click="reloadPage()" :icon="Refresh"></el-button>
   <el-button type="info" size="large" class="big-btn"
              @click="showConstantsDial" :icon="Edit"></el-button>
+  <el-button type="info" size="large" class="big-btn"
+             @click="openNewPage" :icon="Edit"></el-button>
+
   <el-dialog v-model="constantsDial" title="CONSTANT"
              :show-close="false" center draggable destroy-on-close width="1000">
     <el-table :data="constants.value" class="mt-2" max-height="400px"

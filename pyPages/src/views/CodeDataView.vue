@@ -1,9 +1,9 @@
 <script setup>
 import {reactive, ref, onMounted} from 'vue'
 import {ElTable} from 'element-plus'
-import DNLineChart from './DNLineChart.vue'
-import RTLineChart from './RTLineChart.vue'
-import ToolPanel from './ToolPanel.vue'
+import DNLineChart from '../components/DNLineChart.vue'
+import RTLineChart from '../components/RTLineChart.vue'
+import ToolPanel from '../components/ToolPanel.vue'
 import axios from "@/api/http.js";
 import {Search, Histogram, Compass, List, TrendCharts, Flag} from '@element-plus/icons-vue'
 import {
@@ -247,7 +247,7 @@ function showOtherConcernDial() {
       <el-table
           @row-click="handleRowClick"
           :data="codeDateList.value" empty-text=" "
-          highlight-current-row max-height="300"
+          highlight-current-row max-height="500"
           border
           stripe
           class="flex-grow-0"

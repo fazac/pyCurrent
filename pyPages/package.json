@@ -2,7 +2,7 @@
   "name": "pypages",
   "version": "0.0.0",
   "private": true,
-  "main": "electron/main.js",
+  "main": "src/backgroud.js",
   "author": "fazac",
   "description": "pycurwin",
   "scripts": {
@@ -83,7 +83,6 @@
     "asar": true,
     "files": [
       "./dist",
-      "./electron",
       "!**/node_modules/**"
     ],
     "extends": null
