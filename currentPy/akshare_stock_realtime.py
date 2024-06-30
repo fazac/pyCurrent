@@ -277,16 +277,8 @@ def fetch_continues_data():
 
 if __name__ == '__main__':
     task = BackgroundScheduler()
-    # create_rt_table()
-    # fetch_rt_data()
-    # fetch_dn_data()
-    # fetch_da_data()
-    # fetch_concept_data()
-    # fetch_industry_data()
-    # fetch_continues_data()
 
     task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
-
     task.add_job(fetch_rt_data, 'interval', seconds=60,
                  start_date=datetime.now().strftime('%Y-%m-%d') + ' 09:14:00',
                  end_date=datetime.now().strftime('%Y-%m-%d') + ' 11:32:00',
@@ -295,9 +287,10 @@ if __name__ == '__main__':
                  start_date=datetime.now().strftime('%Y-%m-%d') + ' 12:59:00',
                  end_date=datetime.now().strftime('%Y-%m-%d') + ' 15:02:00',
                  id='fetch_realtime_data2')
-
     task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
     task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
     task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
     task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
     task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
+    
+    task.start()
