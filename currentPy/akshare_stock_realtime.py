@@ -292,5 +292,7 @@ if __name__ == '__main__':
     task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
     task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
     task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
-    
+
     task.start()
+
+    input("按回车键继续...")
