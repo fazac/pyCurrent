@@ -45,14 +45,15 @@ public class EmRealTimeStockService {
     }
 
     public List<EmRealTimeStock> findEmCurrent() {
-        return PythonScriptUtils.execThreadPY(Constants.AKSHARE_EM_REALTIME, PyFuncEnum.EM_CURRENT.toString(), this::findLast);
+//        return PythonScriptUtils.execThreadPY(Constants.AKSHARE_EM_REALTIME, PyFuncEnum.EM_CURRENT.toString(), this::findLast);
+        return findLast();
     }
 
     @SuppressWarnings("unchecked")
     public List<EmRealTimeStock> findRBarStockByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * from " + tableName
-                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
+                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -61,7 +62,7 @@ public class EmRealTimeStockService {
     public int findRBarStockCountByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select count(1) from " + tableName
-                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
+                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
         return ((Long) entityManager.createNativeQuery(sql)
                 .setParameter("tsCode", tsCode)
                 .getSingleResult()).intValue();
@@ -70,8 +71,8 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                     "    from " + tableName
-                     + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                "    from " + tableName
+                + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -80,8 +81,8 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByName(String name) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                     "    from " + tableName
-                     + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                "    from " + tableName
+                + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("name", "%" + name + "%")
                 .getResultList();

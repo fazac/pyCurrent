@@ -85,7 +85,7 @@ public class PullData implements CommandLineRunner {
         }
     }
 
-    @Scheduled(cron = "59 * 9-16 * * ?")
+    @Scheduled(cron = "3 * 9-16 * * ?")
     public void pullRealTimeData() {
         if (isTradeHour() && StockUtils.isNotRest() && !PARAMS.BAK_MODE) {
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
@@ -153,11 +153,13 @@ public class PullData implements CommandLineRunner {
     }
 
     private void checkRealData(String[] codes, Map<String, Map<String, EmConstantValue>> stockMap, Map<String, List<BigDecimal>> codePctMap, Map<String, List<String>> logsMap, List<EmRealTimeStock> stockList) {
+        if (stockList == null || stockList.isEmpty()) {
+            return;
+        }
         String NOW_DAY = LocalDateTime.now().format(DATE_TIME_FORMAT);
         initLogsMap();
         String type;
-
-        String curTradeDate = stockList.get(0).getTradeDate();
+        String curTradeDate = stockList.getFirst().getTradeDate();
 
         String nowClock = fixLength(curTradeDate.substring(11), 8);
         int nowHour = Integer.parseInt(nowClock.trim().substring(0, 2));
@@ -236,10 +238,10 @@ public class PullData implements CommandLineRunner {
             yesterdayHigh = limitCodeMap.containsKey(tsCode);
 
             if (rt.getCurrentPri() != null
-                && (tsCode.startsWith("0") || tsCode.startsWith("60"))
-                && !tsName.contains("退")
-                && !noConcerned
-                && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
+                    && (tsCode.startsWith("0") || tsCode.startsWith("60"))
+                    && !tsName.contains("退")
+                    && !noConcerned
+                    && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
                     || holds
                     || concerned)) {
                 logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "") + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
@@ -277,10 +279,10 @@ public class PullData implements CommandLineRunner {
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
             onboard = todayBoardCodes.contains(tsCode);
             if (!noConcerned
-                && !tsName.contains("退")
-                && tsCode.startsWith("3")
-                && rt.getPctChg() != null
-                && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
+                    && !tsName.contains("退")
+                    && tsCode.startsWith("3")
+                    && rt.getPctChg() != null
+                    && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : !yesterdayHigh ? "R" : "L");
                 CurConcernCode curConcernCode = new CurConcernCode();
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
@@ -317,8 +319,8 @@ public class PullData implements CommandLineRunner {
 
                 }
                 if (curConcernCode.getPe() != null
-                    && curConcernCode.getPe().compareTo(Constants.PE_LIMIT) < 0
-                    && curConcernCode.getPe().compareTo(BigDecimal.ZERO) > 0) {
+                        && curConcernCode.getPe().compareTo(Constants.PE_LIMIT) < 0
+                        && curConcernCode.getPe().compareTo(BigDecimal.ZERO) > 0) {
                     curConcernCode.setTableShow(true);
                 }
                 curConcernCode.setTsCode(tsCode);
@@ -351,8 +353,8 @@ public class PullData implements CommandLineRunner {
         }
 
         if (nowMinute % 10 == 5 || nowMinute % 10 == 0
-            || nowHour == 9 && nowMinute == 16
-            || nowHour == 15 && nowMinute == 1) {
+                || nowHour == 9 && nowMinute == 16
+                || nowHour == 15 && nowMinute == 1) {
             CurCount curCount = statisticsCurCount(stockList);
             curCountService.saveOne(curCount);
         }

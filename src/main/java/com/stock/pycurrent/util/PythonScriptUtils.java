@@ -24,7 +24,7 @@ public class PythonScriptUtils {
             try {
                 String[] args = new String[]{"python", pyScript};
                 args = ArrayUtils.concat(args, params.split(" "));
-                log.info("args" + JSONUtils.toJson(args));
+                log.warn("args" + JSONUtils.toJson(args));
                 Process p = r.exec(args);
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(p.getInputStream()));

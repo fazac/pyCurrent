@@ -3,12 +3,15 @@ import pymysql
 import json
 import math
 import threading
+import warnings
 
 from sqlalchemy import create_engine
 from operator import methodcaller
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from dbutils.pooled_db import PooledDB
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 db_config = {
     'host': 'localhost',
@@ -40,7 +43,7 @@ def add_one_day(date_str):
 
 
 # 多线程获取数据
-def fetchThreadData(em_func, em_table, em_symbol_func, em_symbol_name, em_add_flag, params):
+def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_flag, params):
     em_table_tmp = em_table + "_tmp"
 
     if params is None or params == '':
@@ -76,6 +79,7 @@ def fetchThreadData(em_func, em_table, em_symbol_func, em_symbol_name, em_add_fl
                     df.insert(loc=0, column='序号', value=self.symbol)
                     # 日期栏去除'-'
                     df['日期'] = df['日期'].astype(str).str.replace("-", "")
+                    df = df.drop('股票代码', axis=1)
                     if em_add_flag == 'yes':
                         df.insert(loc=df.columns.size, column='周期', value=em_params["period"])
                         df.insert(loc=df.columns.size, column='复权', value=em_params["adjust"])
@@ -125,7 +129,7 @@ def fetchThreadData(em_func, em_table, em_symbol_func, em_symbol_name, em_add_fl
 
 
 # 单线程获取数据
-def fetchData(em_table, em_func):
+def fetch_data(em_table, em_func):
     em_table_tmp = em_table + "_tmp"
     engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")
     db = pymysql.connect(**db_config)
@@ -151,7 +155,7 @@ def fetchData(em_table, em_func):
     db.close()
 
 
-def createRtTable():
+def create_rt_table():
     db = pymysql.connect(**db_config)
     cursor = db.cursor()
     em_table = "em_real_time_stock" + "_" + datetime.now().strftime('%Y%m%d')
@@ -192,16 +196,12 @@ def createRtTable():
     db.close()
 
 
-def fetchRTData():
+def fetch_rt_data():
     em_table = "em_real_time_stock" + "_" + datetime.now().strftime('%Y%m%d')
-    fetchData(em_table, "stock_zh_a_spot_em")
+    fetch_data(em_table, "stock_zh_a_spot_em")
 
 
-def fetchContinuesData():
-    fetchData("continuous_up", "stock_rank_lxsz_ths")
-
-
-def fetchDnData():
+def fetch_dn_data():
     db = pymysql.connect(**db_config)
     cursor = db.cursor()
     sql = 'select max(c.trade_date) from em_d_n_stock c'
@@ -210,17 +210,17 @@ def fetchDnData():
     next_trade_date = add_one_day(max_trade_date)
     now_trade_date = datetime.now().strftime('%Y%m%d')
     if max_trade_date != now_trade_date:
-        fetchThreadData("stock_zh_a_hist",
-                        'em_d_n_stock',
-                        'stock_zh_a_spot_em',
-                        '代码',
-                        '',
-                        '{\"start_date\":\"' + next_trade_date
-                        + '\",\"end_date\":\"' + now_trade_date
-                        + '\",\"adjust\":\"\",\"period\":\"daily\"}')
+        fetch_thread_data("stock_zh_a_hist",
+                          'em_d_n_stock',
+                          'stock_zh_a_spot_em',
+                          '代码',
+                          '',
+                          '{\"start_date\":\"' + next_trade_date
+                          + '\",\"end_date\":\"' + now_trade_date
+                          + '\",\"adjust\":\"\",\"period\":\"daily\"}')
 
 
-def fetchDaData():
+def fetch_da_data():
     db = pymysql.connect(**db_config)
     cursor = db.cursor()
     sql = 'select max(c.trade_date) from em_d_a_stock c'
@@ -229,17 +229,17 @@ def fetchDaData():
     next_trade_date = add_one_day(max_trade_date)
     now_trade_date = datetime.now().strftime('%Y%m%d')
     if max_trade_date != now_trade_date:
-        fetchThreadData("stock_zh_a_hist",
-                        'em_d_n_stock',
-                        'stock_zh_a_spot_em',
-                        '代码',
-                        '',
-                        '{\"start_date\":\"' + next_trade_date
-                        + '\",\"end_date\":\"' + now_trade_date
-                        + '\",\"adjust\":\"hfq\",\"period\":\"daily\"}')
+        fetch_thread_data("stock_zh_a_hist",
+                          'em_d_a_stock',
+                          'stock_zh_a_spot_em',
+                          '代码',
+                          '',
+                          '{\"start_date\":\"' + next_trade_date
+                          + '\",\"end_date\":\"' + now_trade_date
+                          + '\",\"adjust\":\"hfq\",\"period\":\"daily\"}')
 
 
-def fetchConceptData():
+def fetch_concept_data():
     db = pymysql.connect(**db_config)
     cursor = db.cursor()
     sql = 'select max(trade_date) from board_concept_con;'
@@ -247,15 +247,15 @@ def fetchConceptData():
     max_trade_date = datetime.strptime(cursor.fetchall()[0][0], '%Y-%m-%d %H:%M:%S').strftime('%Y%m%d')
     now_trade_date = datetime.now().strftime('%Y%m%d')
     if max_trade_date != now_trade_date:
-        fetchThreadData("stock_board_concept_cons_em",
-                        "board_concept_con",
-                        "stock_board_concept_name_em",
-                        "板块名称",
-                        "",
-                        "")
+        fetch_thread_data("stock_board_concept_cons_em",
+                          "board_concept_con",
+                          "stock_board_concept_name_em",
+                          "板块名称",
+                          "",
+                          "")
 
 
-def fetchIndustryData():
+def fetch_industry_data():
     db = pymysql.connect(**db_config)
     cursor = db.cursor()
     sql = 'select max(trade_date) from board_industry_con;'
@@ -263,30 +263,41 @@ def fetchIndustryData():
     max_trade_date = datetime.strptime(cursor.fetchall()[0][0], '%Y-%m-%d %H:%M:%S').strftime('%Y%m%d')
     now_trade_date = datetime.now().strftime('%Y%m%d')
     if max_trade_date != now_trade_date:
-        fetchThreadData("stock_board_industry_cons_em",
-                        "board_industry_con",
-                        "stock_board_industry_name_em",
-                        "板块名称",
-                        "",
-                        "")
+        fetch_thread_data("stock_board_industry_cons_em",
+                          "board_industry_con",
+                          "stock_board_industry_name_em",
+                          "板块名称",
+                          "",
+                          "")
+
+
+def fetch_continues_data():
+    fetch_data("continuous_up", "stock_rank_lxsz_ths")
 
 
 if __name__ == '__main__':
     task = BackgroundScheduler()
+    # create_rt_table()
+    # fetch_rt_data()
+    # fetch_dn_data()
+    # fetch_da_data()
+    # fetch_concept_data()
+    # fetch_industry_data()
+    # fetch_continues_data()
 
-    task.add_job(createRtTable, 'cron', day_of_week='0-4', hour='9')
+    task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
 
-    task.add_job(fetchRTData, 'interval', seconds=60,
+    task.add_job(fetch_rt_data, 'interval', seconds=60,
                  start_date=datetime.now().strftime('%Y-%m-%d') + ' 09:14:00',
                  end_date=datetime.now().strftime('%Y-%m-%d') + ' 11:32:00',
                  id='fetch_realtime_data1')
-    task.add_job(fetchRTData, 'interval', seconds=60,
+    task.add_job(fetch_rt_data, 'interval', seconds=60,
                  start_date=datetime.now().strftime('%Y-%m-%d') + ' 12:59:00',
                  end_date=datetime.now().strftime('%Y-%m-%d') + ' 15:02:00',
                  id='fetch_realtime_data2')
 
-    task.add_job(fetchDnData, 'cron', day_of_week='0-4', hour='16', minute='0')
-    task.add_job(fetchDaData, 'cron', day_of_week='0-4', hour='16', minute='10')
-    task.add_job(fetchConceptData, 'cron', day_of_week='0-4', hour='16', minute='20')
-    task.add_job(fetchIndustryData, 'cron', day_of_week='0-4', hour='16', minute='25')
-    task.add_job(fetchContinuesData, 'cron', day_of_week='0-4', hour='16', minute='30')
+    task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
+    task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
+    task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
+    task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
+    task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')

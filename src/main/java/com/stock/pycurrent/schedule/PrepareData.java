@@ -40,37 +40,37 @@ public class PrepareData implements CommandLineRunner {
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
-        if (!PARAMS.BAK_MODE
-            && StockUtils.isNotRest()
-            && !limitCodeService.checkDateHoliday(DateUtils.getM_D(n))) {
-            createTable();
-            pullAll();
+        if (PARAMS.BAK_MODE
+                && StockUtils.isNotRest()
+                && !limitCodeService.checkDateHoliday(DateUtils.getM_D(n))) {
+//            createTable();
+//            pullAll();
             rocCal();
         }
     }
 
     @SneakyThrows
-    @Scheduled(cron = " 0 30 16 * * ? ")
+    @Scheduled(cron = " 0 35 16 * * ? ")
     public void pullAll() {
         if (!PARAMS.BAK_MODE) {
-            log.warn("PULL-ALL-ENTER");
-            log.warn("pullData-EM-ENTER");
-            stockService.initEMDailyData();
-            log.warn("pullData-EM-OVER");
-            if (StockUtils.afterPullHour()) {
-                log.warn("pullData-EMBC-ENTER");
-                boardConceptConService.findBoardConceptConCurrent();
-                log.warn("pullData-EMBC-OVER");
-                log.warn("pullData-EMBI-ENTER");
-                boardIndustryConService.findBoardIndustryConCurrent();
-                log.warn("pullData-EMBI-OVER");
-                log.warn("continuousUp-ENTER");
-                continuousUpService.initContinuousUp();
-                log.warn("continuousUp-OVER");
-                log.warn("LABEL-ENTER");
-                codeLabelService.createLabels();
-                log.warn("LABEL-OVER");
-            }
+//            log.warn("PULL-ALL-ENTER");
+//            log.warn("pullData-EM-ENTER");
+//            stockService.initEMDailyData();
+//            log.warn("pullData-EM-OVER");
+//            if (StockUtils.afterPullHour()) {
+//                log.warn("pullData-EMBC-ENTER");
+//                boardConceptConService.findBoardConceptConCurrent();
+//                log.warn("pullData-EMBC-OVER");
+//                log.warn("pullData-EMBI-ENTER");
+//                boardIndustryConService.findBoardIndustryConCurrent();
+//                log.warn("pullData-EMBI-OVER");
+//                log.warn("continuousUp-ENTER");
+//                continuousUpService.initContinuousUp();
+//                log.warn("continuousUp-OVER");
+            log.warn("LABEL-ENTER");
+            codeLabelService.createLabels();
+            log.warn("LABEL-OVER");
+//            }
             log.warn("createLimitCode-ENTER");
             stockService.createLimitCode();
             log.warn("createLimitCode-OVER");
@@ -88,7 +88,7 @@ public class PrepareData implements CommandLineRunner {
         }
     }
 
-    @Scheduled(cron = " 0 0 9 * * ? ")
+//    @Scheduled(cron = " 0 0 9 * * ? ")
     public void createTable() {
         if (!PARAMS.BAK_MODE) {
             if (StockUtils.isNotRest()) {
