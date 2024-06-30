@@ -24,14 +24,6 @@ public class PrepareData implements CommandLineRunner {
     @Resource
     private StockService stockService;
     @Resource
-    private BoardConceptConService boardConceptConService;
-    @Resource
-    private BoardIndustryConService boardIndustryConService;
-    @Resource
-    private EmRealTimeStockService emRealTimeStockService;
-    @Resource
-    private ContinuousUpService continuousUpService;
-    @Resource
     private LimitCodeService limitCodeService;
     @Resource
     private CodeLabelService codeLabelService;
@@ -43,9 +35,7 @@ public class PrepareData implements CommandLineRunner {
         if (PARAMS.BAK_MODE
                 && StockUtils.isNotRest()
                 && !limitCodeService.checkDateHoliday(DateUtils.getM_D(n))) {
-//            createTable();
-//            pullAll();
-            rocCal();
+            stockService.initRocModel();
         }
     }
 
@@ -53,49 +43,17 @@ public class PrepareData implements CommandLineRunner {
     @Scheduled(cron = " 0 35 16 * * ? ")
     public void pullAll() {
         if (!PARAMS.BAK_MODE) {
-//            log.warn("PULL-ALL-ENTER");
-//            log.warn("pullData-EM-ENTER");
-//            stockService.initEMDailyData();
-//            log.warn("pullData-EM-OVER");
-//            if (StockUtils.afterPullHour()) {
-//                log.warn("pullData-EMBC-ENTER");
-//                boardConceptConService.findBoardConceptConCurrent();
-//                log.warn("pullData-EMBC-OVER");
-//                log.warn("pullData-EMBI-ENTER");
-//                boardIndustryConService.findBoardIndustryConCurrent();
-//                log.warn("pullData-EMBI-OVER");
-//                log.warn("continuousUp-ENTER");
-//                continuousUpService.initContinuousUp();
-//                log.warn("continuousUp-OVER");
             log.warn("LABEL-ENTER");
             codeLabelService.createLabels();
             log.warn("LABEL-OVER");
-//            }
             log.warn("createLimitCode-ENTER");
             stockService.createLimitCode();
             log.warn("createLimitCode-OVER");
             log.warn("PULL-ALL-OVER");
-        }
-    }
-
-    @SneakyThrows
-    @Scheduled(cron = " 0 10 17 * * ? ")
-    public void rocCal() {
-        if (!PARAMS.BAK_MODE) {
             log.warn("ROC-ENTER");
             stockService.initRocModel();
             log.warn("ROC-OVER");
         }
     }
 
-//    @Scheduled(cron = " 0 0 9 * * ? ")
-    public void createTable() {
-        if (!PARAMS.BAK_MODE) {
-            if (StockUtils.isNotRest()) {
-                log.warn("createTable-ENTER");
-                emRealTimeStockService.createTable();
-                log.warn("createTable-OVER");
-            }
-        }
-    }
 }

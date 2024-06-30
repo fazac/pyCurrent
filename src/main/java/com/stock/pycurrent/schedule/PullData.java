@@ -63,8 +63,6 @@ public class PullData implements CommandLineRunner {
     private CurCountService curCountService;
     @Resource
     private CurConcernCodeService curConcernCodeService;
-    @Resource
-    private EmDNStockService emDNStockService;
 
     private final Map<String, Integer> codeCountMap = new HashMap<>();
 
@@ -100,7 +98,8 @@ public class PullData implements CommandLineRunner {
 
     @SneakyThrows
     public void pullTest() {
-        while (true) {
+        int count = 0;
+        do {
             List<EmConstant> emConstants = emConstantService.findAll();
             String[] codes = prepareConstantsCodes(emConstants);
             Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
@@ -110,7 +109,8 @@ public class PullData implements CommandLineRunner {
                 List<EmRealTimeStock> stockList = emRealTimeStockService.findStockByDate(s);
                 checkRealData(codes, stockMap, codePctMap, logsMap, stockList);
             }
-        }
+            count++;
+        } while (count != 10);
     }
 
 
@@ -267,7 +267,7 @@ public class PullData implements CommandLineRunner {
                 }
                 List<BigDecimal> fiveMinutesPch = codePctMap.get(tsCode);
                 if (fiveMinutesPch.size() > 10) {
-                    fiveMinutesPch.remove(0);
+                    fiveMinutesPch.removeFirst();
                 }
                 rangeOverLimit = calRange(fiveMinutesPch);
                 if (rangeOverLimit) {
@@ -367,9 +367,7 @@ public class PullData implements CommandLineRunner {
 
     private void sendRTMsg() {
         if (!MySseEmitterUtil.codeCacheEmpty()) {
-            MySseEmitterUtil.codeSSECache.keySet().forEach(x -> {
-                MySseEmitterUtil.sendMsgToClient(prepareRTHisData(x), SSEMsgEnum.RT_HIS);
-            });
+            MySseEmitterUtil.codeSSECache.keySet().forEach(x -> MySseEmitterUtil.sendMsgToClient(prepareRTHisData(x), SSEMsgEnum.RT_HIS));
         }
     }
 
@@ -469,7 +467,7 @@ public class PullData implements CommandLineRunner {
                 }
             }
         }
-        return new CurCount(stockList.get(0).getTradeDate(), countArray);
+        return new CurCount(stockList.getFirst().getTradeDate(), countArray);
     }
 
     private int convertTimeCount(String nowClock) {
@@ -545,7 +543,7 @@ public class PullData implements CommandLineRunner {
 
     private boolean calRange(List<BigDecimal> values) {
 //        BigDecimal maxValue = Collections.max(values);
-        BigDecimal maxValue = values.get(values.size() - 1);
+        BigDecimal maxValue = values.getLast();
         BigDecimal minValue = Collections.min(values);
         return maxValue.subtract(minValue).compareTo(RANGE_LIMIT) >= 0 && values.indexOf(maxValue) > values.indexOf(minValue);
     }
@@ -580,7 +578,7 @@ public class PullData implements CommandLineRunner {
             List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findRBarStockByCode(tsCode);
             if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
                 BigDecimal lastBarValue = BigDecimal.ZERO;
-                EmRealTimeStock cur = emRealTimeStockList.get(0);
+                EmRealTimeStock cur = emRealTimeStockList.getFirst();
                 newBar.setShortSmaPrice(cur.getCurrentPri());
                 newBar.setLongSmaPrice(cur.getCurrentPri());
                 newBar.setDif(BigDecimal.ZERO);
