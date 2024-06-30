@@ -185,3 +185,4 @@ build/
 /pyPages/package-lock.json
 /pyPages/.vite/deps/_metadata.json
 /pyPages/.vite/deps/package.json
+/currentPy/venv/

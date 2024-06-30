@@ -1,0 +1,8 @@
+pyinstaller
+akshare
+pymysql
+sqlalchemy
+# jinja2
+# psycopg2
+apscheduler
+dbutils
