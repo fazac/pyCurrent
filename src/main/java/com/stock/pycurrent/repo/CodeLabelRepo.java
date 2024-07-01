@@ -15,4 +15,7 @@ public interface CodeLabelRepo extends JpaRepository<CodeLabel, String> {
 
     @Query(value = "select * from code_label where ts_code = :code and trade_date = (select max(trade_date) from code_label)", nativeQuery = true)
     CodeLabel findByCode(@Param("code") String code);
+
+    @Query(value = "select max(trade_date) from code_label", nativeQuery = true)
+    String findMaxDate();
 }

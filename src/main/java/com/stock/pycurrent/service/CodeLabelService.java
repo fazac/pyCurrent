@@ -46,6 +46,10 @@ public class CodeLabelService {
 
     public void createLabels() {
         String now = DateUtils.now();
+        String lastDate = codeLabelRepo.findMaxDate();
+        if (now.equals(lastDate)) {
+            return;
+        }
         Map<String, CodeLabel> codeLabelMap = new HashMap<>();
         List<Object> conceptList = boardConceptConRepo.findLast();
         if (conceptList != null && !conceptList.isEmpty()) {

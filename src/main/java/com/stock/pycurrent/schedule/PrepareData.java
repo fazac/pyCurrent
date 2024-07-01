@@ -32,11 +32,7 @@ public class PrepareData implements CommandLineRunner {
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
-        if (PARAMS.BAK_MODE
-                && StockUtils.isNotRest()
-                && !limitCodeService.checkDateHoliday(DateUtils.getM_D(n))) {
-            stockService.initRocModel();
-        }
+        pullAll();
     }
 
     @SneakyThrows

@@ -141,6 +141,10 @@ public class StockService {
 
     public void createLimitCode() {
         String nowDay = DateUtils.now();
+        String lastDate = limitCodeRepo.findMaxDate();
+        if (nowDay.equals(lastDate)) {
+            return;
+        }
         List<EmDNStock> emDNStockList = null;
         boolean flag = false;
         while (true) {
@@ -167,7 +171,7 @@ public class StockService {
         for (EmDNStock rt : emDNStockList) {
             String tsCode = rt.getTsCode();
             if ((tsCode.startsWith("0") || tsCode.startsWith("60")) && rt.getPctChg().compareTo(Constants.EIGHT) > 0
-                || tsCode.startsWith("3") && rt.getPctChg().compareTo(Constants.EIGHTEEN) > 0) {
+                    || tsCode.startsWith("3") && rt.getPctChg().compareTo(Constants.EIGHTEEN) > 0) {
                 int i = checkReachLimit(rt, 0);
                 if (i > 0) {
                     LimitCodeValue limitCodeValue = new LimitCodeValue();

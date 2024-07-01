@@ -154,7 +154,6 @@ public class RealTimeController {
                         limitCodeVOList.add(limitCodeVO);
                     });
                 }
-                log.warn(new Date().getTime());
                 objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
             }
             //ophc

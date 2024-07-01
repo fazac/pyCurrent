@@ -29,7 +29,6 @@ export function rowStyleClass(row) {
 }
 
 export function cellStyle(row) {
-    console.log(row)
     if (row.column.label === 'mark' || row.column.label === 'code' || row.column.label === '详情') {
         return {'text-align': 'center'};
     } else {
