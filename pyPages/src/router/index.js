@@ -1,6 +1,7 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
 import CodeDataView from '../views/CodeDataView.vue'
 import DailyOnBoard from '../views/OnBoardView.vue'
+import OtherCodeView from '../views/OtherCodeView.vue'
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -14,6 +15,11 @@ const router = createRouter({
             path: '/board',
             name: 'board',
             component: DailyOnBoard
+        },
+        {
+            path: '/other',
+            name: 'other',
+            component: OtherCodeView
         }
     ]
 })

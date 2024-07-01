@@ -1,6 +1,6 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, watch, shallowRef, onUnmounted} from 'vue';
+import {onUnmounted, reactive, shallowRef, watch} from 'vue';
 import axios from "@/api/http.js";
 
 const props = defineProps(['code'])
@@ -134,7 +134,7 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           'bar': true,
         },
         right: '10',
-        bottom:'10',
+        bottom: '10',
         orient: 'vertical',
       },
       xAxis: {

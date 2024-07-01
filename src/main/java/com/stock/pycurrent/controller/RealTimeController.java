@@ -73,7 +73,14 @@ public class RealTimeController {
             msg = "访问频率已超限制")
     public ObjectNode findDataByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
+        if (code == null || code.isEmpty()) {
+            return objectNode;
+        }
         List<OpenVO> openVOList = ArrayUtils.convertOpenVO(emRealTimeStockService.findOpenByCode(code));
+        if (openVOList.isEmpty()) {
+            log.warn("no current log ,code = " + code);
+            return objectNode;
+        }
         List<String> labels = getLabelsByCode(code);
         labels.addFirst(openVOList.getFirst().getName());
         objectNode.putPOJO("label", labels);
@@ -128,9 +135,13 @@ public class RealTimeController {
             }
             //limit
             case "3" -> {
-                LimitCode limitCode = limitCodeService.findByDate(DateUtils.convertMillisecond(searchDate));
+                LimitCode limitCode;
+                if (searchDate == null) {
+                    limitCode = limitCodeService.findLastOne(DateUtils.now());
+                } else {
+                    limitCode = limitCodeService.findByDate(DateUtils.convertMillisecond(searchDate));
+                }
                 List<LimitCodeVO> limitCodeVOList = new ArrayList<>();
-                log.warn(new Date().getTime());
                 if (limitCode != null && limitCode.getCodeValue() != null && !limitCode.getCodeValue().isEmpty()) {
                     List<LimitCodeValue> tmp = limitCode.getCodeValue();
                     tmp.sort(Comparator.comparing(LimitCodeValue::getCount));

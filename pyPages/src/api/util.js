@@ -17,6 +17,31 @@ export function txtCenter() {
     return {'text-align': 'center'};
 }
 
+
+export function rowStyleClass(row) {
+    if (!isEmpty(row)) {
+        if (!isEmpty(row.row) && !isEmpty(row.row.mark) && row.row.mark.indexOf('H') > 0) {
+            return 'row-hold-mark';
+        } else if (row.row.mark.charAt(0) === 'R') {
+            return 'row-high-light';
+        }
+    }
+}
+
+export function cellStyle(row) {
+    console.log(row)
+    if (row.column.label === 'mark' || row.column.label === 'code' || row.column.label === '详情') {
+        return {'text-align': 'center'};
+    } else {
+        return {'text-align': 'right'};
+    }
+}
+
+export function headerCellStyle() {
+    return {'text-align': 'center'};
+}
+
+
 export function isEmpty(value) {
     return value === undefined || value === null || value === '';
 }

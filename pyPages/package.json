@@ -2,7 +2,7 @@
   "name": "pypages",
   "version": "0.0.0",
   "private": true,
-  "main": "src/backgroud.js",
+  "main": "src/background.js",
   "author": "fazac",
   "description": "pycurwin",
   "scripts": {
@@ -31,7 +31,7 @@
     "productName": "pycur",
     "directories": {
       "buildResources": "build",
-      "output": "electron_dist"
+      "output": "dist"
     },
     "nsis": {
       "oneClick": false,

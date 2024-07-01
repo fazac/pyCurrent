@@ -36,6 +36,7 @@ button i.el-icon {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    align-items: center;
 }
 
 .el-main .flex-grow-0 {
@@ -58,6 +59,13 @@ button i.el-icon {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
+}
+
+.el-dialog__body{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
 }
 
 .dialog-footer button {
@@ -83,6 +91,14 @@ button i.el-icon {
 
 .mt-1 {
     margin-top: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 2rem;
+}
+
+.mb-1 {
+    margin-bottom: 1rem;
 }
 
 .gap-2 {

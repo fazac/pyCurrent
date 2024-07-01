@@ -1,6 +1,6 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, ref, watch, shallowRef} from 'vue';
+import {reactive, ref, shallowRef, watch} from 'vue';
 import {findDataLineByCode} from '@/api/backend.js'
 
 
@@ -53,7 +53,7 @@ function createDnLine() {
           'h': true,
         },
         right: '10',
-        bottom:'10',
+        bottom: '10',
         orient: 'vertical',
       },
       xAxis: {

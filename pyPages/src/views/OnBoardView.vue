@@ -1,71 +1,85 @@
 <script setup>
-import {reactive, ref, onMounted} from 'vue'
-import {isEmpty, nfc, nullArr, txtCenter} from "@/api/util";
+import {onMounted, reactive, ref} from 'vue'
+import {nullArr, txtCenter} from "@/api/util";
 import {searchSome} from "@/api/backend";
+import {List} from '@element-plus/icons-vue'
+import DetailDialog from '../components/DetailDialog.vue'
+import ToolPanel from '../components/LeftToolPanel.vue'
+import LineChart from "@/components/LineChart.vue";
+import RightToolPanel from "@/components/RightToolPanel.vue";
 
-const searchVisible = ref(false);
 const searchObj = reactive(
     {
-      code: '',
-      name: '',
       searchDate: null,
-      hand: null,
-      pch: null,
-      dayCount: null,
-      r2LowLimit: null,
-      r2HighLimit: null,
-      r1LowLimit: null,
-      r1HighLimit: null,
       type: '',
     }
 );
 
-const sLimitVOVisible = ref(false);
-const sLimitVOType = ref('');
 const sLimitVOTableData = reactive({});
 
-onMounted(() => {
-  if (isEmpty(searchObj.searchDate)) {
-    nfc('input error', 'searchDate miss', 'warning')
+const code = ref('');
+const linetype = ref(true);
+const searchCode = ref('');
+
+function fetchLimit() {
+  searchSome("3", ...nullArr(2), searchObj.searchDate != null ? searchObj.searchDate.getTime() : null).then(res => {
+    sLimitVOTableData.value = res;
+  })
+}
+
+function showDetails(v) {
+  searchCode.value = v;
+}
+
+function handleRowClick(row, column) {
+  if (column && column.label === '详情') {
     return;
   }
-  searchSome("3", ...nullArr(2), searchObj.searchDate.getTime()).then(res => {
-    sLimitVOVisible.value = true;
-    sLimitVOTableData.value = res;
-    sLimitVOType.value = '3';
-    searchVisible.value = false;
-  })
+  code.value = row.code;
+}
+
+
+onMounted(() => {
+  fetchLimit();
 })
 
 
 </script>
 
 <template>
-  <el-dialog v-model="sLimitVOVisible" title="LIMIT-SEARCH" :show-close="false" draggable destroy-on-close
-             width="1000">
-    <el-table :data="sLimitVOTableData.value.limitCodeVOList" class="mt-2"
-              :cell-style="txtCenter" max-height="400" stripe
-              :header-cell-style="txtCenter">
-      <el-table-column property="code" label="code"/>
-      <el-table-column property="labels" min-width="110px" show-overflow-tooltip label="labels"/>
-      <el-table-column property="count" v-if="sLimitVOType==='3'" sortable label="count"/>
-      <el-table-column property="hlc" v-if="sLimitVOType==='4'" sortable label="hlc"/>
-      <el-table-column property="hand" v-if="sLimitVOType==='4'" sortable label="hand"/>
-      <el-table-column property="ac" v-if="sLimitVOType==='4'" sortable label="ac"/>
-      <el-table-column property="cc" v-if="sLimitVOType==='4'" sortable label="cc"/>
-      <el-table-column property="r1" v-if="sLimitVOType==='5'" sortable label="last1"/>
-      <el-table-column property="r2" v-if="sLimitVOType==='5'" sortable label="last2"/>
-      <el-table-column property="cap" sortable label="cap"/>
-      <el-table-column property="pe" sortable label="pe"/>
-      <el-table-column property="pb" sortable label="pb"/>
-      <el-table-column label="详情">
-        <template #default="scope">
-          <el-button type="info"
-                     @click="handleColumnClick(scope.row.code)" :icon="List"></el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-  </el-dialog>
+  <el-container>
+    <ToolPanel/>
+    <el-main class="flex-column">
+      <el-date-picker
+          v-model="searchObj.searchDate"
+          type="date"
+          placeholder="Last Day Or Pick A Day"
+          @change="fetchLimit"
+      />
+      <el-table :data="sLimitVOTableData.value.limitCodeVOList"
+                @row-click="handleRowClick"
+                :cell-style="txtCenter" max-height="360" stripe v-if="sLimitVOTableData.value !=null"
+                :header-cell-style="txtCenter">
+        <el-table-column property="code" label="code"/>
+        <el-table-column property="labels" min-width="110px" show-overflow-tooltip label="labels"/>
+        <el-table-column property="count" sortable label="count"/>
+        <el-table-column property="cap" sortable label="cap"/>
+        <el-table-column property="pe" sortable label="pe"/>
+        <el-table-column property="pb" sortable label="pb"/>
+        <el-table-column label="详情">
+          <template #default="scope">
+            <el-button type="info" @click.native.stop="handleRowClick"
+                       @click="showDetails(scope.row.code)" :icon="List"></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <LineChart :code="code" :dnshow="linetype"/>
+    </el-main>
+    <RightToolPanel v-model:linetype="linetype" v-model:code="code"/>
+  </el-container>
+
+  <DetailDialog v-model:code="searchCode"/>
+
 </template>
 
 <style scoped>

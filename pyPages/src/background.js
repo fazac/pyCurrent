@@ -29,21 +29,24 @@ const createWindow = () => {
             webSecurity: false
         }
     })
-    mainWindow.loadURL('http://localhost:10213')
+    if (app.isPackaged) {
+        mainWindow.loadURL(`file://${path.join(__dirname, '../dist/index.html')}`)
+    } else {
+        mainWindow.loadURL('http://localhost:10213')
+    }
     //打开标签页
     ipcMain.on('open-url', (event, url) => {
         const webContents = mainWindow.webContents;
         console.log(url);
         if (webContents.getURL() !== url) {
             event.preventDefault();
-            // if (!app.isPackaged) {
-            webContents.loadURL(`http://localhost:10213/#` + url);
-            // }
-            // else {
-            // webContents.loadFile("dist/index.html", {
-            //     hash: url
-            // });
-            // }
+            if (!app.isPackaged) {
+                webContents.loadURL(`http://localhost:10213/#` + url);
+            } else {
+                webContents.loadFile("../dist/index.html#", {
+                    hash: url
+                });
+            }
         }
     });
 
