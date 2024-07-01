@@ -276,6 +276,7 @@ def fetch_continues_data():
 
 
 if __name__ == '__main__':
+    create_rt_table()
     task = BackgroundScheduler()
 
     task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
