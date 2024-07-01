@@ -9,3 +9,10 @@ pip install -r .\requirements.txt
 ```
 
 ## 3. nssm install service
+
+```angular2html
+  win + X to get Admin cmd
+  cd nssm folder
+  ./nssm install service name
+  ./nssm start/stop/remove/restart service
+```
