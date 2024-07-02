@@ -16,6 +16,10 @@ export function findConstants() {
     return axios.get('/constants/findAll');
 }
 
+export function findLastContinuous() {
+    return axios.get('/continuous/findLastContinuous');
+}
+
 export function updateConstant(constant) {
     return axios.post('/constants/updateOne', constant, {
         headers: {

@@ -1,11 +1,16 @@
 package com.stock.pycurrent.service;
 
 
+import com.stock.pycurrent.entity.ContinuousUp;
 import com.stock.pycurrent.entity.emum.PyFuncEnum;
 import com.stock.pycurrent.entity.model.Constants;
+import com.stock.pycurrent.repo.ContinuousUpRepo;
 import com.stock.pycurrent.util.PythonScriptUtils;
+import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author fzc
@@ -15,7 +20,14 @@ import org.springframework.stereotype.Service;
 @Service
 @CommonsLog
 public class ContinuousUpService {
+    @Resource
+    private ContinuousUpRepo continuousUpRepo;
+
     public void initContinuousUp() {
         PythonScriptUtils.execThreadPY(Constants.AKSHARE_STOCK_PY, PyFuncEnum.CONTINUOUS_UP.toString());
+    }
+
+    public List<ContinuousUp> findLastContinuous() {
+        return continuousUpRepo.findLast();
     }
 }

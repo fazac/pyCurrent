@@ -84,6 +84,8 @@
     "asar": true,
     "files": [
       "./dist",
+      "./src/background.js",
+      "./src/preload.js",
       "!**/node_modules/**"
     ],
     "extends": null

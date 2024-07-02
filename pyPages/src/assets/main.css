@@ -113,6 +113,10 @@ button i.el-icon {
     margin: 0.5rem 0.6rem;
 }
 
+.el-button:hover{
+    border-color: red!important;
+}
+
 .radio-group {
     width: 50%;
 }

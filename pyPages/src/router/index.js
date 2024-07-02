@@ -5,6 +5,7 @@ import OtherCodeView from '../views/OtherCodeView.vue'
 import OphcCodeView from '../views/OphcCodeView.vue'
 import RocCodeView from '../views/RocCodeView.vue'
 import RTAllCodeView from '../views/RTAllCodeView.vue'
+import ContinuousCodeView from '../views/ContinuousCodeView.vue'
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -36,6 +37,10 @@ const router = createRouter({
             path: '/all',
             name: 'all',
             component: RTAllCodeView
+        }, {
+            path: '/continuous',
+            name: 'continuous',
+            component: ContinuousCodeView
         }
     ]
 })

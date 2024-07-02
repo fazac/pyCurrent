@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 
-import {BellFilled, Compass, DataBoard, Film, HomeFilled,Link} from '@element-plus/icons-vue'
+import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight} from '@element-plus/icons-vue'
 import router from "@/router";
 
 const home_path = ref(true);
@@ -62,7 +62,9 @@ onMounted(() => {
                @click="openPage('all')" v-if="home_path"
                :icon="Link"></el-button>
 
-
+    <el-button type="info" size="large" class="big-btn"
+               @click="openPage('continuous')" v-if="home_path"
+               :icon="TopRight"></el-button>
   </el-aside>
 </template>
 
