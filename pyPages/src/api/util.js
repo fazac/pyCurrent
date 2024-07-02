@@ -13,11 +13,6 @@ export function nullArr(length) {
     return Array(length).fill(null);
 }
 
-export function txtCenter() {
-    return {'text-align': 'center'};
-}
-
-
 export function rowStyleClass(row) {
     if (!isEmpty(row)) {
         if (!isEmpty(row.row) && !isEmpty(row.row.mark) && row.row.mark.indexOf('H') > 0) {

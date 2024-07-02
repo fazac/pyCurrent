@@ -276,20 +276,17 @@ def fetch_continues_data():
 
 
 if __name__ == '__main__':
-
     create_rt_table()
 
     task = BackgroundScheduler()
 
     task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
-    task.add_job(fetch_rt_data, 'interval', seconds=60,
-                 start_date=datetime.now().strftime('%Y-%m-%d') + ' 09:14:00',
-                 end_date=datetime.now().strftime('%Y-%m-%d') + ' 11:32:00',
-                 id='fetch_realtime_data1')
-    task.add_job(fetch_rt_data, 'interval', seconds=60,
-                 start_date=datetime.now().strftime('%Y-%m-%d') + ' 12:59:00',
-                 end_date=datetime.now().strftime('%Y-%m-%d') + ' 15:02:00',
-                 id='fetch_realtime_data2')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
     task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
     task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
     task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')

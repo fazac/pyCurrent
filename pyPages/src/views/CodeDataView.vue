@@ -1,32 +1,13 @@
 <script setup>
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive} from 'vue'
 import {ElTable} from 'element-plus'
-import LineChart from '../components/LineChart.vue'
-import LeftToolPanel from '../components/LeftToolPanel.vue'
-import RightToolPanel from '../components/RightToolPanel.vue'
-import DetailDialog from '../components/DetailDialog.vue'
 import axios from "@/api/http.js";
-import {List} from '@element-plus/icons-vue'
 import {cellStyle, headerCellStyle, nfc, rowStyleClass} from '@/api/util'
-
+import CommonPage from "@/components/CommonPage.vue";
+import OperateButton from '@/components/OperateButton.vue'
+import {commonPageRef} from '@/api/commonpage'
 
 const codeDateList = reactive([{}]);
-
-const code = ref('');
-const detailCode = ref('');
-const linetype = ref(true);
-
-
-function handleRowClick(row, column) {
-  if (column && column.label === '详情') {
-    return;
-  }
-  code.value = row.tsCode;
-}
-
-function handleColumnClick(item) {
-  detailCode.value = item;
-}
 
 onMounted(() => {
   if (!!window.EventSource) {
@@ -67,11 +48,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <el-container>
-    <LeftToolPanel/>
-    <el-main class="flex-column">
+
+  <CommonPage ref="commonPageRef">
+    <template #resTable>
       <el-table
-          @row-click="handleRowClick"
           :data="codeDateList.value" empty-text=" "
           highlight-current-row max-height="500"
           border
@@ -94,20 +74,10 @@ onMounted(() => {
             <span>{{ scope.row.tsCode.substring(2, 6) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="详情">
-          <template #default="scope">
-            <el-button type="info" @click.native.stop="handleRowClick" round
-                       @click="handleColumnClick(scope.row.tsCode)" :icon="List"></el-button>
-          </template>
-        </el-table-column>
+        <OperateButton/>
       </el-table>
-      <LineChart :code="code" :dnshow="linetype"/>
-    </el-main>
-    <RightToolPanel v-model:linetype="linetype" v-model:code="code"/>
-  </el-container>
-
-  <DetailDialog v-model:code=detailCode></DetailDialog>
-
+    </template>
+  </CommonPage>
 
 </template>
 

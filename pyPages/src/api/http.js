@@ -1,8 +1,8 @@
 import axios from "axios";
 
 axios.defaults.timeout = 600000;
-// axios.defaults.baseURL = "http://139.84.194.82:7001";
-axios.defaults.baseURL = "http://localhost:19099";
+axios.defaults.baseURL = "http://139.84.194.82:7001";
+// axios.defaults.baseURL = "http://localhost:19099";
 
 // http request 请求 拦截器
 axios.interceptors.request.use(

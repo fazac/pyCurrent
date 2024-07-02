@@ -45,10 +45,10 @@ public class SseEmitterController {
         SseEmitter sseEmitter = MySseEmitterUtil.createSseConnect(clientId, sseMsgEnum);
         switch (sseMsgEnum) {
             case RT_CURRENT -> {
-                ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendConcernMsg, 2, TimeUnit.SECONDS);
+                ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendConcernMsg, 500, TimeUnit.MILLISECONDS);
             }
             case RT_HIS -> {
-                ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendRTMsg, 2, TimeUnit.SECONDS);
+                ExecutorUtils.SINGLE_MSG_POOL.schedule(this::sendRTMsg, 500, TimeUnit.MILLISECONDS);
             }
         }
         return sseEmitter;

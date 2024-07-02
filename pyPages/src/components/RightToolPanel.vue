@@ -2,13 +2,57 @@
 
 import {reactive, ref} from 'vue'
 import {ElTable} from 'element-plus'
-import {Compass, Histogram, List, Search} from '@element-plus/icons-vue'
-import {isEmpty, nfc, nullArr, txtCenter, rowStyleClass, cellStyle, headerCellStyle} from "@/api/util";
-import {findCurcc, findOtherConcernList, searchSome} from "@/api/backend";
+import {useDark, useToggle} from '@vueuse/core'
+import {Compass, Edit, Histogram, List, Refresh, Search, SwitchButton,} from '@element-plus/icons-vue'
+import {cellStyle, headerCellStyle, isEmpty, nfc, nullArr, rowStyleClass} from "@/api/util";
+import {findConstants, findCurcc, findOtherConcernList, searchSome, updateConstant} from "@/api/backend";
 import DetailDialog from '../components/DetailDialog.vue';
 
-const props = defineProps(['linetype', 'code'])
-const emit = defineEmits(['update:linetype', 'update:code'])
+
+
+
+const isDark = useDark()
+const toggleDark = useToggle(isDark)
+
+
+function reloadPage() {
+  window.location.reload();
+}
+
+const constants = reactive({});
+const constantsDial = ref(false);
+const constantsDialInner = ref(false);
+const selectConstant = reactive({});
+
+function showConstantsDial() {
+  findConstants().then(res => {
+    constants.value = res;
+    constantsDial.value = true;
+  })
+}
+
+
+
+
+function handelSelectConstantRow(row) {
+  selectConstant.value = row;
+  if (selectConstant.value.multiValue !== null) {
+    selectConstant.value.multiValueStr = JSON.stringify(selectConstant.value.multiValue);
+  }
+  constantsDialInner.value = true;
+}
+
+function onSubmit() {
+  updateConstant(selectConstant.value).then(res => {
+    if ("ok" === res) {
+      constantsDialInner.value = false;
+      findConstants().then(res => {
+        constants.value = res;
+      })
+      nfc('Success', 'constant update success');
+    }
+  });
+}
 
 const detailCode = ref('');
 
@@ -43,10 +87,6 @@ const sLimitVOVisible = ref(false);
 const sLimitVOType = ref('');
 const sLimitVOTableData = reactive({});
 
-function changeLineType() {
-  emit('update:linetype', !props.linetype)
-  emit('update:code', '')
-}
 
 function showCurccDial() {
   findCurcc().then(res => {
@@ -149,8 +189,14 @@ function handleColumnClick(tsCode) {
 
 <template>
   <el-aside width="60px">
-    <el-button type="info" @click="changeLineType" size="large"
-               :icon="props.linetype?'Flag':'TrendCharts'"></el-button>
+    <el-button type="info" size="large" class="big-btn"
+               @click="toggleDark()" :icon="SwitchButton"></el-button>
+    <el-button type="info" size="large" class="big-btn"
+               @click="reloadPage()" :icon="Refresh"></el-button>
+    <el-button type="info" size="large" class="big-btn"
+               @click="showConstantsDial" :icon="Edit"></el-button>
+
+
     <el-button type="info" size="large"
                @click="showOtherConcernDial" :icon="Compass"></el-button>
     <el-button type="info" size="large"
@@ -167,8 +213,8 @@ function handleColumnClick(tsCode) {
       <el-radio-button label="0" value="0"/>
     </el-radio-group>
     <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
-              :cell-style="txtCenter" stripe
-              :header-cell-style="txtCenter"
+              :cell-style="cellStyle" stripe
+              :header-cell-style="cellStyle"
               v-if="curType==='3'"
     >
       <el-table-column prop="c30a" label="a"/>
@@ -183,8 +229,8 @@ function handleColumnClick(tsCode) {
       <el-table-column prop="c307d" label="7d"/>
     </el-table>
     <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
-              :cell-style="txtCenter" stripe
-              :header-cell-style="txtCenter"
+              :cell-style="cellStyle" stripe
+              :header-cell-style="cellStyle"
               v-if="curType==='6'"
     >
       <el-table-column prop="c60a" label="a"/>
@@ -199,8 +245,8 @@ function handleColumnClick(tsCode) {
       <el-table-column prop="c607d" label="7d"/>
     </el-table>
     <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
-              :cell-style="txtCenter" stripe
-              :header-cell-style="txtCenter"
+              :cell-style="cellStyle" stripe
+              :header-cell-style="cellStyle"
               v-if="curType==='0'"
     >
       <el-table-column prop="c00a" label="a"/>
@@ -307,8 +353,8 @@ function handleColumnClick(tsCode) {
   <el-dialog v-model="sOpenVOVisible" title="NAME-SEARCH" :show-close="false" draggable destroy-on-close
              width="1000">
     <el-table :data="sOpenVOTableData.value.openVOList" class="mt-2"
-              :cell-style="txtCenter"
-              :header-cell-style="txtCenter">
+              :cell-style="cellStyle"
+              :header-cell-style="cellStyle">
       <el-table-column property="pct_chg" label="pch"/>
       <el-table-column property="change_hand" label="hand"/>
       <el-table-column property="pe" label="pe"/>
@@ -329,8 +375,8 @@ function handleColumnClick(tsCode) {
   <el-dialog v-model="sLimitVOVisible" title="LIMIT-SEARCH" :show-close="false" draggable destroy-on-close
              width="1000">
     <el-table :data="sLimitVOTableData.value.limitCodeVOList" class="mt-2"
-              :cell-style="txtCenter" max-height="400" stripe
-              :header-cell-style="txtCenter">
+              :cell-style="cellStyle" max-height="400" stripe
+              :header-cell-style="cellStyle">
       <el-table-column property="code" label="code"/>
       <el-table-column property="labels" min-width="110px" show-overflow-tooltip label="labels"/>
       <el-table-column property="count" v-if="sLimitVOType==='3'" sortable label="count"/>
@@ -350,6 +396,44 @@ function handleColumnClick(tsCode) {
         </template>
       </el-table-column>
     </el-table>
+  </el-dialog>
+
+  <el-dialog v-model="constantsDial" title="CONSTANT"
+             :show-close="false" center draggable destroy-on-close width="1000">
+    <el-table :data="constants.value" class="mt-2" max-height="400px"
+              :cell-style="cellStyle"
+              :header-cell-style="cellStyle"
+              @row-click="handelSelectConstantRow"
+    >
+      <el-table-column property="ckey" label="ckey"/>
+      <el-table-column property="cvalue" label="cvalue"/>
+      <el-table-column prop="mv" show-overflow-tooltip label="multiValue">
+        <template #default="scope">
+          <span>{{ scope.row.multiValue !== null ? JSON.stringify(scope.row.multiValue) : '' }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-dialog v-model="constantsDialInner" align-center center destroy-on-close
+               :show-close="false" width="600">
+      <el-form :model="selectConstant">
+        <el-form-item label="cval" label-width="88px">
+          <el-input v-model="selectConstant.value.cvalue" autocomplete="off" type="textarea"/>
+        </el-form-item>
+        <el-form-item label="mval" label-width="88px">
+          <el-input v-model="selectConstant.value.multiValueStr" :autosize="{ minRows: 2, maxRows: 4 }"
+                    type="textarea">
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="constantsDialInner = false">Cancel</el-button>
+          <el-button type="primary" @click="onSubmit">
+            Confirm
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </el-dialog>
 
   <DetailDialog v-model:code="detailCode"/>

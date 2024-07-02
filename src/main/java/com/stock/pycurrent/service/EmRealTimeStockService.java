@@ -30,6 +30,13 @@ public class EmRealTimeStockService {
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).getResultList();
     }
 
+    public List<EmRealTimeStock> findLastHundred() {
+        String tableName = "em_real_time_stock_" + DateUtils.now();
+        String sql = " select * from " + tableName + " where trade_date = (select (max(a.trade_date)) from " + tableName + " a) " +
+                " and current_pri is not null order by pct_chg desc limit 100;";
+        return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).getResultList();
+    }
+
     @SuppressWarnings("unchecked")
     public List<String> findTradeDates() {
         String tableName = "em_real_time_stock_" + DateUtils.now();

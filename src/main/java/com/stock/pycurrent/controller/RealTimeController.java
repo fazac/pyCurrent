@@ -11,6 +11,7 @@ import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
 import com.stock.pycurrent.entity.vo.LimitCodeVO;
 import com.stock.pycurrent.entity.vo.OpenVO;
+import com.stock.pycurrent.entity.vo.RealTimeVO;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.DateUtils;
@@ -183,6 +184,17 @@ public class RealTimeController {
             }
         }
         return objectNode;
+    }
+
+    @GetMapping("findLast")
+    public List<OpenVO> findLast() {
+        List<OpenVO> voList = ArrayUtils.convertOpenVO(emRealTimeStockService.findLastHundred());
+        voList.forEach(x -> {
+            List<String> tmps = getLabelsByCode(x.getTs_code());
+            tmps.addFirst(x.getName());
+            x.setLabel(String.join(",", tmps));
+        });
+        return voList;
     }
 
     private void convertLimitVO(@RequestParam(value = "code", required = false) String code, LimitCodeVO limitCodeVO) {

@@ -2,8 +2,8 @@ import {ref} from 'vue';
 
 export const commonPageRef = ref(null)
 
-export const handleRowClick = (row, column) => {
-    commonPageRef.value.handleRowClick(row, column)
+export const showLineChart = (v) => {
+    commonPageRef.value.showLineChart(v)
 }
 
 export const showDetails = (v) => {

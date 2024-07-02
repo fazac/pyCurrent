@@ -8,6 +8,10 @@ export function findDataLineByCode(code) {
     return axios.get('/rt/findDataLineByCode', {params: {code: code}});
 }
 
+export function findLast() {
+    return axios.get('/rt/findLast');
+}
+
 export function findConstants() {
     return axios.get('/constants/findAll');
 }

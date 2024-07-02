@@ -1,7 +1,7 @@
 <script setup>
 import {ref} from 'vue'
 import DetailDialog from '../components/DetailDialog.vue'
-import ToolPanel from '../components/LeftToolPanel.vue'
+import LeftToolPanel from '../components/LeftToolPanel.vue'
 import LineChart from "@/components/LineChart.vue";
 import RightToolPanel from "@/components/RightToolPanel.vue";
 
@@ -13,26 +13,24 @@ function showDetails(v) {
   searchCode.value = v;
 }
 
-function handleRowClick(row, column) {
-  if (column && column.label === '详情') {
-    return;
-  }
-  code.value = row.code;
+function showLineChart(v) {
+  code.value = v;
 }
 
-defineExpose({showDetails, handleRowClick})
+defineExpose({showDetails, showLineChart})
 
 </script>
 
 <template>
   <el-container>
-    <ToolPanel/>
+    <LeftToolPanel v-model:linetype="linetype" v-model:code="code"/>
     <el-main class="flex-column">
       <slot name="queryParams"></slot>
-      <slot name="resTable"></slot>
+      <slot name="resTable">
+      </slot>
       <LineChart :code="code" :dnshow="linetype"/>
     </el-main>
-    <RightToolPanel v-model:linetype="linetype" v-model:code="code"/>
+    <RightToolPanel/>
   </el-container>
 
   <DetailDialog v-model:code="searchCode"/>
