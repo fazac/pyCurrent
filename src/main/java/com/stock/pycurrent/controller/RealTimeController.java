@@ -197,6 +197,19 @@ public class RealTimeController {
         return voList;
     }
 
+    @GetMapping("findCptr")
+    public List<OpenVO> findCptr(@RequestParam(value = "symbol") String symbol) {
+        List<OpenVO> voList = ArrayUtils.convertOpenVO(emRealTimeStockService.findCptr(symbol));
+        if (!voList.isEmpty()) {
+            voList.forEach(x -> {
+                List<String> tmps = getLabelsByCode(x.getTs_code());
+                tmps.addFirst(x.getName());
+                x.setLabel(String.join(",", tmps));
+            });
+        }
+        return voList;
+    }
+
     private void convertLimitVO(@RequestParam(value = "code", required = false) String code, LimitCodeVO limitCodeVO) {
         EmRealTimeStock emRealTimeStock = emRealTimeStockService.findOpenByCode(code).getFirst();
         limitCodeVO.setPe(emRealTimeStock.getPe());

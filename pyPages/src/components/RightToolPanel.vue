@@ -14,6 +14,14 @@ import DetailDialog from '../components/DetailDialog.vue';
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
 
+const props = defineProps(['linetype', 'code'])
+const emit = defineEmits(['update:linetype', 'update:code'])
+
+function changeLineType() {
+  emit('update:linetype', !props.linetype)
+  emit('update:code', '')
+}
+
 
 function reloadPage() {
   window.location.reload();
@@ -193,6 +201,11 @@ function handleColumnClick(tsCode) {
                @click="toggleDark()" :icon="SwitchButton"></el-button>
     <el-button type="info" size="large" class="big-btn"
                @click="reloadPage()" :icon="Refresh"></el-button>
+
+    <el-button type="info" @click="changeLineType" size="large"
+               :icon="props.linetype?'Flag':'TrendCharts'"></el-button>
+
+
     <el-button type="info" size="large" class="big-btn"
                @click="showConstantsDial" :icon="Edit"></el-button>
 
@@ -268,9 +281,9 @@ function handleColumnClick(tsCode) {
     <el-radio-group class="radio-group mb-2" v-model="searchObj.type" size="large">
       <el-radio-button label="code" value="1"/>
       <el-radio-button label="name" value="2"/>
-      <el-radio-button label="limit" value="3"/>
-      <el-radio-button label="ophc" value="4"/>
-      <el-radio-button label="roc" value="5"/>
+<!--      <el-radio-button label="limit" value="3"/>-->
+<!--      <el-radio-button label="ophc" value="4"/>-->
+<!--      <el-radio-button label="roc" value="5"/>-->
     </el-radio-group>
     <el-form :model="searchObj">
       <el-form-item v-if="searchObj.type === '1'">
@@ -352,8 +365,8 @@ function handleColumnClick(tsCode) {
 
   <el-dialog v-model="sOpenVOVisible" title="NAME-SEARCH" :show-close="false" draggable destroy-on-close
              width="1000">
-    <el-table :data="sOpenVOTableData.value.openVOList" class="mt-2"
-              :cell-style="cellStyle"
+    <el-table :data="sOpenVOTableData.value.openVOList"
+              :cell-style="cellStyle" max-height="600"
               :header-cell-style="cellStyle">
       <el-table-column property="pct_chg" label="pch"/>
       <el-table-column property="change_hand" label="hand"/>

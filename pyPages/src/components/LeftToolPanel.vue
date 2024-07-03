@@ -1,20 +1,12 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 
-import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight} from '@element-plus/icons-vue'
+import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight, Aim} from '@element-plus/icons-vue'
 import router from "@/router";
 import axios from "@/api/http";
 import {nfc} from "@/api/util";
 
 const home_path = ref(true);
-
-const props = defineProps(['linetype', 'code'])
-const emit = defineEmits(['update:linetype', 'update:code'])
-
-function changeLineType() {
-  emit('update:linetype', !props.linetype)
-  emit('update:code', '')
-}
 
 
 function openPage(path) {
@@ -53,8 +45,6 @@ onMounted(() => {
 <template>
   <el-aside width="60px">
 
-    <el-button type="info" @click="changeLineType" size="large"
-               :icon="props.linetype?'Flag':'TrendCharts'"></el-button>
 
     <el-button type="info" size="large" class="big-btn"
                @click="openPage" v-if="!home_path"
@@ -83,6 +73,10 @@ onMounted(() => {
     <el-button type="info" size="large" class="big-btn"
                @click="openPage('continuous')" v-if="home_path"
                :icon="TopRight"></el-button>
+
+    <el-button type="info" size="large" class="big-btn"
+               @click="openPage('cptr')" v-if="home_path"
+               :icon="Aim"></el-button>
   </el-aside>
 </template>
 

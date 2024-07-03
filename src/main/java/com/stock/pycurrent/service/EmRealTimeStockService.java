@@ -33,9 +33,16 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findLastHundred() {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = " select * from " + tableName + " where trade_date = (select (max(a.trade_date)) from " + tableName + " a) " +
-                " and current_pri is not null order by pct_chg desc limit 100;";
+                     " and current_pri is not null order by pct_chg desc limit 100;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).getResultList();
     }
+
+    public List<EmRealTimeStock> findCptr(String symbol) {
+        String tableName = "em_real_time_stock_" + DateUtils.now();
+        String sql = " select * from " + tableName + " where trade_date = (select (max(a.trade_date)) from " + tableName + " a)  and current_pri is not null and ts_code in (select ts_code from board_concept_con  where symbol like :symbol and trade_date = (select max(trade_date) from board_concept_con))";
+        return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).setParameter("symbol", "%" + symbol + "%").getResultList();
+    }
+
 
     @SuppressWarnings("unchecked")
     public List<String> findTradeDates() {
@@ -60,7 +67,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findRBarStockByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * from " + tableName
-                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
+                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -69,7 +76,7 @@ public class EmRealTimeStockService {
     public int findRBarStockCountByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select count(1) from " + tableName
-                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
+                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
         return ((Long) entityManager.createNativeQuery(sql)
                 .setParameter("tsCode", tsCode)
                 .getSingleResult()).intValue();
@@ -78,8 +85,8 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                "    from " + tableName
-                + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                     "    from " + tableName
+                     + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -88,8 +95,8 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByName(String name) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                "    from " + tableName
-                + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                     "    from " + tableName
+                     + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("name", "%" + name + "%")
                 .getResultList();

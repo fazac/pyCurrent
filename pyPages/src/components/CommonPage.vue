@@ -23,14 +23,14 @@ defineExpose({showDetails, showLineChart})
 
 <template>
   <el-container>
-    <LeftToolPanel v-model:linetype="linetype" v-model:code="code"/>
+    <LeftToolPanel/>
     <el-main class="flex-column">
       <slot name="queryParams"></slot>
       <slot name="resTable">
       </slot>
       <LineChart :code="code" :dnshow="linetype"/>
     </el-main>
-    <RightToolPanel/>
+    <RightToolPanel v-model:linetype="linetype" v-model:code="code"/>
   </el-container>
 
   <DetailDialog v-model:code="searchCode"/>

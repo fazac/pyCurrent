@@ -6,6 +6,7 @@ import OphcCodeView from '../views/OphcCodeView.vue'
 import RocCodeView from '../views/RocCodeView.vue'
 import RTAllCodeView from '../views/RTAllCodeView.vue'
 import ContinuousCodeView from '../views/ContinuousCodeView.vue'
+import CprtCodeView from '../views/CprtCodeView.vue'
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -41,6 +42,10 @@ const router = createRouter({
             path: '/continuous',
             name: 'continuous',
             component: ContinuousCodeView
+        }, {
+            path: '/cptr',
+            name: 'cptr',
+            component: CprtCodeView
         }
     ]
 })

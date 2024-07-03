@@ -12,6 +12,11 @@ export function findLast() {
     return axios.get('/rt/findLast');
 }
 
+export function findCptr(symbol) {
+    return axios.get('/rt/findCptr', {params: {symbol: symbol}});
+}
+
+
 export function findConstants() {
     return axios.get('/constants/findAll');
 }
