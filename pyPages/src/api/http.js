@@ -1,11 +1,20 @@
 import axios from "axios";
+import {showFullScreenLoading, tryHideFullScreenLoading} from "@/api/axiosLoading";
 
-axios.defaults.timeout = 600000;
-axios.defaults.baseURL = "http://139.84.194.82:7001";
-// axios.defaults.baseURL = "http://localhost:19099";
+const BASE_API = "http://139.84.194.82:7001";
+// const BASE_API = "http://localhost:19099";
+
+const service = axios.create({
+    baseURL: BASE_API, //所有的请求地址前缀部分(没有后端请求不用写)
+    timeout: 30000, // 请求超时时间
+    showLoading: true, // 默认开启loading
+    withCredentials: true, //允许跨域携带凭证(cookie)
+    credentials: true, //后端允许跨域携带cookie
+})
+
 
 // http request 请求 拦截器
-axios.interceptors.request.use(
+service.interceptors.request.use(
     config => {
 
         // let url = config.url;
@@ -17,6 +26,7 @@ axios.interceptors.request.use(
         //         config.headers.Authorization = `Bearer ${store.state.token}`;
         //     }
         // }
+        config.showLoading && showFullScreenLoading()
         return config;
     },
     err => {
@@ -25,10 +35,12 @@ axios.interceptors.request.use(
     });
 
 // http response 响应 拦截器
-axios.interceptors.response.use(
+service.interceptors.response.use(
     response => {
         // if (response.config.tp) {
         //第三方接口, 非我方标准接口格式
+        response.config.showLoading && tryHideFullScreenLoading()
+        //对数据返回做什么
         return Promise.resolve(response.data);
         // }
         // if (response.data.result === 1) {
@@ -67,4 +79,4 @@ axios.interceptors.response.use(
         }
     });
 
-export default axios;
+export default service;
