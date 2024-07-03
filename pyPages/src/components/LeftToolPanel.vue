@@ -3,6 +3,8 @@ import {onMounted, ref} from 'vue'
 
 import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight} from '@element-plus/icons-vue'
 import router from "@/router";
+import axios from "@/api/http";
+import {nfc} from "@/api/util";
 
 const home_path = ref(true);
 
@@ -28,6 +30,22 @@ function openPage(path) {
 
 onMounted(() => {
   home_path.value = '/' === router.currentRoute.value.path;
+  const msgSource = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=&type=3");
+  msgSource.addEventListener('open', function () {
+    console.log("建立msg连接");
+  })
+  msgSource.onmessage = function (event) {
+    if (event.lastEventId !== 'sse_client_id') {
+      let msgArr = JSON.parse(event.data);
+      nfc(msgArr[0], msgArr[1]);
+      window.electronAPI.sendMsg(msgArr[0], msgArr[1]);
+    }
+  }
+  msgSource.onerror = function () {
+    if (!!msgSource) {
+      msgSource.close();
+    }
+  };
 })
 
 </script>

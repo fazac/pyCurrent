@@ -1,4 +1,4 @@
-const {app, protocol, BrowserWindow, Menu, MenuItem, ipcMain} = require('electron')
+const {app, protocol, BrowserWindow, Menu, MenuItem, ipcMain, Notification} = require('electron')
 // 需在当前文件内开头引入 Node.js 的 'path' 模块
 const path = require('path')
 
@@ -49,7 +49,15 @@ const createWindow = () => {
             }
         }
     });
+    //发送消息
+    ipcMain.on('send-msg', (event, title, body) => {
+        showNotification(title, body);
+    });
 
+}
+
+function showNotification(title, body) {
+    new Notification({title: title, body: body}).show()
 }
 
 const menu = new Menu()

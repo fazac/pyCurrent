@@ -4,7 +4,8 @@
 const {contextBridge, ipcRenderer} = require('electron/renderer')
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    openUrl: (url) => ipcRenderer.send('open-url', url)
+    openUrl: (url) => ipcRenderer.send('open-url', url),
+    sendMsg: (title, body) => ipcRenderer.send('send-msg', title, body)
 })
 
 window.addEventListener('DOMContentLoaded', () => {

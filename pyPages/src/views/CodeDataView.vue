@@ -25,21 +25,7 @@ onMounted(() => {
         tabelSource.close();
       }
     };
-    const msgSource = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=&type=3");
-    msgSource.addEventListener('open', function () {
-      console.log("建立msg连接");
-    })
-    msgSource.onmessage = function (event) {
-      if (event.lastEventId !== 'sse_client_id') {
-        let msgArr = JSON.parse(event.data);
-        nfc(msgArr[0], msgArr[1]);
-      }
-    }
-    msgSource.onerror = function () {
-      if (!!msgSource) {
-        msgSource.close();
-      }
-    };
+
   }
 
 });
