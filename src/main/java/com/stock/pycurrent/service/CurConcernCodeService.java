@@ -2,6 +2,7 @@ package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.CurConcernCode;
 import com.stock.pycurrent.repo.CurConcernCodeRepo;
+import com.stock.pycurrent.schedule.PrepareData;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,12 @@ public class CurConcernCodeService {
     }
 
     public List<CurConcernCode> findLast(String type) {
-        return curConcernCodeRepo.findLast(type);
+        List<CurConcernCode> curConcernCodeList = curConcernCodeRepo.findLast(type);
+        if (curConcernCodeList != null && !curConcernCodeList.isEmpty()) {
+            curConcernCodeList.forEach(x -> {
+                x.setLabels(PrepareData.findLabelStr(x.getTsCode()));
+            });
+        }
+        return curConcernCodeList;
     }
 }

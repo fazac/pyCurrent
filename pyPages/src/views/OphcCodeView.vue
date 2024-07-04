@@ -1,8 +1,9 @@
 <script setup>
 import {reactive} from 'vue'
 import CommonPage from '@/components/CommonPage.vue'
-import OperateButton from '@/components/OperateButton.vue'
-import {cellStyle, isEmpty, nfc, nullArr} from "@/api/util";
+import CommonTablePart from '@/components/CommonTablePart.vue'
+import PeColumn from '@/components/TablePart/PeColumn.vue'
+import {cellStyle, headerCellStyle, isEmpty, nfc, nullArr} from "@/api/util";
 import {searchSome} from "@/api/backend";
 import {commonPageRef} from '@/api/commonpage'
 
@@ -53,17 +54,16 @@ function fetchOPHC() {
     <template #resTable>
       <el-table :data="sLimitVOTableData.value.limitCodeVOList" class="mt-2"
                 :cell-style="cellStyle" max-height="400" stripe v-if="sLimitVOTableData.value"
-                :header-cell-style="cellStyle">
+                :header-cell-style="headerCellStyle">
         <el-table-column property="code" label="code"/>
-        <el-table-column property="labels" min-width="110px" show-overflow-tooltip label="labels"/>
         <el-table-column property="hlc" sortable label="hlc"/>
         <el-table-column property="hand" sortable label="hand"/>
         <el-table-column property="ac" sortable label="ac"/>
         <el-table-column property="cc" sortable label="cc"/>
         <el-table-column property="cap" sortable label="cap"/>
-        <el-table-column property="pe" sortable label="pe"/>
+        <PeColumn/>
         <el-table-column property="pb" sortable label="pb"/>
-        <OperateButton/>
+        <CommonTablePart/>
       </el-table>
     </template>
   </CommonPage>

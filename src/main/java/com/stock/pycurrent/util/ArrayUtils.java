@@ -6,6 +6,7 @@ import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
 import com.stock.pycurrent.entity.vo.OpenVO;
 import com.stock.pycurrent.entity.vo.RealTimeVO;
+import com.stock.pycurrent.schedule.PrepareData;
 import lombok.extern.apachecommons.CommonsLog;
 
 import java.math.BigDecimal;
@@ -120,6 +121,7 @@ public class ArrayUtils {
                             .divide(BigDecimal.valueOf(emRealTimeStock.getVol()).multiply(Constants.HUNDRED), 3, RoundingMode.HALF_UP));
                 }
                 openVO.setPri_pre(emRealTimeStock.getPriClosePre());
+                openVO.setLabels(PrepareData.findLabelStr(emRealTimeStock.getTsCode()));
                 res.add(openVO);
             }
             return res;

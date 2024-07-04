@@ -53,6 +53,8 @@ public class CurConcernCode {
 
     @Column(name = "tabel_show")
     private boolean isTableShow;
+    @Transient
+    private String labels;
 
     public CurConcernCode() {
         this.isTableShow = false;

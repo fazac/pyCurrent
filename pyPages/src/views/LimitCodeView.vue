@@ -1,7 +1,8 @@
 <script setup>
 import {onMounted, reactive} from 'vue'
 import CommonPage from '@/components/CommonPage.vue'
-import OperateButton from '@/components/OperateButton.vue'
+import CommonTablePart from '@/components/CommonTablePart.vue'
+import PeColumn from '@/components/TablePart/PeColumn.vue'
 import {cellStyle, headerCellStyle, nullArr} from "@/api/util";
 import {searchSome} from "@/api/backend";
 import {commonPageRef} from '@/api/commonpage'
@@ -41,12 +42,11 @@ onMounted(() => {
                 :cell-style="cellStyle" max-height="360" stripe v-if="sLimitVOTableData.value !=null"
                 :header-cell-style="headerCellStyle">
         <el-table-column property="code" label="code"/>
-        <el-table-column property="labels" min-width="110px" show-overflow-tooltip label="labels"/>
         <el-table-column property="count" sortable label="count"/>
         <el-table-column property="cap" sortable label="cap"/>
-        <el-table-column property="pe" sortable label="pe"/>
+        <PeColumn/>
         <el-table-column property="pb" sortable label="pb"/>
-        <OperateButton/>
+        <CommonTablePart/>
       </el-table>
     </template>
   </CommonPage>

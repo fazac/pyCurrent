@@ -24,7 +24,10 @@ export function rowStyleClass(row) {
 }
 
 export function cellStyle(row) {
-    if (row.column.label === 'mark' || row.column.label === 'code' || row.column.label === '详情') {
+    if (row.column.label === 'mark'
+        || row.column.label === 'code'
+        || row.column.label === 'tsCode'
+        || row.column.label === '详情') {
         return {'text-align': 'center'};
     } else {
         return {'text-align': 'right'};

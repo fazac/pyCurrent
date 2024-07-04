@@ -3,8 +3,9 @@ import {onMounted, reactive} from 'vue'
 import {cellStyle, headerCellStyle, rowStyleClass} from "@/api/util";
 import {findOtherConcernList} from "@/api/backend";
 import CommonPage from "@/components/CommonPage.vue";
+import CommonTablePart from "@/components/CommonTablePart.vue";
 import {commonPageRef} from '@/api/commonpage'
-import OperateButton from '@/components/OperateButton.vue'
+import PeColumn from '@/components/TablePart/PeColumn.vue'
 
 const otherConcernTableData = reactive({});
 
@@ -36,13 +37,13 @@ onMounted(() => {
         <el-table-column prop="h" label="h"/>
         <el-table-column prop="cp" label="cp"/>
         <el-table-column prop="cm" sortable label="cm"/>
-        <el-table-column prop="pe" sortable label="pe"/>
+        <PeColumn/>
         <el-table-column prop="tsCode" label="code">
           <template #default="scope">
             <span>{{ scope.row.tsCode.substring(0, 1).concat(scope.row.tsCode.substring(2, 6)) }}</span>
           </template>
         </el-table-column>
-        <OperateButton/>
+        <CommonTablePart/>
       </el-table>
     </template>
   </CommonPage>

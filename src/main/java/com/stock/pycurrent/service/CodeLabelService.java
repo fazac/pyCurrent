@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author fzc
@@ -29,6 +30,8 @@ public class CodeLabelService {
     private BoardConceptConRepo boardConceptConRepo;
     @Resource
     private BoardIndustryConRepo boardIndustryConRepo;
+    @Resource
+    private EmRealTimeStockService emRealTimeStockService;
 
     public List<CodeLabel> findLast() {
         return codeLabelRepo.findLast();
@@ -46,6 +49,13 @@ public class CodeLabelService {
 
     public void createLabels() {
         String now = DateUtils.now();
+        List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findLast();
+        Map<String, String> codeNameMap;
+        if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
+            codeNameMap = emRealTimeStockList.stream().collect(Collectors.toMap(EmRealTimeStock::getTsCode, EmRealTimeStock::getName));
+        } else {
+            codeNameMap = new HashMap<>();
+        }
         String lastDate = codeLabelRepo.findMaxDate();
         if (now.equals(lastDate)) {
             return;
@@ -59,6 +69,7 @@ public class CodeLabelService {
                 codeLabel.setTradeDate(now);
                 codeLabel.setTsCode(tmpArr[0].toString());
                 codeLabel.setConcept(tmpArr[1] == null ? "" : tmpArr[1].toString());
+                codeLabel.setName(codeNameMap.getOrDefault(codeLabel.getTsCode(), ""));
                 codeLabelMap.put(codeLabel.getTsCode(), codeLabel);
             });
         }
@@ -75,6 +86,7 @@ public class CodeLabelService {
                     codeLabel.setTsCode(tmpArr[0].toString());
                     codeLabel.setConcept("");
                     codeLabel.setIndustry(tmpArr[1] == null ? "" : tmpArr[1].toString());
+                    codeLabel.setName(codeNameMap.getOrDefault(codeLabel.getTsCode(), ""));
                     codeLabelMap.put(codeLabel.getTsCode(), codeLabel);
                 }
             });

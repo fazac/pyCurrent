@@ -47,6 +47,8 @@ public class ContinuousUp {
 
     @Column(name = "industry", length = 32)
     private String industry;
+    @Transient
+    private String labels;
 
     @Override
     public boolean equals(Object o) {

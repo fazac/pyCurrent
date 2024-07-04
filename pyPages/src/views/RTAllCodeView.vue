@@ -1,8 +1,9 @@
 <script setup>
 import {onMounted, reactive} from 'vue'
 import CommonPage from '@/components/CommonPage.vue'
-import OperateButton from '@/components/OperateButton.vue'
-import {cellStyle,headerCellStyle} from "@/api/util";
+import CommonTablePart from '@/components/CommonTablePart.vue'
+import PeColumn from '@/components/TablePart/PeColumn.vue'
+import {cellStyle, headerCellStyle} from "@/api/util";
 import {findLast} from "@/api/backend";
 import {commonPageRef} from '@/api/commonpage'
 
@@ -27,12 +28,11 @@ onMounted(() => {
                 :header-cell-style="headerCellStyle">
         <el-table-column property="pct_chg" label="pch"/>
         <el-table-column property="change_hand" label="hand"/>
-        <el-table-column property="pe" sortable label="pe"/>
+        <PeColumn/>
         <el-table-column property="pb" sortable label="pb"/>
         <el-table-column property="cap" sortable label="cap"/>
-        <el-table-column property="label" min-width="110px" show-overflow-tooltip label="label"/>
         <el-table-column property="ts_code" label="code"/>
-        <OperateButton/>
+        <CommonTablePart/>
       </el-table>
     </template>
   </CommonPage>

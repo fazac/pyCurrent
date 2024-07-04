@@ -399,3 +399,4 @@ alter table `code_label` add index idx_date_code(`ts_code`,`trade_date`);
 
 alter table `code_label` drop column `name`;
 
+alter table `code_label` add column `name` varchar(16);

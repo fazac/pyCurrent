@@ -2,9 +2,10 @@
 import {onMounted, reactive} from 'vue'
 import {ElTable} from 'element-plus'
 import axios from "@/api/http.js";
-import {cellStyle, headerCellStyle, nfc, rowStyleClass} from '@/api/util'
+import {cellStyle, headerCellStyle, rowStyleClass} from '@/api/util'
 import CommonPage from "@/components/CommonPage.vue";
-import OperateButton from '@/components/OperateButton.vue'
+import CommonTablePart from "@/components/CommonTablePart.vue";
+import PeColumn from '@/components/TablePart/PeColumn.vue'
 import {commonPageRef} from '@/api/commonpage'
 
 const codeDateList = reactive([{}]);
@@ -54,13 +55,13 @@ onMounted(() => {
         <el-table-column prop="bp" label="bp"/>
         <el-table-column prop="rr" label="rr"/>
         <el-table-column prop="cm" label="cm"/>
-        <el-table-column prop="pe" label="pe"/>
+        <PeColumn/>
         <el-table-column prop="tsCode" label="code">
           <template #default="scope">
             <span>{{ scope.row.tsCode.substring(2, 6) }}</span>
           </template>
         </el-table-column>
-        <OperateButton/>
+        <CommonTablePart/>
       </el-table>
     </template>
   </CommonPage>

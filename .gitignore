@@ -186,3 +186,8 @@ build/
 /pyPages/.vite/deps/_metadata.json
 /pyPages/.vite/deps/package.json
 /currentPy/venv/
+/currentPy/dist/log/nssm.txt
+/currentPy/dist/akshare_stock_realtime.exe
+/currentPy/dist/nssm.exe
+/currentPy/dist/nssm.pdb
+/currentPy/akshare_stock_realtime.spec

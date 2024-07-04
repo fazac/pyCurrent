@@ -1,9 +1,10 @@
 package com.stock.pycurrent.schedule;
 
-import com.stock.pycurrent.service.*;
+import com.stock.pycurrent.entity.CodeLabel;
+import com.stock.pycurrent.service.CodeLabelService;
+import com.stock.pycurrent.service.StockService;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.PARAMS;
-import com.stock.pycurrent.util.StockUtils;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
@@ -12,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author fzc
@@ -24,15 +27,32 @@ public class PrepareData implements CommandLineRunner {
     @Resource
     private StockService stockService;
     @Resource
-    private LimitCodeService limitCodeService;
-    @Resource
     private CodeLabelService codeLabelService;
+    private static final Map<String, List<String>> labelMap = new ConcurrentHashMap<>();
 
     @Override
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
         pullAll();
+        prepareLabelMap();
+    }
+
+    @SneakyThrows
+    @Scheduled(cron = " 0 5 9 * * ? ")
+    public void prepareLabelMap() {
+        log.warn("LABEL-PREPARE-ENTER");
+        labelMap.clear();
+        List<CodeLabel> codeLabels = codeLabelService.findLast();
+        if (codeLabels != null && !codeLabels.isEmpty()) {
+            codeLabels.forEach(x -> {
+                List<String> tmpLabels = new ArrayList<>(Arrays.asList(x.getConcept().split(",")));
+                tmpLabels.addFirst(x.getIndustry());
+                tmpLabels.addFirst(x.getName());
+                labelMap.put(x.getTsCode(), tmpLabels);
+            });
+        }
+        log.warn("LABEL-PREPARE-OVER");
     }
 
     @SneakyThrows
@@ -50,6 +70,14 @@ public class PrepareData implements CommandLineRunner {
             stockService.initRocModel();
             log.warn("ROC-OVER");
         }
+    }
+
+    public static List<String> findLabelList(String code) {
+        return labelMap.getOrDefault(code, Collections.emptyList());
+    }
+
+    public static String findLabelStr(String code) {
+        return String.join(",", labelMap.getOrDefault(code, Collections.emptyList()));
     }
 
 }

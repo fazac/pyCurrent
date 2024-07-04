@@ -30,5 +30,5 @@ public class OpenVO {
     private BigDecimal current_pri;
     private BigDecimal avg_pri;
     private BigDecimal pri_pre;
-    private String label;
+    private String labels;
 }

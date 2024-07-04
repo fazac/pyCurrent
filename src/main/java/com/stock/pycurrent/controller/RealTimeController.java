@@ -1,7 +1,6 @@
 package com.stock.pycurrent.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.stock.pycurrent.entity.CodeLabel;
 import com.stock.pycurrent.entity.CurConcernCode;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.LimitCode;
@@ -11,7 +10,7 @@ import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.vo.DnVO;
 import com.stock.pycurrent.entity.vo.LimitCodeVO;
 import com.stock.pycurrent.entity.vo.OpenVO;
-import com.stock.pycurrent.entity.vo.RealTimeVO;
+import com.stock.pycurrent.schedule.PrepareData;
 import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.DateUtils;
@@ -45,10 +44,6 @@ public class RealTimeController {
     @Resource
     private EmDNStockService emDNStockService;
     @Resource
-    private BoardIndustryConService boardIndustryConService;
-    @Resource
-    private BoardConceptConService boardConceptConService;
-    @Resource
     private RocModelService rocModelService;
     @Resource
     private CurConcernCodeService curConcernCodeService;
@@ -56,8 +51,6 @@ public class RealTimeController {
     private RealBarService realBarService;
     @Resource
     private LimitCodeService limitCodeService;
-    @Resource
-    private CodeLabelService codeLabelService;
 
     public RealTimeController() {
     }
@@ -82,9 +75,7 @@ public class RealTimeController {
             log.warn("no current log ,code = " + code);
             return objectNode;
         }
-        List<String> labels = getLabelsByCode(code);
-        labels.addFirst(openVOList.getFirst().getName());
-        objectNode.putPOJO("label", labels);
+        objectNode.putPOJO("label", PrepareData.findLabelList(code));
         objectNode.putPOJO("open", openVOList);
         objectNode.putPOJO("dnDetail", emDNStockService.findByCodeCount(code, 30));
         objectNode.putPOJO("roc", rocModelService.findRocByCode(code));
@@ -188,26 +179,12 @@ public class RealTimeController {
 
     @GetMapping("findLast")
     public List<OpenVO> findLast() {
-        List<OpenVO> voList = ArrayUtils.convertOpenVO(emRealTimeStockService.findLastHundred());
-        voList.forEach(x -> {
-            List<String> tmps = getLabelsByCode(x.getTs_code());
-            tmps.addFirst(x.getName());
-            x.setLabel(String.join(",", tmps));
-        });
-        return voList;
+        return ArrayUtils.convertOpenVO(emRealTimeStockService.findLastHundred());
     }
 
     @GetMapping("findCptr")
     public List<OpenVO> findCptr(@RequestParam(value = "symbol") String symbol) {
-        List<OpenVO> voList = ArrayUtils.convertOpenVO(emRealTimeStockService.findCptr(symbol));
-        if (!voList.isEmpty()) {
-            voList.forEach(x -> {
-                List<String> tmps = getLabelsByCode(x.getTs_code());
-                tmps.addFirst(x.getName());
-                x.setLabel(String.join(",", tmps));
-            });
-        }
-        return voList;
+        return ArrayUtils.convertOpenVO(emRealTimeStockService.findCptr(symbol));
     }
 
     private void convertLimitVO(@RequestParam(value = "code", required = false) String code, LimitCodeVO limitCodeVO) {
@@ -217,9 +194,7 @@ public class RealTimeController {
         if (emRealTimeStock.getCirculationMarketCap() != null) {
             limitCodeVO.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
         }
-        List<String> labels = getLabelsByCode(code);
-        labels.addFirst(emRealTimeStock.getName());
-        limitCodeVO.setLabels(String.join(",", labels));
+        limitCodeVO.setLabels(PrepareData.findLabelStr(code));
     }
 
     private void convertROCLimitVO(List<LimitCodeVO> limitCodeVOS) {
@@ -236,25 +211,9 @@ public class RealTimeController {
                 if (emRealTimeStock.getCirculationMarketCap() != null) {
                     x.setCap(emRealTimeStock.getCirculationMarketCap().divide(Constants.ONE_HUNDRED_MILLION, 2, RoundingMode.HALF_UP));
                 }
-                List<String> labels = getLabelsByCode(x.getCode());
-                labels.addFirst(emRealTimeStock.getName());
-                x.setLabels(String.join(",", labels));
+                x.setLabels(PrepareData.findLabelStr(x.getCode()));
             });
         }
-    }
-
-    private List<String> getLabelsByCode(@RequestParam(value = "code", required = false) String code) {
-        List<String> labels = new ArrayList<>();
-        CodeLabel codeLabel = codeLabelService.findByCode(code);
-        if (codeLabel != null) {
-            if (codeLabel.getConcept() != null && !codeLabel.getConcept().isEmpty()) {
-                labels.addAll(Arrays.asList(codeLabel.getConcept().split(",")));
-            }
-            if (codeLabel.getIndustry() != null && !codeLabel.getIndustry().isEmpty()) {
-                labels.addFirst(codeLabel.getIndustry());
-            }
-        }
-        return labels;
     }
 
     public BigDecimal findPriMin(List<DnVO> dnVOList) {

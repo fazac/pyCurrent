@@ -29,16 +29,19 @@ public class CodeLabel {
     @Column(name = "concept", length = 512)
     private String concept;
 
+    @Column(name = "name", length = 16)
+    private String name;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CodeLabel codeLabel = (CodeLabel) o;
-        return Objects.equals(getTradeDate(), codeLabel.getTradeDate()) && Objects.equals(getTsCode(), codeLabel.getTsCode()) && Objects.equals(getIndustry(), codeLabel.getIndustry()) && Objects.equals(getConcept(), codeLabel.getConcept());
+        return Objects.equals(getTradeDate(), codeLabel.getTradeDate()) && Objects.equals(getTsCode(), codeLabel.getTsCode()) && Objects.equals(getIndustry(), codeLabel.getIndustry()) && Objects.equals(getConcept(), codeLabel.getConcept()) && Objects.equals(getName(), codeLabel.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getTradeDate(), getTsCode(), getIndustry(), getConcept());
+        return Objects.hash(getTradeDate(), getTsCode(), getIndustry(), getConcept(), getName());
     }
 }
