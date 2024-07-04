@@ -25,7 +25,9 @@ public class NoCacheFilter implements Filter {
         httpServletResponse.setHeader("Pragma", "no-cache");
         httpServletResponse.setDateHeader("Expires", 0);
         // 继续过滤链
-        filterChain.doFilter(servletRequest, httpServletResponse);
+        if (filterChain != null) {
+            filterChain.doFilter(servletRequest, httpServletResponse);
+        }
     }
 
     @Override

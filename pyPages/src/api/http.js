@@ -2,8 +2,8 @@ import axios from "axios";
 import {showFullScreenLoading, tryHideFullScreenLoading} from "@/api/axiosLoading";
 
 // const BASE_API = "http://70.34.202.145:7001"; //frp
-// const BASE_API = "http://10.243.161.168:19093"; // zerotier
-const BASE_API = "http://localhost:19093";
+const BASE_API = "http://10.243.161.168:19093"; // zerotier
+// const BASE_API = "http://localhost:19099";
 
 const service = axios.create({
     baseURL: BASE_API, //所有的请求地址前缀部分(没有后端请求不用写)

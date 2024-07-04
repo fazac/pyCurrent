@@ -25,4 +25,8 @@ public class CurCountService {
         return curCountRepo.findLastAll();
     }
 
+    public List<CurCount> findSummaryList() {
+        return curCountRepo.findSummaryList();
+    }
+
 }

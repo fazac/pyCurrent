@@ -7,6 +7,7 @@ import RocCodeView from '../views/RocCodeView.vue'
 import RTAllCodeView from '../views/RTAllCodeView.vue'
 import ContinuousCodeView from '../views/ContinuousCodeView.vue'
 import CprtCodeView from '../views/CprtCodeView.vue'
+import CcountSummaryView from '../views/CcountSummaryView.vue'
 
 const router = createRouter({
     history: createWebHashHistory(),
@@ -46,6 +47,10 @@ const router = createRouter({
             path: '/cptr',
             name: 'cptr',
             component: CprtCodeView
+        }, {
+            path: '/ccs',
+            name: 'ccs',
+            component: CcountSummaryView
         }
     ]
 })

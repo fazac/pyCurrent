@@ -6,6 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "cur_count")
 @Getter
@@ -84,6 +86,16 @@ public class CurCount {
     private Integer c6013d;
     @Column(name = "c_60_37d")
     private Integer c6037d;
+    @Column(name = "is_summary")
+    private boolean isSummary;
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+    @Column(name = "zero_amount")
+    private BigDecimal zeroAmount;
+    @Column(name = "three_amount")
+    private BigDecimal threeAmount;
+    @Column(name = "six_amount")
+    private BigDecimal sixAmount;
 
 
     public CurCount(String tradeDate, Integer... ca) {

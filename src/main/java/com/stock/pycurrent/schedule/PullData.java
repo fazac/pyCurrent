@@ -356,6 +356,30 @@ public class PullData implements CommandLineRunner {
                 || nowHour == 9 && nowMinute == 16
                 || nowHour == 15 && nowMinute == 1) {
             CurCount curCount = statisticsCurCount(stockList);
+            if (nowHour == 15 && nowMinute == 1) {
+                BigDecimal totalAmount = BigDecimal.ZERO;
+                BigDecimal zeroAmount = BigDecimal.ZERO;
+                BigDecimal threeAmount = BigDecimal.ZERO;
+                BigDecimal sixAmount = BigDecimal.ZERO;
+                for (EmRealTimeStock stock : stockList) {
+                    BigDecimal amount = Objects.requireNonNullElse(stock.getAmount(), BigDecimal.ZERO);
+                    totalAmount = totalAmount.add(amount);
+                    if (stock.getTsCode().charAt(0) == '0') {
+                        zeroAmount = zeroAmount.add(amount);
+                    } else if (stock.getTsCode().charAt(0) == '3') {
+                        threeAmount = threeAmount.add(amount);
+                    } else if (stock.getTsCode().charAt(0) == '6') {
+                        sixAmount = sixAmount.add(amount);
+                    }
+                }
+                curCount.setTotalAmount(totalAmount);
+                curCount.setZeroAmount(zeroAmount);
+                curCount.setThreeAmount(threeAmount);
+                curCount.setSixAmount(sixAmount);
+                curCount.setSummary(true);
+            } else {
+                curCount.setSummary(false);
+            }
             curCountService.saveOne(curCount);
         }
         if (!curConcernCodeList.isEmpty()) {

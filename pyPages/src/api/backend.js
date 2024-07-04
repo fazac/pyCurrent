@@ -37,6 +37,10 @@ export function findCurcc() {
     return axios.get('/curcount/findLastAll');
 }
 
+export function findSummaryList() {
+    return axios.get('/curcount/findSummaryList');
+}
+
 export function findOtherConcernList() {
     return axios.get('/rt/findOtherList');
 }

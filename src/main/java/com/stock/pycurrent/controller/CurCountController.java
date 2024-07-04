@@ -27,4 +27,8 @@ public class CurCountController {
         return curCountService.findLastAll();
     }
 
+    @GetMapping("findSummaryList")
+    public List<CurCount> findSummaryList() {
+        return curCountService.findSummaryList();
+    }
 }

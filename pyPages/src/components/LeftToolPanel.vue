@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 
-import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight, Aim} from '@element-plus/icons-vue'
+import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight, Aim,Promotion} from '@element-plus/icons-vue'
 import router from "@/router";
 import axios from "@/api/http";
 import {nfc} from "@/api/util";
@@ -77,6 +77,11 @@ onMounted(() => {
     <el-button type="info" size="large" class="big-btn"
                @click="openPage('cptr')" v-if="home_path"
                :icon="Aim"></el-button>
+
+    <el-button type="info" size="large" class="big-btn"
+               @click="openPage('ccs')" v-if="home_path"
+               :icon="Promotion"></el-button>
+
   </el-aside>
 </template>
 

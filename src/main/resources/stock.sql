@@ -399,4 +399,13 @@ alter table `code_label` add index idx_date_code(`ts_code`,`trade_date`);
 
 alter table `code_label` drop column `name`;
 
+-- 20240704
 alter table `code_label` add column `name` varchar(16);
+
+alter table `cur_count` add column `is_summary` tinyint(1) default '0' comment '是否最后一条';
+alter table `cur_count` add column `total_amount` decimal(30,2) comment '金额';
+alter table `cur_count` add column `zero_amount` decimal(30,2) comment '金额';
+alter table `cur_count` add column `three_amount` decimal(30,2) comment '金额';
+alter table `cur_count` add column `six_amount` decimal(30,2) comment '金额';
+
+alter table `cur_count` add index `idx_summary`(is_summary);
