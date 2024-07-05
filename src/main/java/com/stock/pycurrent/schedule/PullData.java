@@ -238,16 +238,23 @@ public class PullData implements CommandLineRunner {
             yesterdayHigh = limitCodeMap.containsKey(tsCode);
 
             if (rt.getCurrentPri() != null
-                    && (tsCode.startsWith("0") || tsCode.startsWith("60"))
-                    && !tsName.contains("退")
-                    && !noConcerned
-                    && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
+                && (tsCode.startsWith("0") || tsCode.startsWith("60"))
+                && !tsName.contains("退")
+                && !noConcerned
+                && (limitCodeMap.containsKey(tsCode) && (limitCodeMap.get(tsCode).getCount() >= 2)
                     || holds
                     || concerned)) {
                 logsMap.get(holds ? "H" : concerned && !tsCode.startsWith("30") ? "C" : "A").add(fixPositiveLength(limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "") + " " + (tsCode.substring(2, 6)) + fixLength("", 1) + fixLength(rt.getPctChg(), 6) + fixLength(rt.getChangeHand(), 5) + fixLength("", 7) + fixLength("", 7) + fixLength(rt.getCurrentPri(), 6) + fixLength(rt.getVol() != null && checkOverLimit ? deleteOrCalBar(rt.getTsCode(), rt.getTradeDate(), rt.getCurrentPri()).multiply(THOUSAND).setScale(0, RoundingMode.FLOOR) : "", 8) + fixLength(rt.getCirculationMarketCap().divide(HUNDRED_MILLION, 3, RoundingMode.HALF_UP), 8) + fixLength(rt.getPe(), 8));
                 CurConcernCode curConcernCode = new CurConcernCode();
                 curConcernCode.setTsCode(tsCode);
-                curConcernCode.setMark((limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "") + " A");
+                if (limitCodeMap.containsKey(tsCode)) {
+                    curConcernCode.setMark((limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "") + " A");
+                } else {
+                    curConcernCode.setMark("C");
+                }
+                if (concerned) {
+                    curConcernCode.setTableShow(true);
+                }
                 curConcernCode.setRt(rt.getPctChg());
                 curConcernCode.setH(rt.getChangeHand());
                 curConcernCode.setCp(rt.getCurrentPri());
@@ -279,10 +286,10 @@ public class PullData implements CommandLineRunner {
             highLimit = rt.getPriHigh() != null && calRatio(rt.getPriHigh(), rt.getPriClosePre()).compareTo(PCH_LIMIT) > 0;
             onboard = todayBoardCodes.contains(tsCode);
             if (!noConcerned
-                    && !tsName.contains("退")
-                    && tsCode.startsWith("3")
-                    && rt.getPctChg() != null
-                    && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
+                && !tsName.contains("退")
+                && tsCode.startsWith("3")
+                && rt.getPctChg() != null
+                && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
                 type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : !yesterdayHigh ? "R" : "L");
                 CurConcernCode curConcernCode = new CurConcernCode();
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
@@ -319,8 +326,8 @@ public class PullData implements CommandLineRunner {
 
                 }
                 if (curConcernCode.getPe() != null
-                        && curConcernCode.getPe().compareTo(Constants.PE_LIMIT) < 0
-                        && curConcernCode.getPe().compareTo(BigDecimal.ZERO) > 0) {
+                    && curConcernCode.getPe().compareTo(Constants.PE_LIMIT) < 0
+                    && curConcernCode.getPe().compareTo(BigDecimal.ZERO) > 0) {
                     curConcernCode.setTableShow(true);
                 }
                 curConcernCode.setTsCode(tsCode);
@@ -353,8 +360,8 @@ public class PullData implements CommandLineRunner {
         }
 
         if (nowMinute % 10 == 5 || nowMinute % 10 == 0
-                || nowHour == 9 && nowMinute == 16
-                || nowHour == 15 && nowMinute == 1) {
+            || nowHour == 9 && nowMinute == 16
+            || nowHour == 15 && nowMinute == 1) {
             CurCount curCount = statisticsCurCount(stockList);
             if (nowHour == 15 && nowMinute == 1) {
                 BigDecimal totalAmount = BigDecimal.ZERO;
