@@ -55,6 +55,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
 
     # symbol_df = ak.stock_zh_a_spot_em()
     symbol_df = methodcaller(em_symbol_func)(ak)
+    print(symbol_df)
     sql1 = "drop table if exists " + em_table_tmp
 
     now = datetime.now()
@@ -139,6 +140,7 @@ def fetch_data(em_table, em_func):
     now = datetime.now()
 
     df = methodcaller(em_func)(ak)
+    print(df)
     idx = df.columns
     if '序号' not in idx:
         df.insert(loc=0, column='序号', value=1)
@@ -276,8 +278,10 @@ def fetch_continues_data():
 
 
 if __name__ == '__main__':
+    print('start frpcpy')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     create_rt_table()
-
+    print('table created')
     task = BackgroundScheduler()
 
     task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
