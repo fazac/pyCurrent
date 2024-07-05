@@ -1,5 +1,13 @@
 import {ElNotification} from 'element-plus'
 
+export function amountFix(amount) {
+    return parseFloat((amount / 100000000).toFixed(2));
+}
+
+export function tradeDateDecorate(date) {
+    return date.substring(4, 10).replaceAll('-', '');
+}
+
 
 export function nfc(title, message, type) {
     ElNotification({

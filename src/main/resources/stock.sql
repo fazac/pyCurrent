@@ -409,3 +409,45 @@ alter table `cur_count` add column `three_amount` decimal(30,2) comment '金额'
 alter table `cur_count` add column `six_amount` decimal(30,2) comment '金额';
 
 alter table `cur_count` add index `idx_summary`(is_summary);
+
+-- 20240705
+
+select concat(left(trade_date, 4), '-', substr(trade_date, 5, 2), '-', substr(trade_date, 7, 2), ' 15:01:00') as trade_date,
+       count(case when ts_code like '3%' and pct_chg >= 0 then 1 end)                   as c_30u,
+       count(case when ts_code like '3%' then 1 end)                                    as c_30a,
+       count(case when ts_code like '6%' and pct_chg >= 0 then 1 end)                   as c_60u,
+       count(case when ts_code like '6%' then 1 end)                                    as c_60a,
+       count(case when ts_code like '0%' and pct_chg >= 0 then 1 end)                   as c_00u,
+       count(case when ts_code like '0%' then 1 end)                                    as c_00a,
+       count(case when ts_code like '3%' and pct_chg >= 5 then 1 end)                   as c_30_5u,
+       count(case when ts_code like '3%' and pct_chg < -7 then 1 end)                   as c_30_7d,
+       count(case when ts_code like '6%' and pct_chg >= 5 then 1 end)                   as c_60_5u,
+       count(case when ts_code like '6%' and pct_chg < -7 then 1 end)                   as c_60_7d,
+       count(case when ts_code like '0%' and pct_chg >= 5 then 1 end)                   as c_00_5u,
+       count(case when ts_code like '0%' and pct_chg < -7 then 1 end)                   as c_00_7d,
+       count(case when ts_code like '3%' and pct_chg >= 3 and pct_chg < 5 then 1 end)   as c_30_35u,
+       count(case when ts_code like '6%' and pct_chg >= 3 and pct_chg < 5 then 1 end)   as c_60_35u,
+       count(case when ts_code like '0%' and pct_chg >= 3 and pct_chg < 5 then 1 end)   as c_00_35u,
+       count(case when ts_code like '3%' and pct_chg >= 1 and pct_chg < 3 then 1 end)   as c_30_13u,
+       count(case when ts_code like '6%' and pct_chg >= 1 and pct_chg < 3 then 1 end)   as c_60_13u,
+       count(case when ts_code like '0%' and pct_chg >= 1 and pct_chg < 3 then 1 end)   as c_00_13u,
+       count(case when ts_code like '3%' and pct_chg >= 0 and pct_chg < 1 then 1 end)   as c_30_01u,
+       count(case when ts_code like '6%' and pct_chg >= 0 and pct_chg < 1 then 1 end)   as c_60_01u,
+       count(case when ts_code like '0%' and pct_chg >= 0 and pct_chg < 1 then 1 end)   as c_00_01u,
+       count(case when ts_code like '3%' and pct_chg >= -1 and pct_chg < 0 then 1 end)  as c_30_01d,
+       count(case when ts_code like '6%' and pct_chg >= -1 and pct_chg < 0 then 1 end)  as c_60_01d,
+       count(case when ts_code like '0%' and pct_chg >= -1 and pct_chg < 0 then 1 end)  as c_00_01d,
+       count(case when ts_code like '3%' and pct_chg >= -3 and pct_chg < -1 then 1 end) as c_30_13d,
+       count(case when ts_code like '6%' and pct_chg >= -3 and pct_chg < -1 then 1 end) as c_60_13d,
+       count(case when ts_code like '0%' and pct_chg >= -3 and pct_chg < -1 then 1 end) as c_00_13d,
+       count(case when ts_code like '3%' and pct_chg >= -7 and pct_chg < -3 then 1 end) as c_30_37d,
+       count(case when ts_code like '6%' and pct_chg >= -7 and pct_chg < -3 then 1 end) as c_60_37d,
+       count(case when ts_code like '0%' and pct_chg >= -7 and pct_chg < -3 then 1 end) as c_00_37d,
+       '1' as is_summary,
+       sum(amount) as total_amount,
+       sum(case when ts_code like '0%' then amount end) as zero_amount,
+       sum(case when ts_code like '3%' then amount end) as three_amount,
+       sum(case when ts_code like '6%' then amount end) as six_amount
+from em_d_n_stock
+where trade_date > '20240101'
+group by trade_date;

@@ -1,7 +1,7 @@
 <script setup>
 
-import {onMounted, reactive, ref} from 'vue'
-import {cellStyle, headerCellStyle} from "@/api/util";
+import {onMounted, reactive, ref, provide} from 'vue'
+import {cellStyle, headerCellStyle, amountFix} from "@/api/util";
 import {findSummaryList} from "@/api/backend";
 import AmountColumn from '@/components/TablePart/AmountColumn.vue'
 import TradeDateColumn from '@/components/TablePart/TradeDateColumn.vue'
@@ -10,15 +10,13 @@ import CommonPage from '@/components/CommonPage.vue'
 const curCountTableData = reactive({});
 const curType = ref('');
 
+provide('ldata', curCountTableData);
+
 function fetchCcountSummary() {
   findSummaryList().then(res => {
     curCountTableData.value = res;
     curType.value = '3';
   })
-}
-
-function amountFix(amount) {
-  return (amount / 100000000).toFixed(2)
 }
 
 
@@ -37,7 +35,7 @@ onMounted(() => {
       </el-radio-group>
     </template>
     <template #resTable>
-      <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
+      <el-table :data="curCountTableData.value" class="mt-2" max-height="350px"
                 :cell-style="cellStyle" stripe
                 :header-cell-style="headerCellStyle"
                 v-if="curType==='3'"
@@ -61,7 +59,7 @@ onMounted(() => {
         <AmountColumn/>
         <TradeDateColumn/>
       </el-table>
-      <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
+      <el-table :data="curCountTableData.value" class="mt-2" max-height="350px"
                 :cell-style="cellStyle" stripe
                 :header-cell-style="headerCellStyle"
                 v-if="curType==='6'"
@@ -79,13 +77,13 @@ onMounted(() => {
         <el-table-column prop="c607d" label="7d"/>
         <el-table-column prop="sixAmount" label="amount">
           <template #default="scope">
-            <span>{{  amountFix(scope.row.sixAmount) }}</span>
+            <span>{{ amountFix(scope.row.sixAmount) }}</span>
           </template>
         </el-table-column>
         <AmountColumn/>
         <TradeDateColumn/>
       </el-table>
-      <el-table :data="curCountTableData.value" class="mt-2" max-height="400px"
+      <el-table :data="curCountTableData.value" class="mt-2" max-height="350px"
                 :cell-style="cellStyle" stripe
                 :header-cell-style="headerCellStyle"
                 v-if="curType==='0'"
