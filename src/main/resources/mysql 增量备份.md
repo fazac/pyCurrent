@@ -53,3 +53,13 @@
    ```
    mysql -uroot -p --default-character-set=utf8mb4 database_name < databases.sql
    ```
+
+5. 远程连接
+   ```angular2html
+   # zerotier ip 
+   create user 'fawork'@'10.243.85.210' identified by '123456'; 
+   
+   grant all privileges on *.* to 'fawork'@'10.243.85.210';
+   
+   flush privileges;
+   ```
