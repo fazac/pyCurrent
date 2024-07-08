@@ -1,17 +1,20 @@
 <script setup>
-const props = defineProps(['linetype', 'code'])
-const emit = defineEmits(['update:linetype', 'update:code'])
+import {inject} from 'vue'
+import {circleLineType} from "@/api/arrayConstants";
+import {TrendCharts,} from '@element-plus/icons-vue'
+
+const lineType = inject('lineType', null);
 
 function changeLineType() {
-  emit('update:linetype', !props.linetype)
-  emit('update:code', '')
+  lineType.value = circleLineType(lineType.value);
 }
 
 </script>
 
 <template>
+  {{lineType}}
   <el-button type="info" @click="changeLineType" size="large"
-             :icon="props.linetype?'Flag':'TrendCharts'"></el-button>
+             :icon="TrendCharts"></el-button>
 </template>
 
 <style scoped>

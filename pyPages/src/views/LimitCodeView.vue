@@ -15,7 +15,7 @@ provide("myTableData", sLimitVOTableData);
 
 function fetchLimit() {
   searchSome("3", ...nullArr(2), searchObj.searchDate != null ? searchObj.searchDate.getTime() : null).then(res => {
-    sLimitVOTableData.value = res.limitCodeVOList;
+    sLimitVOTableData.value = res.codeDataVOList;
   })
 }
 
@@ -36,7 +36,7 @@ onMounted(() => {
       />
     </template>
     <template #elseColumn>
-      <el-table-column property="count" sortable label="count"/>
+      <el-table-column property="extraNode.count" sortable label="count"/>
     </template>
   </ModelPage>
 </template>

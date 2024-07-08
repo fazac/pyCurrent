@@ -9,13 +9,15 @@ import UpdateConstants from './functionButton/UpdateConstants.vue'
 </script>
 
 <template>
-  <ToggleDark/>
-  <ToggleLineType/>
-  <ReloadPage/>
-  <UpdateConstants/>
-  <CurCount/>
-  <OtherConcern/>
-  <Search/>
+  <el-aside width="60px">
+    <ToggleDark/>
+    <ToggleLineType/>
+    <ReloadPage/>
+    <UpdateConstants/>
+    <CurCount/>
+    <OtherConcern/>
+    <Search/>
+  </el-aside>
 </template>
 
 <style scoped>

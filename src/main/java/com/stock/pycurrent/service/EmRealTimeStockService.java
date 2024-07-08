@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findLastHundred() {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = " select * from " + tableName + " where trade_date = (select (max(a.trade_date)) from " + tableName + " a) " +
-                     " and current_pri is not null order by pct_chg desc limit 100;";
+                " and current_pri is not null order by pct_chg desc limit 100;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).getResultList();
     }
 
@@ -67,7 +68,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findRBarStockByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * from " + tableName
-                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
+                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -76,7 +77,7 @@ public class EmRealTimeStockService {
     public int findRBarStockCountByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select count(1) from " + tableName
-                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
+                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
         return ((Long) entityManager.createNativeQuery(sql)
                 .setParameter("tsCode", tsCode)
                 .getSingleResult()).intValue();
@@ -85,8 +86,8 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                     "    from " + tableName
-                     + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                "    from " + tableName
+                + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -107,8 +108,8 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByName(String name) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                     "    from " + tableName
-                     + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                "    from " + tableName
+                + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("name", "%" + name + "%")
                 .getResultList();
@@ -169,5 +170,53 @@ public class EmRealTimeStockService {
         } catch (Exception e) {
             log.error("创建失败：" + tableName, e);
         }
+    }
+
+    List<Object[]> findLastHandPri(String code, String tradeDate) {
+        String sql = """
+                with st as (select trade_date,
+                                   ts_code,
+                                   pri_close,
+                                   ROW_NUMBER() over (order by trade_date desc)     as sn,
+                                   sum(change_hand) over (order by trade_date desc) as sh,
+                                   round(sum(amount) over (order by trade_date desc) / sum(vol) over (order by trade_date desc) / 100,
+                                         2)                                         as sa
+                            from em_d_n_stock
+                            where ts_code =""".concat(
+                " \'").concat(code).concat("\' and trade_date <=\'").concat(tradeDate).concat("\' ").concat(
+                """
+                                    order by trade_date desc)
+                        select t1.trade_date,
+                               t1.ts_code,
+                               t1.pri_close,
+                               ifnull(round(max(case
+                                                    when t1.sh < 5 and t2.sh > 5
+                                                        then t1.sa + (t2.sa - t1.sa) / (t2.sh - t1.sh) * (5 - t1.sh) end),
+                                            2), round(case when t1.sn = 1 then t1.sa end, 2)) as p5,
+                               ifnull(round(max(case
+                                                    when t1.sh < 10 and t2.sh > 10
+                                                        then t1.sa + (t2.sa - t1.sa) / (t2.sh - t1.sh) * (10 - t1.sh) end),
+                                            2), round(case when t1.sn = 1 then t1.sa end, 2)) as p10,
+                               ifnull(round(max(case
+                                                    when t1.sh < 20 and t2.sh > 20
+                                                        then t1.sa + (t2.sa - t1.sa) / (t2.sh - t1.sh) * (20 - t1.sh) end),
+                                            2), round(case when t1.sn = 1 then t1.sa end, 2)) as p20,
+                               ifnull(round(max(case
+                                                    when t1.sh < 30 and t2.sh > 30
+                                                        then t1.sa + (t2.sa - t1.sa) / (t2.sh - t1.sh) * (30 - t1.sh) end),
+                                            2), round(case when t1.sn = 1 then t1.sa end, 2)) as p30,
+                               ifnull(round(max(case
+                                                    when t1.sh < 50 and t2.sh > 50
+                                                        then t1.sa + (t2.sa - t1.sa) / (t2.sh - t1.sh) * (50 - t1.sh) end),
+                                            2), round(case when t1.sn = 1 then t1.sa end, 2)) as p50,
+                               ifnull(round(max(case
+                                                    when t1.sh < 100 and t2.sh > 100
+                                                        then t1.sa + (t2.sa - t1.sa) / (t2.sh - t1.sh) * (100 - t1.sh) end),
+                                            2), round(case when t1.sn = 1 then t1.sa end, 2)) as p100
+                        from st t1
+                                 join st t2 on t1.sn = t2.sn - 1;
+                                    """);
+        return entityManager.createNativeQuery(sql)
+                .getResultList();
     }
 }

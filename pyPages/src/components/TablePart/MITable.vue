@@ -17,6 +17,7 @@ const myTableHeight = inject('myTableHeight', 400);
       v-if="myTableData"
       empty-text=" no data "
       :max-height="myTableHeight"
+      class="mt-1"
       border
       stripe
       :row-class-name="rowStyleClass"
@@ -27,7 +28,7 @@ const myTableHeight = inject('myTableHeight', 400);
     <CmColumn/>
     <PeColumn/>
     <el-table-column property="pb" sortable label="pb"/>
-<!--    <el-table-column property="tsCode" label="code"/>-->
+    <el-table-column property="code" label="code"/>
     <LabelColumn/>
     <OperateButton/>
   </el-table>

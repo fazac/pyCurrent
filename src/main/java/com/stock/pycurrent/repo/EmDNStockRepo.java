@@ -116,7 +116,7 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
             from st t1
                      join st t2 on t1.sn = t2.sn - 1;
                         """, nativeQuery = true)
-    LastHandPri findLastHandPri(@Param("code") String code, @Param("tradeDate") String tradeDate);
+    List<Object[]> findLastHandPri(@Param("code") String code, @Param("tradeDate") String tradeDate);
 
 
     @Query(value = "select distinct trade_date from em_d_n_stock where trade_date > '20240101' order by  trade_date  ", nativeQuery = true)
