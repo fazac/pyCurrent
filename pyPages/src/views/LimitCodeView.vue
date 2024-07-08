@@ -15,7 +15,7 @@ provide("myTableData", sLimitVOTableData);
 
 function fetchLimit() {
   searchSome("3", ...nullArr(2), searchObj.searchDate != null ? searchObj.searchDate.getTime() : null).then(res => {
-    sLimitVOTableData.value = res;
+    sLimitVOTableData.value = res.limitCodeVOList;
   })
 }
 

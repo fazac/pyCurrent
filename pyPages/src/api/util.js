@@ -36,8 +36,8 @@ export function nullArr(length) {
 }
 
 export function rowStyleClass(row) {
-    if (!isEmpty(row)) {
-        if (!isEmpty(row.row) && !isEmpty(row.row.mark) && row.row.mark.indexOf('H') > 0) {
+    if (!isEmpty(row) && !isEmpty(row.row) && !isEmpty(row.row.mark)) {
+        if (row.row.mark.indexOf('H') > 0) {
             return 'row-hold-mark';
         } else if (row.row.mark.charAt(0) === 'R') {
             return 'row-high-light';

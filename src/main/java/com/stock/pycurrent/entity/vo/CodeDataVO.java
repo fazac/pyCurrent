@@ -20,14 +20,8 @@ public class CodeDataVO {
     private String labels;
     private BigDecimal pe;
     private BigDecimal pb;
-    private BigDecimal cap;
+    private BigDecimal cm;
     private BigDecimal currentPri;
-    private BigDecimal lastFivePri;
-    private BigDecimal lastTenPri;
-    private BigDecimal lastTwentyPri;
-    private BigDecimal lastThirtyPri;
-    private BigDecimal lastFiftyPri;
-
-    private ObjectNode objectNode;
+    private ObjectNode extraNode;
 
 }

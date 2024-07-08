@@ -7,6 +7,7 @@ import com.stock.pycurrent.entity.LimitCode;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
 import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
+import com.stock.pycurrent.entity.vo.CodeDataVO;
 import com.stock.pycurrent.entity.vo.DnVO;
 import com.stock.pycurrent.entity.vo.LimitCodeVO;
 import com.stock.pycurrent.entity.vo.OpenVO;
@@ -133,20 +134,21 @@ public class RealTimeController {
                 } else {
                     limitCode = limitCodeService.findByDate(DateUtils.convertMillisecond(searchDate));
                 }
-                List<LimitCodeVO> limitCodeVOList = new ArrayList<>();
+
+                List<CodeDataVO> codeDataVOList = new ArrayList<>();
                 if (limitCode != null && limitCode.getCodeValue() != null && !limitCode.getCodeValue().isEmpty()) {
                     List<LimitCodeValue> tmp = limitCode.getCodeValue();
                     tmp.sort(Comparator.comparing(LimitCodeValue::getCount));
                     tmp = tmp.reversed();
                     tmp.forEach(x -> {
-                        LimitCodeVO limitCodeVO = new LimitCodeVO();
-                        limitCodeVO.setCode(x.getCode());
-                        limitCodeVO.setCount(x.getCount());
-                        convertLimitVO(x.getCode(), limitCodeVO);
-                        limitCodeVOList.add(limitCodeVO);
+                        CodeDataVO codeDataVO = convertCodeDataVO(x.getCode());
+                        ObjectNode extraNode = JSONUtils.getNode();
+                        extraNode.put("count", x.getCount());
+                        codeDataVO.setExtraNode(extraNode);
+                        codeDataVOList.add(codeDataVO);
                     });
                 }
-                objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
+                objectNode.putPOJO("codeDataVOList", codeDataVOList);
             }
             //ophc
             case "4" -> {
@@ -185,6 +187,20 @@ public class RealTimeController {
     @GetMapping("findCptr")
     public List<OpenVO> findCptr(@RequestParam(value = "symbol") String symbol) {
         return ArrayUtils.convertOpenVO(emRealTimeStockService.findCptr(symbol));
+    }
+
+    private CodeDataVO convertCodeDataVO(@RequestParam(value = "code", required = false) String code) {
+        CodeDataVO vo = new CodeDataVO();
+        vo.setCode(code);
+        EmRealTimeStock emRealTimeStock = emRealTimeStockService.findLastOneByCode(code);
+        if (emRealTimeStock != null) {
+            vo.setLabels(PrepareData.findLabelStr(code));
+            vo.setPe(emRealTimeStock.getPe());
+            vo.setPb(emRealTimeStock.getPb());
+            vo.setCm(emRealTimeStock.getCirculationMarketCap());
+            vo.setCurrentPri(emRealTimeStock.getCurrentPri());
+        }
+        return vo;
     }
 
     private void convertLimitVO(@RequestParam(value = "code", required = false) String code, LimitCodeVO limitCodeVO) {

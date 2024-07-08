@@ -8,6 +8,7 @@ const lineType = inject('lineType', null);
 const detailCode = inject('detailCode', null);
 
 function showDetailDial(tsCode) {
+  console.log(tsCode)
   detailCode.value = tsCode;
 }
 
@@ -20,9 +21,9 @@ function showDetailDial(tsCode) {
       <el-button type="info" round
                  @click="showDetailDial(scope.row.tsCode)"
                  :icon="List"></el-button>
-      <el-button type="info" round
-                 @click="scope.row.code?showLineChart(scope.row.code):scope.row.tsCode?showLineChart(scope.row.tsCode):showLineChart(scope.row.ts_code)"
-                 :icon="TrendCharts"></el-button>
+<!--      <el-button type="info" round-->
+<!--                 @click="scope.row.code?showLineChart(scope.row.code):scope.row.tsCode?showLineChart(scope.row.tsCode):showLineChart(scope.row.ts_code)"-->
+<!--                 :icon="TrendCharts"></el-button>-->
     </template>
   </el-table-column>
 </template>
