@@ -2,6 +2,7 @@ package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.entity.CodeLabel;
 import com.stock.pycurrent.service.CodeLabelService;
+import com.stock.pycurrent.service.LastHandPriService;
 import com.stock.pycurrent.service.StockService;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.PARAMS;
@@ -28,6 +29,8 @@ public class PrepareData implements CommandLineRunner {
     private StockService stockService;
     @Resource
     private CodeLabelService codeLabelService;
+    @Resource
+    private LastHandPriService lastHandPriService;
     private static final Map<String, List<String>> labelMap = new ConcurrentHashMap<>();
 
     @Override
@@ -65,10 +68,13 @@ public class PrepareData implements CommandLineRunner {
             log.warn("createLimitCode-ENTER");
             stockService.createLimitCode();
             log.warn("createLimitCode-OVER");
-            log.warn("PULL-ALL-OVER");
             log.warn("ROC-ENTER");
             stockService.initRocModel();
             log.warn("ROC-OVER");
+            log.warn("LHP-ENTER");
+            lastHandPriService.createIntradayLHP();
+            log.warn("LHP-OVER");
+            log.warn("PULL-ALL-OVER");
         }
     }
 

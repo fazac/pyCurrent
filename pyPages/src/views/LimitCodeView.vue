@@ -1,19 +1,17 @@
 <script setup>
-import {onMounted, reactive} from 'vue'
-import CommonPage from '@/components/CommonPage.vue'
-import CommonTablePart from '@/components/CommonTablePart.vue'
-import PeColumn from '@/components/TablePart/PeColumn.vue'
-import {cellStyle, headerCellStyle, nullArr} from "@/api/util";
+import {onMounted, provide, reactive} from 'vue'
+import ModelPage from '@/components/ModelPage.vue'
+import {nullArr} from "@/api/util";
 import {searchSome} from "@/api/backend";
-import {commonPageRef} from '@/api/commonpage'
 
 const searchObj = reactive(
     {
       searchDate: null,
     }
 );
-
 const sLimitVOTableData = reactive({});
+
+provide("myTableData", sLimitVOTableData);
 
 function fetchLimit() {
   searchSome("3", ...nullArr(2), searchObj.searchDate != null ? searchObj.searchDate.getTime() : null).then(res => {
@@ -28,7 +26,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <CommonPage ref="commonPageRef">
+  <ModelPage>
     <template #queryParams>
       <el-date-picker
           v-model="searchObj.searchDate"
@@ -37,19 +35,10 @@ onMounted(() => {
           @change="fetchLimit"
       />
     </template>
-    <template #resTable>
-      <el-table :data="sLimitVOTableData.value.limitCodeVOList"
-                :cell-style="cellStyle" max-height="360" stripe v-if="sLimitVOTableData.value !=null"
-                :header-cell-style="headerCellStyle">
-        <el-table-column property="code" label="code"/>
-        <el-table-column property="count" sortable label="count"/>
-        <el-table-column property="cap" sortable label="cap"/>
-        <PeColumn/>
-        <el-table-column property="pb" sortable label="pb"/>
-        <CommonTablePart/>
-      </el-table>
+    <template #elseColumn>
+      <el-table-column property="count" sortable label="count"/>
     </template>
-  </CommonPage>
+  </ModelPage>
 </template>
 
 <style scoped>

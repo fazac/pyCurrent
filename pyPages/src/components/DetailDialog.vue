@@ -1,35 +1,26 @@
 <script setup>
 import {findDataByCode} from "@/api/backend";
-import {reactive, ref, watch} from 'vue'
-import {cellStyle, isEmpty, nfc} from "@/api/util";
+import {inject, reactive, ref, watch} from 'vue'
+import {cellStyle, isEmpty} from "@/api/util";
 
 const dialogTableVisible = ref(false);
 const codeTableData = reactive({});
 const dialogType = ref('');
 
-const props = defineProps(['code'])
-const emit = defineEmits(['update:code'])
-
-const handleColumnClick = () => {
-  if (isEmpty(props.code)) {
-    nfc("NO CODE", "code is required", "warning")
-    return;
-  }
-  findDataByCode(props.code).then(res => {
-    dialogTableVisible.value = true;
-    codeTableData.value = res;
-    dialogType.value = 'open';
-  });
-}
+const detailCode = inject('detailCode', null);
 
 const resetCode = () => {
-  emit('update:code', '');
+  detailCode.value = null;
   dialogTableVisible.value = false;
 }
 
-watch(() => props.code, async () => {
-  if (!isEmpty(props.code)) {
-    handleColumnClick();
+watch(detailCode, async () => {
+  if (!isEmpty(detailCode) && !isEmpty(detailCode.value)) {
+    findDataByCode(detailCode.value).then(res => {
+      dialogTableVisible.value = true;
+      codeTableData.value = res;
+      dialogType.value = 'open';
+    });
   }
 });
 

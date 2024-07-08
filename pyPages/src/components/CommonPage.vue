@@ -1,23 +1,19 @@
 <script setup>
-import {ref} from 'vue'
+import {provide, ref} from 'vue'
 import DetailDialog from '../components/DetailDialog.vue'
-import LeftToolPanel from '../components/LeftToolPanel.vue'
+import LeftToolPanel from '../components/parts/LeftToolPanel.vue'
 import LineChart from "@/components/LineChart.vue";
-import RightToolPanel from "@/components/RightToolPanel.vue";
+import RightToolPanel from "@/components/parts/RightToolPanel.vue";
+import MyTable from "@/components/TablePart/MITable.vue";
 
-const code = ref('');
-const linetype = ref(true);
-const searchCode = ref('');
+const lineCode = ref('');
+const lineType = ref('');
+const detailCode = ref('');
 
-function showDetails(v) {
-  searchCode.value = v;
-}
+provide('lineCode', lineCode);
+provide('lineType', lineType);
+provide('detailCode', detailCode);
 
-function showLineChart(v) {
-  code.value = v;
-}
-
-defineExpose({showDetails, showLineChart})
 
 </script>
 
@@ -26,14 +22,12 @@ defineExpose({showDetails, showLineChart})
     <LeftToolPanel/>
     <el-main class="flex-column">
       <slot name="queryParams"></slot>
-      <slot name="resTable">
-      </slot>
-      <LineChart :code="code" :dnshow="linetype"/>
+      <MyTable/>
+      <LineChart/>
     </el-main>
-    <RightToolPanel v-model:linetype="linetype" v-model:code="code"/>
+    <RightToolPanel/>
   </el-container>
-
-  <DetailDialog v-model:code="searchCode"/>
+  <DetailDialog/>
 </template>
 
 <style scoped>

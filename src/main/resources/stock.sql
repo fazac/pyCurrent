@@ -293,23 +293,31 @@ alter table continuous_up
 
 ALTER DATABASE stockrealtime CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-ALTER TABLE `board_concept_con` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
-ALTER TABLE `board_industry_con` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+ALTER TABLE `board_concept_con`
+    CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `board_industry_con`
+    CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- 20240328
-alter table `cur_count` add column `c_30_5u` int;
-alter table `cur_count` add column `c_30_7d` int;
-alter table `cur_count` add column `c_60_5u` int;
-alter table `cur_count` add column `c_60_7d` int;
-alter table `cur_count` add column `c_00_5u` int;
-alter table `cur_count` add column `c_00_7d` int;
+alter table `cur_count`
+    add column `c_30_5u` int;
+alter table `cur_count`
+    add column `c_30_7d` int;
+alter table `cur_count`
+    add column `c_60_5u` int;
+alter table `cur_count`
+    add column `c_60_7d` int;
+alter table `cur_count`
+    add column `c_00_5u` int;
+alter table `cur_count`
+    add column `c_00_7d` int;
 
 -- 20240502
 drop table if exists holiday_date;
 create table holiday_date
 (
-    `date_year` varchar(4) primary key,
-    `date_value` json DEFAULT NULL COMMENT '原值',
+    `date_year`   varchar(4) primary key,
+    `date_value`  json DEFAULT NULL COMMENT '原值',
     `after_value` json DEFAULT NULL COMMENT '修改后值'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -318,29 +326,47 @@ create table holiday_date
 
 -- 20240529
 
-alter table `cur_count` add column `c_30_35u` int;
-alter table `cur_count` add column `c_60_35u` int;
-alter table `cur_count` add column `c_00_35u` int;
+alter table `cur_count`
+    add column `c_30_35u` int;
+alter table `cur_count`
+    add column `c_60_35u` int;
+alter table `cur_count`
+    add column `c_00_35u` int;
 
-alter table `cur_count` add column `c_30_13u` int;
-alter table `cur_count` add column `c_60_13u` int;
-alter table `cur_count` add column `c_00_13u` int;
+alter table `cur_count`
+    add column `c_30_13u` int;
+alter table `cur_count`
+    add column `c_60_13u` int;
+alter table `cur_count`
+    add column `c_00_13u` int;
 
-alter table `cur_count` add column `c_30_01u` int;
-alter table `cur_count` add column `c_60_01u` int;
-alter table `cur_count` add column `c_00_01u` int;
+alter table `cur_count`
+    add column `c_30_01u` int;
+alter table `cur_count`
+    add column `c_60_01u` int;
+alter table `cur_count`
+    add column `c_00_01u` int;
 
-alter table `cur_count` add column `c_30_01d` int;
-alter table `cur_count` add column `c_60_01d` int;
-alter table `cur_count` add column `c_00_01d` int;
+alter table `cur_count`
+    add column `c_30_01d` int;
+alter table `cur_count`
+    add column `c_60_01d` int;
+alter table `cur_count`
+    add column `c_00_01d` int;
 
-alter table `cur_count` add column `c_30_13d` int;
-alter table `cur_count` add column `c_60_13d` int;
-alter table `cur_count` add column `c_00_13d` int;
+alter table `cur_count`
+    add column `c_30_13d` int;
+alter table `cur_count`
+    add column `c_60_13d` int;
+alter table `cur_count`
+    add column `c_00_13d` int;
 
-alter table `cur_count` add column `c_30_37d` int;
-alter table `cur_count` add column `c_60_37d` int;
-alter table `cur_count` add column `c_00_37d` int;
+alter table `cur_count`
+    add column `c_30_37d` int;
+alter table `cur_count`
+    add column `c_60_37d` int;
+alter table `cur_count`
+    add column `c_00_37d` int;
 
 drop table if exists board_code;
 create table board_code
@@ -374,11 +400,14 @@ create table `cur_concern_code`
   ROW_FORMAT = DYNAMIC;
 
 -- 20240625
-alter table cur_concern_code add column `tabel_show` tinyint(1) default '0';
+alter table cur_concern_code
+    add column `tabel_show` tinyint(1) default '0';
 
 -- 20240626
-ALTER TABLE `board_concept_con` ADD INDEX index_code_date (`ts_code`, `trade_date`);
-ALTER TABLE `board_industry_con` ADD INDEX index_code_date (`ts_code`, `trade_date`);
+ALTER TABLE `board_concept_con`
+    ADD INDEX index_code_date (`ts_code`, `trade_date`);
+ALTER TABLE `board_industry_con`
+    ADD INDEX index_code_date (`ts_code`, `trade_date`);
 
 -- 20240627
 create table `code_label`
@@ -395,24 +424,34 @@ create table `code_label`
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
 
-alter table `code_label` add index idx_date_code(`ts_code`,`trade_date`);
+alter table `code_label`
+    add index idx_date_code (`ts_code`, `trade_date`);
 
-alter table `code_label` drop column `name`;
+alter table `code_label`
+    drop column `name`;
 
 -- 20240704
-alter table `code_label` add column `name` varchar(16);
+alter table `code_label`
+    add column `name` varchar(16);
 
-alter table `cur_count` add column `is_summary` tinyint(1) default '0' comment '是否最后一条';
-alter table `cur_count` add column `total_amount` decimal(30,2) comment '金额';
-alter table `cur_count` add column `zero_amount` decimal(30,2) comment '金额';
-alter table `cur_count` add column `three_amount` decimal(30,2) comment '金额';
-alter table `cur_count` add column `six_amount` decimal(30,2) comment '金额';
+alter table `cur_count`
+    add column `is_summary` tinyint(1) default '0' comment '是否最后一条';
+alter table `cur_count`
+    add column `total_amount` decimal(30, 2) comment '金额';
+alter table `cur_count`
+    add column `zero_amount` decimal(30, 2) comment '金额';
+alter table `cur_count`
+    add column `three_amount` decimal(30, 2) comment '金额';
+alter table `cur_count`
+    add column `six_amount` decimal(30, 2) comment '金额';
 
-alter table `cur_count` add index `idx_summary`(is_summary);
+alter table `cur_count`
+    add index `idx_summary` (is_summary);
 
 -- 20240705
 
-select concat(left(trade_date, 4), '-', substr(trade_date, 5, 2), '-', substr(trade_date, 7, 2), ' 15:01:00') as trade_date,
+select concat(left(trade_date, 4), '-', substr(trade_date, 5, 2), '-', substr(trade_date, 7, 2),
+              ' 15:01:00')                                                              as trade_date,
        count(case when ts_code like '3%' and pct_chg >= 0 then 1 end)                   as c_30u,
        count(case when ts_code like '3%' then 1 end)                                    as c_30a,
        count(case when ts_code like '6%' and pct_chg >= 0 then 1 end)                   as c_60u,
@@ -443,11 +482,32 @@ select concat(left(trade_date, 4), '-', substr(trade_date, 5, 2), '-', substr(tr
        count(case when ts_code like '3%' and pct_chg >= -7 and pct_chg < -3 then 1 end) as c_30_37d,
        count(case when ts_code like '6%' and pct_chg >= -7 and pct_chg < -3 then 1 end) as c_60_37d,
        count(case when ts_code like '0%' and pct_chg >= -7 and pct_chg < -3 then 1 end) as c_00_37d,
-       '1' as is_summary,
-       sum(amount) as total_amount,
-       sum(case when ts_code like '0%' then amount end) as zero_amount,
-       sum(case when ts_code like '3%' then amount end) as three_amount,
-       sum(case when ts_code like '6%' then amount end) as six_amount
+       '1'                                                                              as is_summary,
+       sum(amount)                                                                      as total_amount,
+       sum(case when ts_code like '0%' then amount end)                                 as zero_amount,
+       sum(case when ts_code like '3%' then amount end)                                 as three_amount,
+       sum(case when ts_code like '6%' then amount end)                                 as six_amount
 from em_d_n_stock
 where trade_date > '20240101'
 group by trade_date;
+
+
+-- 2024-07-08
+drop table if exists `last_hand_pri`;
+create table `last_hand_pri`
+(
+    `trade_date`       varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `ts_code`          varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+    `current_pri`      decimal(18, 2),
+    `last_five_pri`    decimal(18, 2),
+    `last_ten_pri`     decimal(18, 2),
+    `last_twenty_pri`  decimal(18, 2),
+    `last_thirty_pri`  decimal(18, 2),
+    `last_fifty_pri`   decimal(18, 2),
+    `last_hundred_pri` decimal(18, 2),
+    KEY `idx_lhp_code` (`ts_code`) USING BTREE,
+    KEY `idx_lhp_date` (`trade_date`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;

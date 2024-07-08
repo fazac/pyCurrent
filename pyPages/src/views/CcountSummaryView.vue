@@ -3,7 +3,7 @@
 import {onMounted, reactive, ref, provide} from 'vue'
 import {cellStyle, headerCellStyle, amountFix} from "@/api/util";
 import {findSummaryList} from "@/api/backend";
-import AmountColumn from '@/components/TablePart/AmountColumn.vue'
+import AmountColumn from '@/components/TablePart/CmColumn.vue'
 import TradeDateColumn from '@/components/TablePart/TradeDateColumn.vue'
 import CommonPage from '@/components/CommonPage.vue'
 

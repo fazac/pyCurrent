@@ -8,6 +8,20 @@ export function tradeDateDecorate(date) {
     return date.substring(4, 10).replaceAll('-', '');
 }
 
+export function minArr(arr, props) {
+    let rObj = {start: '', min: null, max: null};
+    rObj.start = arr[29].tradeDate;
+    let min = Infinity;
+    let max = -Infinity;
+    arr.reduce(function (pre, cur, index) {
+        let tmpArr = props.map(prop => cur[prop])
+        min = Math.min.apply(min, tmpArr);
+        max = Math.max.apply(max, tmpArr);
+    }, null);
+    rObj.min = min;
+    rObj.max = max;
+    return rObj;
+}
 
 export function nfc(title, message, type) {
     ElNotification({

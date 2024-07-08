@@ -2,17 +2,18 @@
 import {inject} from 'vue';
 import DNLineChart from "@/components/LineChartPart/DNLineChart.vue";
 import RTLineChart from "@/components/LineChartPart/RTLineChart.vue";
-import CountSummaryLineChart from "@/components/LineChartPart/CountSummaryLineChart.vue";
+import CSLineChart from "@/components/LineChartPart/CSLineChart.vue";
+import HPLineChart from "@/components/LineChartPart/HPLineChart.vue";
 
-const props = defineProps(['code', 'dnshow']);
-const ldata = inject('ldata', null)
+const lineType = inject('lineType', null)
 
 </script>
 
 <template>
-  <DNLineChart :code=props.code v-if="props.dnshow && props.code"></DNLineChart>
-  <RTLineChart :code=props.code v-if="!props.dnshow  && props.code"></RTLineChart>
-  <CountSummaryLineChart v-if="ldata"/>
+  <DNLineChart v-if="lineType === 'dn'"/>
+  <RTLineChart v-if="lineType === 'rt'"/>
+  <HPLineChart v-if="lineType === 'hp'"/>
+  <CSLineChart v-if="lineType === 'cs'"/>
 </template>
 
 <style scoped>
