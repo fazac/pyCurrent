@@ -21,7 +21,7 @@ function showOtherConcernDial() {
   <el-button type="info" size="large"
              @click="showOtherConcernDial" :icon="Compass"></el-button>
 
-  <el-dialog v-model="otherConcernVisible" title="OTHER"
+  <el-dialog v-model="otherConcernVisible" title="OTHER" :modal="false"
              :show-close="false" center draggable destroy-on-close width="1000">
     <MPTable :myTableData="otherConcernTableData.value">
       <template #column-slot>

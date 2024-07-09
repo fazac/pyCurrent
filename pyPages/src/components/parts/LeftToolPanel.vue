@@ -8,8 +8,8 @@ import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight, Aim, P
     <PageButton :icon='HomeFilled'/>
     <PageButton :icon='DataBoard' badgeValue="b" url='board'/>
     <PageButton :icon='Compass' url='other'/>
-    <PageButton :icon='BellFilled' url='ophc' badgeValue="ph"/>
-    <PageButton :icon='Film' url='roc' badgeValue="rc"/>
+    <PageButton :icon='BellFilled' url='ophc' badgeValue="p"/>
+    <PageButton :icon='Film' url='roc' badgeValue="r"/>
     <PageButton :icon='Link' url='all' badgeValue="a"/>
     <PageButton :icon='TopRight' url='continuous' badgeValue="u"/>
     <PageButton :icon='Aim' url='cptr' badgeValue="m"/>

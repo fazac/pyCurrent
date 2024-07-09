@@ -202,20 +202,6 @@ public class RealTimeController {
                 codeDataVO.setPe(emRealTimeStock.getPe());
                 codeDataVO.setPb(emRealTimeStock.getPb());
                 codeDataVO.setCm(emRealTimeStock.getCirculationMarketCap());
-                if (emRealTimeStock.getPriClosePre() != null && emRealTimeStock.getPriOpen() != null) {
-                    extraNode.put("open", StockUtils.calRatio(emRealTimeStock.getPriOpen(), emRealTimeStock.getPriClosePre()));
-                    extraNode.put("low", StockUtils.calRatio(emRealTimeStock.getPriLow(), emRealTimeStock.getPriClosePre()));
-                    extraNode.put("high", StockUtils.calRatio(emRealTimeStock.getPriHigh(), emRealTimeStock.getPriClosePre()));
-                } else {
-                    extraNode.put("open", emRealTimeStock.getPriOpen());
-                    extraNode.put("low", emRealTimeStock.getPriLow());
-                    extraNode.put("high", emRealTimeStock.getPriHigh());
-                }
-                if (emRealTimeStock.getAmount() != null) {
-                    extraNode.put("avgPri", emRealTimeStock.getAmount()
-                            .divide(BigDecimal.valueOf(emRealTimeStock.getVol()).multiply(Constants.HUNDRED), 3, RoundingMode.HALF_UP));
-                }
-                extraNode.put("priPre", emRealTimeStock.getPriClosePre());
                 codeDataVO.setLabels(PrepareData.findLabelStr(emRealTimeStock.getTsCode()));
                 codeDataVO.setExtraNode(extraNode);
                 res.add(codeDataVO);

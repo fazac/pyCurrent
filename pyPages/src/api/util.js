@@ -9,18 +9,30 @@ export function tradeDateDecorate(date) {
     return date.substring(4, 10).replaceAll('-', '');
 }
 
-export function minArr(arr, props) {
+export function minArr(arr, excludeKeys) {
     let rObj = {start: '', min: null, max: null};
-    rObj.start = arr[29].tradeDate;
+    if (arr.length < 30) {
+        rObj.start = arr[0].tradeDate;
+    } else {
+        rObj.start = arr[29].tradeDate;
+    }
     let min = Infinity;
     let max = -Infinity;
     arr.reduce(function (pre, cur, index) {
-        let tmpArr = props.map(prop => cur[prop])
-        min = Math.min.apply(min, tmpArr);
-        max = Math.max.apply(max, tmpArr);
+        const values = Object.keys(cur)
+            .filter(key => !excludeKeys.includes(key))
+            .map(key => cur[key]);
+        if (min !== Infinity) {
+            values.push(min);
+        }
+        if (max !== -Infinity) {
+            values.push(max);
+        }
+        min = Math.min.apply(null, values);
+        max = Math.max.apply(null, values);
     }, null);
-    rObj.min = min;
-    rObj.max = max;
+    rObj.min = Math.floor(min);
+    rObj.max = Math.ceil(max);
     return rObj;
 }
 

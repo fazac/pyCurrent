@@ -11,16 +11,17 @@ watch(lineCode, () => {
   if (isEmpty(lineCode)) {
     return
   }
-  findLHPByCode(lineCode).then(res => {
+  findLHPByCode(lineCode.value).then(res => {
     if (!isEmpty(res)) {
-      let tmpArr = res.value.map(obj => {
+      let tmpArr = res.map(obj => {
         return {
           ...obj,
           tradeDate: tradeDateDecorate(obj.tradeDate),
         };
       });
-      let arrProps = minArr(res, ['currentPri', 'lastFivePri', 'lastTenPri', 'lastTwentyPri', 'lastThirtyPri', 'lastFiftyPri', 'lastHundredPri'])
-      createLine(tmpArr.reverse(), arrProps);
+      tmpArr = tmpArr.reverse();
+      let arrProps = minArr(tmpArr, ['tsCode', 'tradeDate'])
+      createLine(tmpArr, arrProps);
     }
   })
 })
@@ -159,7 +160,7 @@ function createLine(res, arrProps) {
         {
           type: 'line',
           name: 'cp',
-          encode: {y: 'tradeDate'},
+          encode: {y: 'currentPri'},
           yAxisIndex: 0,
           label: {
             show: false,

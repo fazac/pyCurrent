@@ -18,14 +18,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <ModelPage>
-    <template #elseColumn>
-      <el-table-column property="extraNode.pch" label="rt"/>
-      <el-table-column property="extraNode.hand" label="h"/>
-      <el-table-column property="extraNode.avgPri" label="ap"/>
-      <el-table-column property="extraNode.priPre" label="pp"/>
-    </template>
-  </ModelPage>
+  <ModelPage/>
 </template>
 
 <style scoped>

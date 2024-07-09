@@ -10,7 +10,6 @@ const td = tableData();
 function fetchContinuous() {
   findLastContinuous().then(res => {
     td.value = res;
-    console.log(extraTdKey(td))
   })
 }
 

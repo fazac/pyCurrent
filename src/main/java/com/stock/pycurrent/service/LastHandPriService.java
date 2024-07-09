@@ -52,8 +52,11 @@ public class LastHandPriService {
             List<LastHandPri> lastHandPris = new ArrayList<>();
             emDNStockList.stream().filter(x -> x.getVol() != null && x.getVol() > 0).forEach(x ->
             {
-                log.warn(DateUtils.commonNow() + " ,lastHandPris:" + lastHandPris.size());
-                lastHandPris.add(convertLastHandPri(emRealTimeStockService.findLastHandPri(x.getTsCode(), now)));
+                log.warn(DateUtils.commonNow() + " ,lastHandPris:" + lastHandPris.size() + " ,code:" + x.getTsCode());
+                LastHandPri lastHandPri = convertLastHandPri(emDNStockRepo.findLastHandPri(x.getTsCode(), now));
+                if (lastHandPri != null) {
+                    lastHandPris.add(lastHandPri);
+                }
             });
             lastHandPriRepo.saveAllAndFlush(lastHandPris);
         }
@@ -61,6 +64,9 @@ public class LastHandPriService {
 
     private LastHandPri convertLastHandPri(List<Object[]> queryResList) {
         Object[] queryRes = queryResList.getFirst();
+        if (queryRes[0] == null) {
+            return null;
+        }
         LastHandPri lastHandPri = new LastHandPri();
         lastHandPri.setTradeDate(queryRes[0].toString());
         lastHandPri.setTsCode(queryRes[1].toString());
