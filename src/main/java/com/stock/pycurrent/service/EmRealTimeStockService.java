@@ -1,22 +1,17 @@
 package com.stock.pycurrent.service;
 
 import com.stock.pycurrent.entity.EmRealTimeStock;
-import com.stock.pycurrent.entity.emum.PyFuncEnum;
-import com.stock.pycurrent.entity.model.Constants;
-import com.stock.pycurrent.entity.vo.OpenVO;
+import com.stock.pycurrent.entity.vo.CodeDataVO;
+import com.stock.pycurrent.schedule.PrepareData;
 import com.stock.pycurrent.util.DateUtils;
-import com.stock.pycurrent.util.PythonScriptUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @CommonsLog
@@ -34,7 +29,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findLastHundred() {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = " select * from " + tableName + " where trade_date = (select (max(a.trade_date)) from " + tableName + " a) " +
-                " and current_pri is not null order by pct_chg desc limit 100;";
+                     " and current_pri is not null order by pct_chg desc limit 100;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class).getResultList();
     }
 
@@ -68,7 +63,7 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findRBarStockByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * from " + tableName
-                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
+                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') and current_pri is not null order by trade_date;";
         return (List<EmRealTimeStock>) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
@@ -77,7 +72,7 @@ public class EmRealTimeStockService {
     public int findRBarStockCountByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select count(1) from " + tableName
-                + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
+                     + " where ts_code = :tsCode and trade_date > concat(CURDATE(),' 09:29:30') order by trade_date;";
         return ((Long) entityManager.createNativeQuery(sql)
                 .setParameter("tsCode", tsCode)
                 .getSingleResult()).intValue();
@@ -86,14 +81,14 @@ public class EmRealTimeStockService {
     public List<EmRealTimeStock> findOpenByCode(String tsCode) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                "    from " + tableName
-                + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                     "    from " + tableName
+                     + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("tsCode", tsCode)
                 .getResultList();
     }
 
-    public EmRealTimeStock findLastOneByCode(String tsCode) {
+    private EmRealTimeStock findLastOneByCode(String tsCode) {
         try {
             String tableName = "em_real_time_stock_" + DateUtils.now();
             String sql = "select * from " + tableName + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") order by trade_date desc limit 1";
@@ -105,11 +100,24 @@ public class EmRealTimeStockService {
         }
     }
 
+    public void fillCodeData(CodeDataVO codeDataVO) {
+        EmRealTimeStock rt = findLastOneByCode(codeDataVO.getCode());
+        if (rt != null) {
+            codeDataVO.setPe(rt.getPe());
+            codeDataVO.setPb(rt.getPb());
+            codeDataVO.setCm(rt.getCirculationMarketCap());
+            codeDataVO.setCurrentPri(rt.getCurrentPri());
+            codeDataVO.setPch(rt.getPctChg());
+            codeDataVO.setHand(rt.getChangeHand());
+        }
+        codeDataVO.setLabels(PrepareData.findLabelStr(codeDataVO.getCode()));
+    }
+
     public List<EmRealTimeStock> findOpenByName(String name) {
         String tableName = "em_real_time_stock_" + DateUtils.now();
         String sql = "select * " +
-                "    from " + tableName
-                + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
+                     "    from " + tableName
+                     + " t where t.name like :name and t.current_pri is not null and t.trade_date = (select max(trade_date) from " + tableName + ") ";
         return entityManager.createNativeQuery(sql, EmRealTimeStock.class)
                 .setParameter("name", "%" + name + "%")
                 .getResultList();

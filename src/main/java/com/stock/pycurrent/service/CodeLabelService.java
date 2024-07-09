@@ -6,6 +6,7 @@ import com.stock.pycurrent.repo.BoardConceptConRepo;
 import com.stock.pycurrent.repo.BoardIndustryConRepo;
 import com.stock.pycurrent.repo.CodeLabelRepo;
 import com.stock.pycurrent.util.DateUtils;
+import com.stock.pycurrent.util.StockUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Service;
@@ -49,16 +50,16 @@ public class CodeLabelService {
 
     public void createLabels() {
         String now = DateUtils.now();
+        String lastDate = codeLabelRepo.findMaxDate();
+        if (now.equals(lastDate) || !StockUtils.afterPullHour()) {
+            return;
+        }
         List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findLast();
         Map<String, String> codeNameMap;
         if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
             codeNameMap = emRealTimeStockList.stream().collect(Collectors.toMap(EmRealTimeStock::getTsCode, EmRealTimeStock::getName));
         } else {
             codeNameMap = new HashMap<>();
-        }
-        String lastDate = codeLabelRepo.findMaxDate();
-        if (now.equals(lastDate)) {
-            return;
         }
         Map<String, CodeLabel> codeLabelMap = new HashMap<>();
         List<Object> conceptList = boardConceptConRepo.findLast();

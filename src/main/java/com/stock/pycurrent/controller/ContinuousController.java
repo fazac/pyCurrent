@@ -1,6 +1,7 @@
 package com.stock.pycurrent.controller;
 
 import com.stock.pycurrent.entity.ContinuousUp;
+import com.stock.pycurrent.entity.vo.CodeDataVO;
 import com.stock.pycurrent.service.ContinuousUpService;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
@@ -18,7 +19,7 @@ public class ContinuousController {
     private ContinuousUpService continuousUpService;
 
     @GetMapping("findLastContinuous")
-    public List<ContinuousUp> findLastContinuous() {
+    public List<CodeDataVO> findLastContinuous() {
         return continuousUpService.findLastContinuous();
     }
 }

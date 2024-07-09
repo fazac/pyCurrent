@@ -13,7 +13,6 @@ const lineType = inject('lineType', null)
   <DNLineChart v-if="lineType === 'dn'"/>
   <RTLineChart v-if="lineType === 'rt'"/>
   <HPLineChart v-if="lineType === 'hp'"/>
-  <CSLineChart v-if="lineType === 'cs'"/>
 </template>
 
 <style scoped>

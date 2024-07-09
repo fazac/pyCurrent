@@ -1,11 +1,8 @@
 <script setup>
 import {reactive} from 'vue'
-import CommonPage from '@/components/CommonPage.vue'
-import CommonTablePart from '@/components/CommonTablePart.vue'
-import PeColumn from '@/components/TablePart/PeColumn.vue'
-import {cellStyle, headerCellStyle, isEmpty, nfc} from "@/api/util";
+import ModelPage from '@/components/ModelPage.vue'
+import {isEmpty, nfc, tableData} from "@/api/util";
 import {findCptr} from "@/api/backend";
-import {commonPageRef} from '@/api/commonpage'
 
 const searchObj = reactive(
     {
@@ -13,7 +10,7 @@ const searchObj = reactive(
     }
 );
 
-const tableData = reactive({});
+const td = tableData();
 
 function fetchCptr() {
   if (isEmpty(searchObj.symbol)) {
@@ -21,7 +18,7 @@ function fetchCptr() {
     return;
   }
   findCptr(searchObj.symbol).then(res => {
-    tableData.value = res;
+    td.value = res;
   })
 }
 
@@ -29,7 +26,7 @@ function fetchCptr() {
 </script>
 
 <template>
-  <CommonPage ref="commonPageRef">
+  <ModelPage>
     <template #queryParams>
       <el-form :model="searchObj" inline>
         <el-form-item>
@@ -41,22 +38,8 @@ function fetchCptr() {
           </el-button>
         </el-form-item>
       </el-form>
-
     </template>
-    <template #resTable>
-      <el-table :data="tableData.value"
-                :cell-style="cellStyle" max-height="400"
-                :header-cell-style="headerCellStyle">
-        <el-table-column property="pct_chg" label="pch"/>
-        <el-table-column property="change_hand" label="hand"/>
-        <PeColumn/>
-        <el-table-column property="pb" sortable label="pb"/>
-        <el-table-column property="cap" sortable label="cap"/>
-        <el-table-column property="ts_code" label="code"/>
-        <CommonTablePart/>
-      </el-table>
-    </template>
-  </CommonPage>
+  </ModelPage>
 </template>
 
 <style scoped>

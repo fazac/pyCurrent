@@ -1,14 +1,10 @@
 <script setup>
-import {onMounted, reactive} from 'vue'
-import {ElTable} from 'element-plus'
+import {onMounted, provide, reactive} from 'vue'
 import axios from "@/api/http.js";
-import {cellStyle, headerCellStyle, rowStyleClass} from '@/api/util'
-import CommonPage from "@/components/CommonPage.vue";
-import CommonTablePart from "@/components/CommonTablePart.vue";
-import PeColumn from '@/components/TablePart/PeColumn.vue'
-import {commonPageRef} from '@/api/commonpage'
+import ModelPage from "@/components/ModelPage.vue";
 
 const codeDateList = reactive([{}]);
+provide("myTableData", codeDateList);
 
 onMounted(() => {
   if (!!window.EventSource) {
@@ -35,37 +31,7 @@ onMounted(() => {
 </script>
 
 <template>
-
-  <CommonPage ref="commonPageRef">
-    <template #resTable>
-      <el-table
-          :data="codeDateList.value" empty-text=" "
-          highlight-current-row max-height="500"
-          border
-          stripe
-          class="flex-grow-0"
-          :cell-style="cellStyle"
-          :header-cell-style="headerCellStyle"
-          :row-class-name="rowStyleClass"
-      >
-        <el-table-column prop="mark" label="mark"/>
-        <el-table-column prop="rt" label="rt"/>
-        <el-table-column prop="h" label="h"/>
-        <el-table-column prop="cp" label="cp"/>
-        <el-table-column prop="bp" label="bp"/>
-        <el-table-column prop="rr" label="rr"/>
-        <el-table-column prop="cm" label="cm"/>
-        <PeColumn/>
-        <el-table-column prop="tsCode" label="code">
-          <template #default="scope">
-            <span>{{ scope.row.tsCode.substring(2, 6) }}</span>
-          </template>
-        </el-table-column>
-        <CommonTablePart/>
-      </el-table>
-    </template>
-  </CommonPage>
-
+  <ModelPage/>
 </template>
 
 <style scoped>

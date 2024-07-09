@@ -1,9 +1,14 @@
 package com.stock.pycurrent.service;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.RocModel;
+import com.stock.pycurrent.entity.vo.CodeDataVO;
 import com.stock.pycurrent.entity.vo.LimitCodeVO;
 import com.stock.pycurrent.exception.MyException;
 import com.stock.pycurrent.repo.RocModelRepo;
+import com.stock.pycurrent.schedule.PrepareData;
+import com.stock.pycurrent.util.JSONUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Service;
@@ -22,16 +27,18 @@ import java.util.List;
 public class RocModelService {
     @Resource
     private RocModelRepo rocModelRepo;
+    @Resource
+    private EmRealTimeStockService emRealTimeStockService;
 
     public List<RocModel> findRocByCode(String code) {
         return rocModelRepo.findByCode(code);
     }
 
-    public List<LimitCodeVO> findRocByLimit(BigDecimal r2LowLimit,
-                                            BigDecimal r2HighLimit,
-                                            BigDecimal r1LowLimit,
-                                            BigDecimal r1HighLimit) {
-        List<LimitCodeVO> res = new ArrayList<>();
+    public List<CodeDataVO> findRocByLimit(BigDecimal r2LowLimit,
+                                           BigDecimal r2HighLimit,
+                                           BigDecimal r1LowLimit,
+                                           BigDecimal r1HighLimit) {
+        List<CodeDataVO> res = new ArrayList<>();
         List<Object> tmpRes = rocModelRepo.findByLimit(r2LowLimit, r2HighLimit, r1LowLimit, r1HighLimit);
         if (tmpRes != null && !tmpRes.isEmpty()) {
             if (tmpRes.size() >= 250) {
@@ -39,15 +46,18 @@ public class RocModelService {
             }
             tmpRes.forEach(x -> {
                 Object[] tmpArr = (Object[]) x;
-                LimitCodeVO limitCodeVO = new LimitCodeVO();
-                limitCodeVO.setCode(tmpArr[0].toString());
+                CodeDataVO codeDataVO = new CodeDataVO();
+                codeDataVO.setCode(tmpArr[0].toString());
+                ObjectNode extraNode = JSONUtils.getNode();
+                emRealTimeStockService.fillCodeData(codeDataVO);
                 if (tmpArr[1] != null) {
-                    limitCodeVO.setR1(new BigDecimal(tmpArr[1].toString()));
+                    extraNode.put("r1", new BigDecimal(tmpArr[1].toString()));
                 }
                 if (tmpArr[2] != null) {
-                    limitCodeVO.setR2(new BigDecimal(tmpArr[2].toString()));
+                    extraNode.put("r2", new BigDecimal(tmpArr[2].toString()));
                 }
-                res.add(limitCodeVO);
+                codeDataVO.setExtraNode(extraNode);
+                res.add(codeDataVO);
             });
 
         }

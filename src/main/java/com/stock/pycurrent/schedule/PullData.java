@@ -391,7 +391,7 @@ public class PullData implements CommandLineRunner {
         }
         if (!curConcernCodeList.isEmpty()) {
             curConcernCodeService.saveList(curConcernCodeList);
-            MySseEmitterUtil.sendMsgToClient(curConcernCodeList.stream().filter(CurConcernCode::isTableShow).collect(Collectors.toList()), SSEMsgEnum.RT_CURRENT);
+            MySseEmitterUtil.sendMsgToClient(curConcernCodeService.findLast("1"), SSEMsgEnum.RT_CURRENT);
             sendRTMsg();
         }
     }

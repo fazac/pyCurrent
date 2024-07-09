@@ -2,7 +2,7 @@
 import router from "@/router";
 import {isEmpty} from "@/api/util";
 
-const props = defineProps(['icon', 'url']);
+const props = defineProps(['icon', 'url', 'badgeValue']);
 
 
 function openPage(path) {
@@ -16,9 +16,16 @@ function openPage(path) {
 </script>
 
 <template>
-  <el-button type="info" size="large" class="big-btn"
+  <el-badge :value="badgeValue" v-if="badgeValue" type="info" :offset="[-50,10]" class="item">
+    <el-button type="info" size="large" class="big-btn"
+               @click="openPage(props.url)"
+               :icon="props.icon">
+    </el-button>
+  </el-badge>
+  <el-button type="info" size="large" v-if="!badgeValue" class="big-btn"
              @click="openPage(props.url)"
-             :icon="props.icon"></el-button>
+             :icon="props.icon">
+  </el-button>
 </template>
 
 <style scoped>

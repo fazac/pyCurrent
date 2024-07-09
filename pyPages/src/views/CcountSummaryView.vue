@@ -1,11 +1,12 @@
 <script setup>
 
-import {onMounted, reactive, ref, provide} from 'vue'
-import {cellStyle, headerCellStyle, amountFix} from "@/api/util";
+import {onMounted, provide, reactive, ref} from 'vue'
+import {amountFix, cellStyle, headerCellStyle} from "@/api/util";
 import {findSummaryList} from "@/api/backend";
-import AmountColumn from '@/components/TablePart/CmColumn.vue'
 import TradeDateColumn from '@/components/TablePart/TradeDateColumn.vue'
-import CommonPage from '@/components/CommonPage.vue'
+import RightToolPanel from "@/components/parts/RightToolPanel.vue";
+import LeftToolPanel from "@/components/parts/LeftToolPanel.vue";
+import CSLineChart from "@/components/LineChartPart/CSLineChart.vue";
 
 const curCountTableData = reactive({});
 const curType = ref('');
@@ -23,24 +24,24 @@ function fetchCcountSummary() {
 onMounted(() => {
   fetchCcountSummary();
 })
+
 </script>
 
 <template>
-  <CommonPage ref="commonPageRef">
-    <template #queryParams>
+  <el-container>
+    <LeftToolPanel/>
+    <el-main class="flex-column">
       <el-radio-group class="radio-group" v-model="curType" size="large">
         <el-radio-button label="3" value="3"/>
         <el-radio-button label="6" value="6"/>
         <el-radio-button label="0" value="0"/>
       </el-radio-group>
-    </template>
-    <template #resTable>
+
       <el-table :data="curCountTableData.value" class="mt-2" max-height="350px"
                 :cell-style="cellStyle" stripe
                 :header-cell-style="headerCellStyle"
                 v-if="curType==='3'"
       >
-
         <el-table-column prop="c30a" label="a"/>
         <el-table-column prop="c30u" label="u"/>
         <el-table-column prop="c305u" label="5u"/>
@@ -56,7 +57,11 @@ onMounted(() => {
             <span>{{ amountFix(scope.row.threeAmount) }}</span>
           </template>
         </el-table-column>
-        <AmountColumn/>
+        <el-table-column prop="zeroAmount" label="amount">
+          <template #default="scope">
+            <span>{{ amountFix(scope.row.totalAmount) }}</span>
+          </template>
+        </el-table-column>
         <TradeDateColumn/>
       </el-table>
       <el-table :data="curCountTableData.value" class="mt-2" max-height="350px"
@@ -80,7 +85,11 @@ onMounted(() => {
             <span>{{ amountFix(scope.row.sixAmount) }}</span>
           </template>
         </el-table-column>
-        <AmountColumn/>
+        <el-table-column prop="zeroAmount" label="amount">
+          <template #default="scope">
+            <span>{{ amountFix(scope.row.totalAmount) }}</span>
+          </template>
+        </el-table-column>
         <TradeDateColumn/>
       </el-table>
       <el-table :data="curCountTableData.value" class="mt-2" max-height="350px"
@@ -103,11 +112,17 @@ onMounted(() => {
             <span>{{ amountFix(scope.row.zeroAmount) }}</span>
           </template>
         </el-table-column>
-        <AmountColumn/>
+        <el-table-column prop="zeroAmount" label="amount">
+          <template #default="scope">
+            <span>{{ amountFix(scope.row.totalAmount) }}</span>
+          </template>
+        </el-table-column>
         <TradeDateColumn/>
       </el-table>
-    </template>
-  </CommonPage>
+      <CSLineChart/>
+    </el-main>
+    <RightToolPanel/>
+  </el-container>
 </template>
 
 <style scoped>

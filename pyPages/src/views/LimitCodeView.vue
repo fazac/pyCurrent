@@ -1,7 +1,7 @@
 <script setup>
-import {onMounted, provide, reactive} from 'vue'
+import {onMounted, reactive} from 'vue'
 import ModelPage from '@/components/ModelPage.vue'
-import {nullArr} from "@/api/util";
+import {nullArr, tableData} from "@/api/util";
 import {searchSome} from "@/api/backend";
 
 const searchObj = reactive(
@@ -9,9 +9,7 @@ const searchObj = reactive(
       searchDate: null,
     }
 );
-const sLimitVOTableData = reactive({});
-
-provide("myTableData", sLimitVOTableData);
+const sLimitVOTableData = tableData();
 
 function fetchLimit() {
   searchSome("3", ...nullArr(2), searchObj.searchDate != null ? searchObj.searchDate.getTime() : null).then(res => {
@@ -34,9 +32,6 @@ onMounted(() => {
           placeholder="Last Day Or Pick A Day"
           @change="fetchLimit"
       />
-    </template>
-    <template #elseColumn>
-      <el-table-column property="extraNode.count" sortable label="count"/>
     </template>
   </ModelPage>
 </template>

@@ -1,4 +1,5 @@
 import {ElNotification} from 'element-plus'
+import {reactive, provide} from 'vue'
 
 export function amountFix(amount) {
     return parseFloat((amount / 100000000).toFixed(2));
@@ -23,6 +24,22 @@ export function minArr(arr, props) {
     return rObj;
 }
 
+function createObject(prop, sortable) {
+    return {
+        prop: prop,
+        fullProp: 'extraNode.' + prop,
+        sortable: sortable
+    };
+}
+
+export function extraTdKey(td) {
+    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0].extraNode)) {
+        return Object.entries(td.value[0].extraNode).map(entry => createObject(entry[0], typeof entry[1] === 'number')
+        )
+    }
+    return null;
+}
+
 export function nfc(title, message, type) {
     ElNotification({
         title: title,
@@ -33,6 +50,12 @@ export function nfc(title, message, type) {
 
 export function nullArr(length) {
     return Array(length).fill(null);
+}
+
+export function tableData() {
+    const tableData = reactive({});
+    provide('myTableData', tableData);
+    return tableData;
 }
 
 export function rowStyleClass(row) {
@@ -49,7 +72,11 @@ export function cellStyle(row) {
     if (row.column.label === 'mark'
         || row.column.label === 'code'
         || row.column.label === 'tsCode'
-        || row.column.label === '详情') {
+        || row.column.label === '详情'
+        || row.column.label === 'date'
+        || row.column.label === 'startDate'
+        || row.column.label === 'endDate'
+    ) {
         return {'text-align': 'center'};
     } else {
         return {'text-align': 'right'};

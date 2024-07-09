@@ -153,4 +153,9 @@ public class StockUtils {
         return List.of(maxIndex, minIndex);
     }
 
+    public static BigDecimal calRatio(BigDecimal curPri, BigDecimal doorPri) {
+        return curPri.subtract(doorPri).multiply(Constants.HUNDRED)
+                .divide(doorPri, 3, RoundingMode.HALF_UP);
+    }
+
 }

@@ -32,6 +32,10 @@ button i.el-icon {
     font-size: 20px;
 }
 
+.el-main {
+    --el-main-padding: 2px 10px!important;
+}
+
 .el-main.flex-column {
     display: flex;
     flex-direction: column;
@@ -43,7 +47,7 @@ button i.el-icon {
     flex-grow: 0;
 }
 
-.el-table-filter__content,.el-table-filter__bottom {
+.el-table-filter__content, .el-table-filter__bottom {
     display: flex;
     justify-content: center;
 }
@@ -77,6 +81,13 @@ button i.el-icon {
     margin: 0 1rem;
 }
 
+.el-popper.el-table-filter {
+    z-index: 10000 !important;
+}
+
+.el-form--inline .el-form-item{
+    margin-bottom: 1px;
+}
 
 .txtr {
     text-align: right;
@@ -96,6 +107,10 @@ button i.el-icon {
 
 .mt-1 {
     margin-top: 1rem;
+}
+
+.mt-1p {
+    margin-top: 2px;
 }
 
 .mb-2 {

@@ -1,9 +1,10 @@
 <script setup>
-import {reactive, ref} from 'vue'
+import {reactive, ref, inject} from 'vue'
 import {Search,} from '@element-plus/icons-vue'
 import {cellStyle, isEmpty, nfc, nullArr} from "@/api/util";
 import {searchSome} from "@/api/backend";
 
+const detailCode = inject('detailCode', null);
 const searchVisible = ref(false);
 const searchObj = reactive(
     {

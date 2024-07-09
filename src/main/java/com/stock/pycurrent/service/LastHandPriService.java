@@ -5,6 +5,7 @@ import com.stock.pycurrent.entity.LastHandPri;
 import com.stock.pycurrent.repo.EmDNStockRepo;
 import com.stock.pycurrent.repo.LastHandPriRepo;
 import com.stock.pycurrent.util.DateUtils;
+import com.stock.pycurrent.util.StockUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class LastHandPriService {
     public void createIntradayLHP() {
         String now = DateUtils.now();
         String maxDate = lastHandPriRepo.findMaxDate();
-        if (now.equals(maxDate)) {
+        if (now.equals(maxDate) || !StockUtils.afterPullHour()) {
             return;
         }
         List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(DateUtils.now());

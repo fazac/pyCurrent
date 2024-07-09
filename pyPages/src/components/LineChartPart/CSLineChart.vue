@@ -289,7 +289,7 @@ function createLine() {
           encode: {y: 'tu'},
           yAxisIndex: 7,
           label: {
-            show: false,
+            show: true,
             rotate: 20,
             offset: [10, 0],
           },

@@ -1,13 +1,10 @@
 <script setup>
-import {onMounted, reactive} from 'vue'
-import {cellStyle, headerCellStyle, rowStyleClass} from "@/api/util";
+import {onMounted} from 'vue'
 import {findOtherConcernList} from "@/api/backend";
-import CommonPage from "@/components/CommonPage.vue";
-import CommonTablePart from "@/components/CommonTablePart.vue";
-import {commonPageRef} from '@/api/commonpage'
-import PeColumn from '@/components/TablePart/PeColumn.vue'
+import ModelPage from "@/components/ModelPage.vue";
+import {tableData} from "@/api/util";
 
-const otherConcernTableData = reactive({});
+const otherConcernTableData = tableData();
 
 function fetchOther() {
   findOtherConcernList().then(res => {
@@ -22,31 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <CommonPage ref="commonPageRef">
-    <template #resTable>
-      <el-table
-          :data="otherConcernTableData.value" empty-text=" " max-height="500"
-          border
-          stripe
-          :row-class-name="rowStyleClass"
-          :cell-style="cellStyle"
-          :header-cell-style="headerCellStyle"
-      >
-        <el-table-column prop="mark" label="mark"/>
-        <el-table-column prop="rt" label="rt"/>
-        <el-table-column prop="h" label="h"/>
-        <el-table-column prop="cp" label="cp"/>
-        <el-table-column prop="cm" sortable label="cm"/>
-        <PeColumn/>
-        <el-table-column prop="tsCode" label="code">
-          <template #default="scope">
-            <span>{{ scope.row.tsCode.substring(0, 1).concat(scope.row.tsCode.substring(2, 6)) }}</span>
-          </template>
-        </el-table-column>
-        <CommonTablePart/>
-      </el-table>
-    </template>
-  </CommonPage>
+  <ModelPage/>
 </template>
 
 <style scoped>

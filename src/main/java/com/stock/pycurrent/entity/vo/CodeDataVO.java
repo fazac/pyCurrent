@@ -22,6 +22,8 @@ public class CodeDataVO {
     private BigDecimal pb;
     private BigDecimal cm;
     private BigDecimal currentPri;
+    private BigDecimal pch;
+    private BigDecimal hand;
     private ObjectNode extraNode;
 
 }

@@ -1,11 +1,8 @@
 <script setup>
 import {reactive} from 'vue'
-import CommonPage from '@/components/CommonPage.vue'
-import CommonTablePart from '@/components/CommonTablePart.vue'
-import PeColumn from '@/components/TablePart/PeColumn.vue'
-import {cellStyle, headerCellStyle, isEmpty, nfc, nullArr} from "@/api/util";
+import ModelPage from '@/components/ModelPage.vue'
+import {isEmpty, nfc, nullArr, tableData} from "@/api/util";
 import {searchSome} from "@/api/backend";
-import {commonPageRef} from '@/api/commonpage'
 
 const searchObj = reactive(
     {
@@ -15,8 +12,7 @@ const searchObj = reactive(
     }
 );
 
-const sLimitVOTableData = reactive({});
-
+const sLimitVOTableData = tableData();
 
 function fetchOPHC() {
   if (isEmpty(searchObj) || isEmpty(searchObj.dayCount) || (isEmpty(searchObj.pch) && isEmpty(searchObj.hand))) {
@@ -24,14 +20,14 @@ function fetchOPHC() {
     return;
   }
   searchSome("4", ...nullArr(3), searchObj.hand, searchObj.pch, searchObj.dayCount).then(res => {
-    sLimitVOTableData.value = res;
+    sLimitVOTableData.value = res.codeDataVOList;
   })
 }
 
 </script>
 
 <template>
-  <CommonPage ref="commonPageRef">
+  <ModelPage>
     <template #queryParams>
       <el-form :model="searchObj" inline>
         <el-form-item>
@@ -49,24 +45,8 @@ function fetchOPHC() {
           </el-button>
         </el-form-item>
       </el-form>
-
     </template>
-    <template #resTable>
-      <el-table :data="sLimitVOTableData.value.limitCodeVOList" class="mt-2"
-                :cell-style="cellStyle" max-height="400" stripe v-if="sLimitVOTableData.value"
-                :header-cell-style="headerCellStyle">
-        <el-table-column property="code" label="code"/>
-        <el-table-column property="hlc" sortable label="hlc"/>
-        <el-table-column property="hand" sortable label="hand"/>
-        <el-table-column property="ac" sortable label="ac"/>
-        <el-table-column property="cc" sortable label="cc"/>
-        <el-table-column property="cap" sortable label="cap"/>
-        <PeColumn/>
-        <el-table-column property="pb" sortable label="pb"/>
-        <CommonTablePart/>
-      </el-table>
-    </template>
-  </CommonPage>
+  </ModelPage>
 </template>
 
 <style scoped>

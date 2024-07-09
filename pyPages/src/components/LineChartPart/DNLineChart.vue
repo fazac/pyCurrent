@@ -1,10 +1,11 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, ref, shallowRef, watch} from 'vue';
+import {reactive, ref, shallowRef, watch, inject} from 'vue';
 import {findDataLineByCode} from '@/api/backend.js'
+import {isEmpty} from "@/api/util";
 
 
-const props = defineProps(['code'])
+const lineCode = inject('lineCode', null);
 
 const dnHisData = reactive([{}]);
 const dnPriMin = ref(0);
@@ -12,14 +13,14 @@ const dnPriMax = ref(0);
 const dnChart = reactive({});
 
 
-watch(() => props.code, async (newCode, oldCode) => {
-  if (newCode !== undefined && newCode !== null && newCode !== oldCode) {
+watch(lineCode, async () => {
+  if (!isEmpty(lineCode) && !isEmpty(lineCode.value)) {
     prepareDnHisData();
   }
 });
 
 function prepareDnHisData() {
-  findDataLineByCode(props.code).then(res => {
+  findDataLineByCode(lineCode.value).then(res => {
     dnHisData.value = res.dnData;
     dnPriMin.value = res.dnPriMin;
     dnPriMax.value = res.dnPriMax;

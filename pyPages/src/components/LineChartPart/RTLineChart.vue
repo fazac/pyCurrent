@@ -1,17 +1,18 @@
 <script setup>
 import echarts from '@/echarts';
-import {onUnmounted, reactive, shallowRef, watch} from 'vue';
+import {inject, onUnmounted, reactive, shallowRef, watch} from 'vue';
 import axios from "@/api/http.js";
+import {isEmpty} from "@/api/util";
 
-const props = defineProps(['code'])
+const lineCode = inject('lineCode', null);
 
 const rtHisData = reactive([{}]);
 const rtChart = reactive({});
 
 const sourceList = [];
 
-watch(() => props.code, async (newCode, oldCode) => {
-  if (newCode !== undefined && newCode !== null && newCode !== oldCode) {
+watch(lineCode, async () => {
+  if (!isEmpty(lineCode) && !isEmpty(lineCode.value)) {
     prepareRTHisData();
   }
 });
@@ -23,7 +24,7 @@ function prepareRTHisData() {
     })
     sourceList.length = 0;
   }
-  const source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=" + props.code + "&type=2");
+  const source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=" + lineCode.value + "&type=2");
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
       rtHisData.value = JSON.parse(event.data);

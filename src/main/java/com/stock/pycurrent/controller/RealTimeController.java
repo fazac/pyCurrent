@@ -16,6 +16,7 @@ import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.JSONUtils;
+import com.stock.pycurrent.util.StockUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.repository.query.Param;
@@ -100,7 +101,7 @@ public class RealTimeController {
     }
 
     @GetMapping("findOtherList")
-    public List<CurConcernCode> findOtherList() {
+    public List<CodeDataVO> findOtherList() {
         return curConcernCodeService.findLast("0");
     }
 
@@ -152,55 +153,76 @@ public class RealTimeController {
             }
             //ophc
             case "4" -> {
-                List<LimitCodeVO> limitCodeVOList = emDNStockService.findOPHC(count,
+                List<CodeDataVO> codeDataVOList = emDNStockService.findOPHC(count,
                         hand == null ? null : BigDecimal.valueOf(hand),
                         pch == null ? null : BigDecimal.valueOf(pch));
-                if (limitCodeVOList != null && !limitCodeVOList.isEmpty()) {
-                    limitCodeVOList.forEach(x -> convertLimitVO(x.getCode(), x));
-                }
-                objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
+                objectNode.putPOJO("codeDataVOList", codeDataVOList);
             }
             //roc
             case "5" -> {
-                List<LimitCodeVO> limitCodeVOList = rocModelService.findRocByLimit(
+                List<CodeDataVO> codeDataVOList = rocModelService.findRocByLimit(
                         r2HighLimit == null ? null : BigDecimal.valueOf(r2HighLimit).negate(),
                         r2LowLimit == null ? null : BigDecimal.valueOf(r2LowLimit).negate(),
                         r1LowLimit == null ? null : BigDecimal.valueOf(r1LowLimit),
                         r1HighLimit == null ? null : BigDecimal.valueOf(r1HighLimit)
                 );
-                if (limitCodeVOList != null && !limitCodeVOList.isEmpty()) {
-                    convertROCLimitVO(limitCodeVOList);
-                    limitCodeVOList = limitCodeVOList.stream().filter(x -> x.getCap() != null).toList();
-                }
-                log.warn("5: " + new Date().getTime());
-                objectNode.putPOJO("limitCodeVOList", limitCodeVOList);
+                objectNode.putPOJO("codeDataVOList", codeDataVOList);
             }
         }
         return objectNode;
     }
 
     @GetMapping("findLast")
-    public List<OpenVO> findLast() {
-        return ArrayUtils.convertOpenVO(emRealTimeStockService.findLastHundred());
+    public List<CodeDataVO> findLast() {
+        return convertCodeDataVO(emRealTimeStockService.findLastHundred());
     }
 
     @GetMapping("findCptr")
-    public List<OpenVO> findCptr(@RequestParam(value = "symbol") String symbol) {
-        return ArrayUtils.convertOpenVO(emRealTimeStockService.findCptr(symbol));
+    public List<CodeDataVO> findCptr(@RequestParam(value = "symbol") String symbol) {
+        return convertCodeDataVO(emRealTimeStockService.findCptr(symbol));
     }
 
     private CodeDataVO convertCodeDataVO(@RequestParam(value = "code", required = false) String code) {
         CodeDataVO vo = new CodeDataVO();
         vo.setCode(code);
-        EmRealTimeStock emRealTimeStock = emRealTimeStockService.findLastOneByCode(code);
-        if (emRealTimeStock != null) {
-            vo.setLabels(PrepareData.findLabelStr(code));
-            vo.setPe(emRealTimeStock.getPe());
-            vo.setPb(emRealTimeStock.getPb());
-            vo.setCm(emRealTimeStock.getCirculationMarketCap());
-            vo.setCurrentPri(emRealTimeStock.getCurrentPri());
-        }
+        emRealTimeStockService.fillCodeData(vo);
         return vo;
+    }
+
+    private List<CodeDataVO> convertCodeDataVO(List<EmRealTimeStock> emRealTimeStockList) {
+        if (emRealTimeStockList != null && !emRealTimeStockList.isEmpty()) {
+            List<CodeDataVO> res = new ArrayList<>();
+            for (EmRealTimeStock emRealTimeStock : emRealTimeStockList) {
+                CodeDataVO codeDataVO = new CodeDataVO();
+                codeDataVO.setCode(emRealTimeStock.getTsCode());
+                codeDataVO.setCurrentPri(emRealTimeStock.getCurrentPri());
+                ObjectNode extraNode = JSONUtils.getNode();
+                extraNode.put("pch", emRealTimeStock.getPctChg());
+                extraNode.put("hand", emRealTimeStock.getChangeHand());
+                codeDataVO.setPe(emRealTimeStock.getPe());
+                codeDataVO.setPb(emRealTimeStock.getPb());
+                codeDataVO.setCm(emRealTimeStock.getCirculationMarketCap());
+                if (emRealTimeStock.getPriClosePre() != null && emRealTimeStock.getPriOpen() != null) {
+                    extraNode.put("open", StockUtils.calRatio(emRealTimeStock.getPriOpen(), emRealTimeStock.getPriClosePre()));
+                    extraNode.put("low", StockUtils.calRatio(emRealTimeStock.getPriLow(), emRealTimeStock.getPriClosePre()));
+                    extraNode.put("high", StockUtils.calRatio(emRealTimeStock.getPriHigh(), emRealTimeStock.getPriClosePre()));
+                } else {
+                    extraNode.put("open", emRealTimeStock.getPriOpen());
+                    extraNode.put("low", emRealTimeStock.getPriLow());
+                    extraNode.put("high", emRealTimeStock.getPriHigh());
+                }
+                if (emRealTimeStock.getAmount() != null) {
+                    extraNode.put("avgPri", emRealTimeStock.getAmount()
+                            .divide(BigDecimal.valueOf(emRealTimeStock.getVol()).multiply(Constants.HUNDRED), 3, RoundingMode.HALF_UP));
+                }
+                extraNode.put("priPre", emRealTimeStock.getPriClosePre());
+                codeDataVO.setLabels(PrepareData.findLabelStr(emRealTimeStock.getTsCode()));
+                codeDataVO.setExtraNode(extraNode);
+                res.add(codeDataVO);
+            }
+            return res;
+        }
+        return Collections.emptyList();
     }
 
     private void convertLimitVO(@RequestParam(value = "code", required = false) String code, LimitCodeVO limitCodeVO) {

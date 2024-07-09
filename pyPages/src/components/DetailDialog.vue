@@ -1,7 +1,7 @@
 <script setup>
 import {findDataByCode} from "@/api/backend";
 import {inject, reactive, ref, watch} from 'vue'
-import {cellStyle, isEmpty} from "@/api/util";
+import {cellStyle, headerCellStyle, isEmpty} from "@/api/util";
 
 const dialogTableVisible = ref(false);
 const codeTableData = reactive({});
@@ -28,7 +28,7 @@ watch(detailCode, async () => {
 
 <template>
   <el-dialog v-model="dialogTableVisible" title="DETAIL" :show-close="false" draggable destroy-on-close
-             width="1000" :before-close="resetCode">
+             width="1000" :before-close="resetCode" :z-index="9999">
     <el-radio-group class="radio-group" v-model="dialogType" size="large">
       <el-radio-button label="open" value="open"/>
       <el-radio-button label="dn" value="dn"/>
@@ -39,7 +39,7 @@ watch(detailCode, async () => {
 
     <el-table :data="codeTableData.value.open" class="mt-2" v-if="dialogType==='open'"
               :cell-style="cellStyle"
-              :header-cell-style="cellStyle">
+              :header-cell-style="headerCellStyle">
       <el-table-column property="pct_chg" label="pch"/>
       <el-table-column property="change_hand" label="hand"/>
       <el-table-column property="pe" label="pe"/>
@@ -55,7 +55,7 @@ watch(detailCode, async () => {
 
     <el-table :data="codeTableData.value.dnDetail" class="mt-2" max-height="400px" stripe v-if="dialogType==='dn'"
               :cell-style="cellStyle"
-              :header-cell-style="cellStyle">
+              :header-cell-style="headerCellStyle">
       <el-table-column prop="tradeDate" sortable label="date"/>
       <el-table-column prop="pctChg" label="pch"/>
       <el-table-column prop="changeHand" label="hand"/>
@@ -80,7 +80,7 @@ watch(detailCode, async () => {
 
     <el-table :data="codeTableData.value.roc" class="mt-2" max-height="400px" stripe v-if="dialogType==='roc'"
               :cell-style="cellStyle"
-              :header-cell-style="cellStyle">
+              :header-cell-style="headerCellStyle">
       <el-table-column property="startDate" label="startDate"/>
       <el-table-column property="endDate" label="endDate"/>
       <el-table-column property="count" label="count"/>
@@ -91,7 +91,7 @@ watch(detailCode, async () => {
 
     <el-table :data="codeTableData.value.current" class="mt-2" max-height="400px" stripe v-if="dialogType==='current'"
               :cell-style="cellStyle"
-              :header-cell-style="cellStyle">
+              :header-cell-style="headerCellStyle">
       <el-table-column property="di" label="di"/>
       <el-table-column property="rt" label="rt"/>
       <el-table-column property="h" label="h"/>

@@ -1,12 +1,9 @@
 <script setup>
 
 import {reactive} from 'vue'
-import CommonPage from '@/components/CommonPage.vue'
-import CommonTablePart from '@/components/CommonTablePart.vue'
-import PeColumn from '@/components/TablePart/PeColumn.vue'
-import {cellStyle, headerCellStyle, isEmpty, nfc, nullArr} from "@/api/util";
+import ModelPage from '@/components/ModelPage.vue'
+import {isEmpty, nfc, nullArr, tableData} from "@/api/util";
 import {searchSome} from "@/api/backend";
-import {commonPageRef} from '@/api/commonpage'
 
 const searchObj = reactive(
     {
@@ -17,7 +14,7 @@ const searchObj = reactive(
     }
 );
 
-const sLimitVOTableData = reactive({});
+const sLimitVOTableData = tableData();
 
 function fetchRoc() {
   if (isEmpty(searchObj.r2LowLimit)
@@ -30,15 +27,25 @@ function fetchRoc() {
   }
   searchSome("5", ...nullArr(6), searchObj.r2LowLimit, searchObj.r2HighLimit, searchObj.r1LowLimit, searchObj.r1HighLimit)
       .then(res => {
-        sLimitVOTableData.value = res;
+        sLimitVOTableData.value = res.codeDataVOList;
       }).catch(e => {
     nfc('result error', e, 'error')
   })
 }
+
+const filterHandler = (
+    value,
+    row,
+    column
+) => {
+  return value > 0 ? !isEmpty(row.extraNode.r2) : isEmpty(row.extraNode.r2);
+}
+
+
 </script>
 
 <template>
-  <CommonPage ref="commonPageRef">
+  <ModelPage>
     <template #queryParams>
       <el-form :model="searchObj" inline>
         <el-form-item>
@@ -60,19 +67,13 @@ function fetchRoc() {
         </el-form-item>
       </el-form>
     </template>
-    <template #resTable>
-      <el-table :data="sLimitVOTableData.value.limitCodeVOList" class="mt-2"
-                :cell-style="cellStyle" max-height="400" stripe v-if="sLimitVOTableData.value"
-                :header-cell-style="headerCellStyle">
-        <el-table-column property="code" label="code"/>
-        <el-table-column property="r1" sortable label="last1"/>
-        <el-table-column property="r2" sortable label="last2"/>
-        <el-table-column property="cap" sortable label="cap"/>
-        <PeColumn/>
-        <el-table-column property="pb" sortable label="pb"/>
-        <CommonTablePart/>
-      </el-table>
+    <template #elseColumn>
+      <el-table-column property="extraNode.r1" sortable label="r1"/>
+      <el-table-column property="extraNode.r2" :filter-multiple="false" sortable :filters="[
+        { text: '有', value: '1' },
+        { text: '无', value: '-1' },
+      ]" :filter-method="filterHandler" filter-placement="bottom-end" label="r2"/>
     </template>
-  </CommonPage>
+  </ModelPage>
 </template>
 
