@@ -27,6 +27,6 @@ public class LastHandPriController {
 
     @PostMapping("createPastRecord")
     public void createPastRecord() {
-        lastHandPriService.createPastRecord();
+        lastHandPriService.createRecode();
     }
 }

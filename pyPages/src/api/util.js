@@ -10,12 +10,8 @@ export function tradeDateDecorate(date) {
 }
 
 export function minArr(arr, excludeKeys) {
-    let rObj = {start: '', min: null, max: null};
-    if (arr.length < 30) {
-        rObj.start = arr[0].tradeDate;
-    } else {
-        rObj.start = arr[29].tradeDate;
-    }
+    let rObj = {min: null, max: null};
+
     let min = Infinity;
     let max = -Infinity;
     arr.reduce(function (pre, cur, index) {

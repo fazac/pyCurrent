@@ -511,3 +511,6 @@ create table `last_hand_pri`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
   ROW_FORMAT = DYNAMIC;
+
+-- 20240709
+alter table last_hand_pri drop column `current_pri`;

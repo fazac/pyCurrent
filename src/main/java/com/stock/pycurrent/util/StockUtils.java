@@ -39,7 +39,7 @@ public class StockUtils {
         String endDate = DateUtils.now();
         LocalDateTime now = LocalDateTime.now();
         if (now.getDayOfWeek().equals(DayOfWeek.SATURDAY)
-            || now.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+                || now.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
             endDate = DateUtils.getFriday(now);
             return endDate;
         } else {
@@ -58,19 +58,19 @@ public class StockUtils {
 
     public static boolean afterPullHour() {
         return LocalDateTime.now().getHour() == 15
-               && LocalDateTime.now().getMinute() >= 30
-               || LocalDateTime.now().getHour() > 15;
+                && LocalDateTime.now().getMinute() >= 30
+                || LocalDateTime.now().getHour() > 15;
     }
 
     @SuppressWarnings("unused")
     public static boolean inStartTimePeriod() {
         return LocalDateTime.now().getHour() <= 15
-               && LocalDateTime.now().getMinute() <= 40;
+                && LocalDateTime.now().getMinute() <= 40;
     }
 
     public static boolean isNotRest() {
         return LocalDateTime.now().getDayOfWeek() != DayOfWeek.SATURDAY
-               && LocalDateTime.now().getDayOfWeek() != DayOfWeek.SUNDAY;
+                && LocalDateTime.now().getDayOfWeek() != DayOfWeek.SUNDAY;
     }
 
     public static boolean checkEmpty(String str) {
@@ -156,6 +156,10 @@ public class StockUtils {
     public static BigDecimal calRatio(BigDecimal curPri, BigDecimal doorPri) {
         return curPri.subtract(doorPri).multiply(Constants.HUNDRED)
                 .divide(doorPri, 3, RoundingMode.HALF_UP);
+    }
+
+    public static BigDecimal calVPrice(BigDecimal h1, BigDecimal h2, BigDecimal p1, BigDecimal p2, BigDecimal h) {
+        return p2.subtract(p1).multiply(h.subtract(h1)).divide(h2.subtract(h1), 3, RoundingMode.HALF_UP).add(p1);
     }
 
 }

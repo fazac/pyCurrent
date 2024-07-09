@@ -28,9 +28,6 @@ public class LastHandPri {
     @Id
     private String tsCode;
 
-    @Column(name = "current_pri", precision = 18, scale = 2)
-    private BigDecimal currentPri;
-
     @Column(name = "last_five_pri", precision = 18, scale = 2)
     private BigDecimal lastFivePri;
 
@@ -59,7 +56,7 @@ public class LastHandPri {
         if (thisEffectiveClass != oEffectiveClass) return false;
         LastHandPri that = (LastHandPri) o;
         return getTradeDate() != null && Objects.equals(getTradeDate(), that.getTradeDate())
-               && getTsCode() != null && Objects.equals(getTsCode(), that.getTsCode());
+                && getTsCode() != null && Objects.equals(getTsCode(), that.getTsCode());
     }
 
     @Override

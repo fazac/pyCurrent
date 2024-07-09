@@ -31,6 +31,9 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
     @Query(value = "select * from em_d_n_stock where trade_date=:tradeDate", nativeQuery = true)
     List<EmDNStock> findCurrent(@Param("tradeDate") String tradeDate);
 
+    @Query(value = "select * from em_d_n_stock where trade_date >=:tradeDate and ts_code = :tsCode", nativeQuery = true)
+    List<EmDNStock> findOverDate(@Param("tradeDate") String tradeDate, @Param("tsCode") String tsCode);
+
     @Query(value = "select * from em_d_n_stock where ts_code = :tsCode and trade_date <:tradeDate order by trade_date desc limit 1"
             , nativeQuery = true)
     EmDNStock findLeftOne(@Param("tsCode") String tsCode, @Param("tradeDate") String tradeDate);
@@ -119,6 +122,18 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
     List<Object[]> findLastHandPri(@Param("code") String code, @Param("tradeDate") String tradeDate);
 
 
-    @Query(value = "select distinct trade_date from em_d_n_stock where trade_date > '20240101' order by  trade_date  ", nativeQuery = true)
+    @Query(value = "select distinct trade_date from em_d_n_stock where trade_date > '20240101' and trade_date < '20240708' order by  trade_date  ", nativeQuery = true)
     List<String> findIntraYearDate();
+
+    @Query(value = """
+                select max(trade_date)
+                    from (select trade_date,
+                                 sum(change_hand) over (order by trade_date desc) as sh
+                          from em_d_n_stock
+                          where ts_code = :code
+                            and trade_date <= '20240101'
+                          order by trade_date desc) t
+                    where t.sh > 100;
+            """, nativeQuery = true)
+    String findMinTradeDate(@Param("code") String code);
 }
