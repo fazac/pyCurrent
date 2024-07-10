@@ -6,12 +6,14 @@ import Search from './functionButton/Search.vue'
 import ToggleDark from './functionButton/ToggleDark.vue'
 import ToggleLineType from './functionButton/ToggleLineType.vue'
 import UpdateConstants from './functionButton/UpdateConstants.vue'
+import ToggleCodeDisplay from './functionButton/ToggleCodeDisplay.vue'
 </script>
 
 <template>
   <el-aside width="60px">
     <ToggleDark/>
     <ToggleLineType/>
+    <ToggleCodeDisplay/>
     <ReloadPage/>
     <UpdateConstants/>
     <CurCount/>

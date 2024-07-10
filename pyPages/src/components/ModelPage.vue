@@ -10,10 +10,12 @@ import MITable from "@/components/MITable.vue";
 const lineCode = ref('');
 const lineType = ref('dn');
 const detailCode = ref('');
+const codeDisplay = ref(true);
 
 provide('lineCode', lineCode);
 provide('lineType', lineType);
 provide('detailCode', detailCode);
+provide('codeDisplay', codeDisplay);
 const elseColumn = !!useSlots().elseColumn;
 
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import {inject, useSlots} from 'vue';
+import {inject, useSlots, watch} from 'vue';
 import {cellStyle, extraTdKey, headerCellStyle, rowStyleClass} from "@/api/util";
 import LabelColumn from "@/components/TablePart/LabelColumn.vue";
 import OperateButton from "@/components/TablePart/OperateButton.vue";
@@ -10,8 +10,12 @@ const props = defineProps(['elseColumn'])
 
 const myTableData = inject('myTableData', null);
 const myTableHeight = inject('myTableHeight', 400);
+const codeDisplay = inject('codeDisplay', true);
 const slotColumn = !!useSlots().columnSlot && props.elseColumn;
 
+watch(codeDisplay, () => {
+  console.log(codeDisplay.value)
+})
 </script>
 
 <template>
@@ -39,8 +43,13 @@ const slotColumn = !!useSlots().columnSlot && props.elseColumn;
     <CmColumn/>
     <PeColumn/>
     <el-table-column property="pb" sortable label="pb"/>
-    <el-table-column property="code" label="code"/>
-    <LabelColumn/>
+    <el-table-column property="code" label="code" v-if="codeDisplay">
+      <template #default="scope">
+        <span>{{ scope.row.code.substring(0, 1).concat(scope.row.code.substring(2, 6)) }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column property="code" label="code" v-if="!codeDisplay"/>
+    <LabelColumn v-if="!codeDisplay"/>
     <OperateButton/>
   </el-table>
 </template>
