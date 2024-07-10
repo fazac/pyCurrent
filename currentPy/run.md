@@ -13,6 +13,7 @@ pyinstaller --collect-all tzdata  -F .\akshare_stock_realtime.py --add-data "C:\
 ## 3. ~~nssm install service~~
 
 ```angular2html
+in admin powerShell
 ./nssm.exe install serviceName
 ./nssm.exe start serviceName
 ./nssm.exe stop serviceName
@@ -22,8 +23,11 @@ pyinstaller --collect-all tzdata  -F .\akshare_stock_realtime.py --add-data "C:\
 
 ## 4. winsw  install service
 ```angular2html
+in admin powerShell
 .\WinSW-x64.exe install xx.xml
 .\WinSW-x64.exe uninstall xx.xml
 .\WinSW-x64.exe start xx.xml
+.\WinSW-x64.exe stop xx.xml
+.\WinSW-x64.exe restart xx.xml
 .\WinSW-x64.exe status xx.xml
 ```
