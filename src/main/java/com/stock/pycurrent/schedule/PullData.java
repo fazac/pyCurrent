@@ -429,7 +429,7 @@ public class PullData implements CommandLineRunner {
         Integer[] countArray = Stream.generate(() -> 0).limit(30).toArray(Integer[]::new);
         for (EmRealTimeStock em : stockList) {
             if (em.getPctChg() != null) {
-                if (em.getTsCode().startsWith("00")) {
+                if (em.getTsCode().startsWith("0")) {
                     countArray[0]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[1]++;
@@ -451,7 +451,7 @@ public class PullData implements CommandLineRunner {
                     } else {
                         countArray[3]++;
                     }
-                } else if (em.getTsCode().startsWith("30")) {
+                } else if (em.getTsCode().startsWith("3")) {
                     countArray[10]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[11]++;
@@ -473,7 +473,7 @@ public class PullData implements CommandLineRunner {
                     } else {
                         countArray[13]++;
                     }
-                } else if (em.getTsCode().startsWith("60")) {
+                } else if (em.getTsCode().startsWith("6")) {
                     countArray[20]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[21]++;
