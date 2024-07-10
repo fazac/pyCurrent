@@ -1,12 +1,17 @@
 import {ElNotification} from 'element-plus'
 import {reactive, provide} from 'vue'
 
+
 export function amountFix(amount) {
     return parseFloat((amount / 100000000).toFixed(2));
 }
 
 export function tradeDateDecorate(date) {
-    return date.substring(4, 10).replaceAll('-', '');
+    if (date.indexOf('-') > 0) {
+        return date.substring(6, 10).replaceAll('-', '');
+    } else {
+        return date.substring(5, 10).replaceAll('-', '');
+    }
 }
 
 export function minArr(arr, excludeKeys) {

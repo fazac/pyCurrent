@@ -1,16 +1,52 @@
 <script setup>
 import echarts from "@/echarts";
-import {inject, ref, reactive, shallowRef, watch} from 'vue';
+import {inject, ref, reactive, shallowRef, watch, computed} from 'vue';
 import {isEmpty, tradeDateDecorate, amountFix} from "@/api/util";
+import {useStore} from 'vuex'
 
-const ldata = inject('ldata', null)
+const store = useStore();
+const ldata = inject('ldata', null);
+const isDark = computed(() => store.state.isDark);
 const chart = reactive({});
 const lhdata = reactive({});
-const leftMin = 0;
-const leftMax = 2500;
-const rightMin = 0;
-const rightMax = 15000;
+
 const start = ref('');
+const textColor = ref('');
+updateTextColor();
+
+watch(isDark, () => {
+  updateTextColor();
+  createLineChart();
+})
+watch(ldata, () => {
+  createLineChart();
+})
+
+function updateTextColor() {
+  textColor.value = isDark.value ? '#e4e7ed' : '#303133';
+}
+
+function createLineChart() {
+  if (isEmpty(ldata) || isEmpty(ldata.value)) {
+    console.log('no data')
+    return;
+  }
+  lhdata.value = JSON.stringify(JSON.toString(ldata.value));
+  let tmpArr = ldata.value.map(obj => {
+    return {
+      ...obj,
+      tradeDate: tradeDateDecorate(obj.tradeDate),
+      totalAmount: amountFix(obj.totalAmount),
+      zeroAmount: amountFix(obj.zeroAmount),
+      threeAmount: amountFix(obj.threeAmount),
+      sixAmount: amountFix(obj.sixAmount),
+      tu: obj.c00u + obj.c30u + obj.c60u
+    };
+  });
+  start.value = tmpArr[29].tradeDate;
+  lhdata.value = tmpArr.reverse();
+  createLine();
+}
 
 function createLine() {
   setTimeout(() => {
@@ -42,6 +78,9 @@ function createLine() {
         right: '10',
         bottom: '20',
         orient: 'vertical',
+        textStyle: {
+          color: textColor.value,
+        },
       },
       dataZoom: [{
         show: true,
@@ -49,41 +88,56 @@ function createLine() {
       }],
       xAxis: {
         type: 'category',
+        axisLabel: {
+          interval: 0, // 强制显示所有标签
+          // formatter: function (value){return value.split('').join('\n')},
+        },
       },
       yAxis: [
         {
           type: 'value',
           position: 'left',
           scale: true,
-          show: false,
-          min: leftMin,
-          max: leftMax,
+          show: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
             }
-          }
+          },
+          alignTicks: true,
         },
         {
           type: 'value',
           position: 'left',
           scale: true,
           show: false,
-          min: leftMin,
-          max: leftMax,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
             }
-          }
+          },
+          alignTicks: true,
         },
         {
           type: 'value',
           position: 'left',
           scale: true,
           show: false,
-          min: leftMin,
-          max: leftMax,
+          splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          },
+          alignTicks: true,
+        },
+        {
+          type: 'value',
+          position: 'right',
+          scale: true,
+          show: false,
+          min:3000,
+          max:15000,
+          alignTicks: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -94,8 +148,8 @@ function createLine() {
           type: 'value',
           position: 'right',
           scale: true,
-          min: rightMin,
-          max: rightMax,
+          show: false,
+          alignTicks: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -106,8 +160,8 @@ function createLine() {
           type: 'value',
           position: 'right',
           scale: true,
-          min: rightMin,
-          max: rightMax,
+          show: false,
+          alignTicks: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -117,38 +171,26 @@ function createLine() {
         {
           type: 'value',
           position: 'right',
+          show: false,
           scale: true,
-          min: rightMin,
-          max: rightMax,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
             }
-          }
-        },
-        {
-          type: 'value',
-          position: 'right',
-          scale: true,
-          min: rightMin,
-          max: rightMax,
-          splitLine: {
-            lineStyle: {
-              opacity: 0.1,
-            }
-          }
+          },
+          alignTicks: true,
         },
         {
           type: 'value',
           position: 'left',
+          show: false,
           scale: true,
-          min: leftMin,
-          max: 6000,
+          alignTicks: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
             }
-          }
+          },
         },
       ],
       series: [
@@ -163,6 +205,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -179,6 +222,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -195,6 +239,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -205,13 +250,23 @@ function createLine() {
           name: 'ta',
           encode: {y: 'totalAmount'},
           label: {
-            show: false,
-            rotate: 45,
+            show: true,
+            color: '#ff00ff',
+            position: 'bottom',
+            fontWeight: '600',
+            // rotate: -90,
+            // 确保标签在纵向上正确对齐
+            // verticalAlign: 'middle',
+            // align: 'left',
+            formatter: function (value) {
+              return value.data[value.dimensionNames[value.seriesIndex + 1]].toString().replace('.', '·').split('').join('\n')
+            },
           },
           yAxisIndex: 3,
           emphasis: {
             focus: 'self',
             label: {
+              color: '#ff00ff',
               show: true,
               opacity: 1,
             },
@@ -219,7 +274,6 @@ function createLine() {
         },
         {
           type: 'bar',
-          stack: 'x',
           name: '0a',
           encode: {y: 'zeroAmount'},
           label: {
@@ -232,6 +286,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
               rotate: 45,
@@ -241,7 +296,6 @@ function createLine() {
         },
         {
           type: 'bar',
-          stack: 'x',
           name: '3a',
           encode: {y: 'threeAmount'},
           label: {
@@ -254,6 +308,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
               rotate: 45,
@@ -263,7 +318,6 @@ function createLine() {
         },
         {
           type: 'bar',
-          stack: 'x',
           name: '6a',
           encode: {y: 'sixAmount'},
           label: {
@@ -276,6 +330,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
               rotate: 45,
@@ -289,6 +344,7 @@ function createLine() {
           encode: {y: 'tu'},
           yAxisIndex: 7,
           label: {
+            color: textColor.value,
             show: true,
             rotate: 20,
             offset: [10, 0],
@@ -296,6 +352,7 @@ function createLine() {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -308,28 +365,6 @@ function createLine() {
 }
 
 
-watch(ldata, () => {
-  if (isEmpty(ldata) || isEmpty(ldata.value)) {
-    console.log('no data')
-    return;
-  }
-  lhdata.value = JSON.stringify(JSON.toString(ldata.value));
-  let tmpArr = ldata.value.map(obj => {
-    return {
-      ...obj,
-      tradeDate: tradeDateDecorate(obj.tradeDate),
-      totalAmount: amountFix(obj.totalAmount),
-      zeroAmount: amountFix(obj.zeroAmount),
-      threeAmount: amountFix(obj.threeAmount),
-      sixAmount: amountFix(obj.sixAmount),
-      tu: obj.c00u + obj.c30u + obj.c60u
-    };
-  });
-  start.value = tmpArr[29].tradeDate;
-  console.log(start.value)
-  lhdata.value = tmpArr.reverse();
-  createLine();
-})
 </script>
 
 <template>

@@ -1,9 +1,24 @@
 <script setup>
 import {SwitchButton,} from '@element-plus/icons-vue'
 import {useDark, useToggle} from '@vueuse/core'
+import {watch} from 'vue';
+import {useStore} from 'vuex'
+
+const store = useStore();
+
 
 const isDark = useDark()
-const toggleDark = useToggle(isDark)
+updateStoreDark();
+const toggleDark = useToggle(isDark);
+
+watch(isDark, () => {
+  updateStoreDark();
+})
+
+function updateStoreDark() {
+  store.commit('updateIsDark', isDark);
+}
+
 </script>
 
 <template>

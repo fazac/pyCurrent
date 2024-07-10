@@ -1,13 +1,34 @@
 <script setup>
-import {inject, reactive, shallowRef, watch} from 'vue'
+import {inject, reactive, shallowRef, watch, computed, ref} from 'vue'
 import {findLHPByCode} from '@/api/backend'
 import {isEmpty, minArr, tradeDateDecorate} from "@/api/util";
 import echarts from "@/echarts";
+import {useStore} from 'vuex'
+
+
+const store = useStore();
+const isDark = computed(() => store.state.isDark);
+const textColor = ref('');
+updateTextColor();
 
 const lineCode = inject('lineCode', null)
 const chart = reactive({});
 
 watch(lineCode, () => {
+  createLineChart();
+})
+
+watch(isDark, () => {
+  updateTextColor();
+  createLineChart();
+})
+
+function updateTextColor() {
+  textColor.value = isDark.value ? '#e4e7ed' : '#303133';
+}
+
+
+function createLineChart() {
   if (isEmpty(lineCode)) {
     return
   }
@@ -31,7 +52,8 @@ watch(lineCode, () => {
       createLine(tmpArr, arrProps);
     }
   })
-})
+}
+
 
 function createLine(res, arrProps) {
   setTimeout(() => {
@@ -61,6 +83,9 @@ function createLine(res, arrProps) {
         right: '10',
         bottom: '20',
         orient: 'vertical',
+        textStyle: {
+          color: textColor.value,
+        },
       },
       dataZoom: [{
         show: true,
@@ -74,12 +99,12 @@ function createLine(res, arrProps) {
           type: 'value',
           position: 'left',
           scale: true,
-          show: false,
+          show: true,
           min: arrProps.min,
           max: arrProps.max,
           splitLine: {
             lineStyle: {
-              opacity: 0.1,
+              opacity: 0.9,
             }
           }
         },
@@ -161,6 +186,7 @@ function createLine(res, arrProps) {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -177,6 +203,7 @@ function createLine(res, arrProps) {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -193,6 +220,7 @@ function createLine(res, arrProps) {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -209,6 +237,7 @@ function createLine(res, arrProps) {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -225,6 +254,7 @@ function createLine(res, arrProps) {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
@@ -241,6 +271,7 @@ function createLine(res, arrProps) {
           emphasis: {
             focus: 'self',
             label: {
+              color: textColor.value,
               show: true,
               opacity: 1,
             },
