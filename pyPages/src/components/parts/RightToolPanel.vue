@@ -7,6 +7,7 @@ import ToggleDark from './functionButton/ToggleDark.vue'
 import ToggleLineType from './functionButton/ToggleLineType.vue'
 import UpdateConstants from './functionButton/UpdateConstants.vue'
 import ToggleCodeDisplay from './functionButton/ToggleCodeDisplay.vue'
+import BackendMessage from './functionButton/BackendMessage.vue'
 </script>
 
 <template>
@@ -19,6 +20,7 @@ import ToggleCodeDisplay from './functionButton/ToggleCodeDisplay.vue'
     <CurCount/>
     <OtherConcern/>
     <Search/>
+    <BackendMessage/>
   </el-aside>
 </template>
 

@@ -104,7 +104,6 @@ function createLine() {
               opacity: 0.1,
             }
           },
-          alignTicks: true,
         },
         {
           type: 'value',
@@ -116,7 +115,6 @@ function createLine() {
               opacity: 0.1,
             }
           },
-          alignTicks: true,
         },
         {
           type: 'value',
@@ -128,7 +126,6 @@ function createLine() {
               opacity: 0.1,
             }
           },
-          alignTicks: true,
         },
         {
           type: 'value',
@@ -137,7 +134,6 @@ function createLine() {
           show: false,
           min:3000,
           max:15000,
-          alignTicks: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -149,7 +145,8 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          alignTicks: true,
+          min:1000,
+          max: 7000,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -161,7 +158,8 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          alignTicks: true,
+          min:1000,
+          max: 7000,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -173,19 +171,19 @@ function createLine() {
           position: 'right',
           show: false,
           scale: true,
+          min:1000,
+          max: 7000,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
             }
           },
-          alignTicks: true,
         },
         {
           type: 'value',
           position: 'left',
           show: false,
           scale: true,
-          alignTicks: true,
           splitLine: {
             lineStyle: {
               opacity: 0.1,

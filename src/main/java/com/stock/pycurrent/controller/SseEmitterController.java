@@ -9,6 +9,7 @@ import com.stock.pycurrent.service.EmRealTimeStockService;
 import com.stock.pycurrent.service.RealBarService;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.ExecutorUtils;
+import com.stock.pycurrent.util.MessageUtil;
 import com.stock.pycurrent.util.MySseEmitterUtil;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,10 @@ public class SseEmitterController {
     @Resource
     private CurConcernCodeService curConcernCodeService;
 
+    @GetMapping("testMsg")
+    public void testMsg() {
+        MessageUtil.sendNotificationMsg("hello", "new One");
+    }
 
     @GetMapping("/createSSEConnect")
     @RequestLimit(key = "limit0",

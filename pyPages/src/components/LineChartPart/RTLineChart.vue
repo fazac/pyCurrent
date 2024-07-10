@@ -1,8 +1,7 @@
 <script setup>
 import echarts from '@/echarts';
 import {inject, onUnmounted, reactive, shallowRef, watch} from 'vue';
-import axios from "@/api/http.js";
-import {isEmpty} from "@/api/util";
+import {isEmpty, baseUrl} from "@/api/util";
 
 const lineCode = inject('lineCode', null);
 
@@ -24,7 +23,7 @@ function prepareRTHisData() {
     })
     sourceList.length = 0;
   }
-  const source = new EventSource(axios.defaults.baseURL + "/sse/createSSEConnect?clientId=" + lineCode.value + "&type=2");
+  const source = new EventSource(baseUrl + "/sse/createSSEConnect?clientId=" + lineCode.value + "&type=2");
   source.onmessage = function (event) {
     if (event.lastEventId !== 'sse_client_id') {
       rtHisData.value = JSON.parse(event.data);
