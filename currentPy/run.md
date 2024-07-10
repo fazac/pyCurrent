@@ -6,6 +6,24 @@ pip install -r .\requirements.txt
 
 ## 2. pack exe
 
-pyinstaller -F .\akshare_stock_realtime.py --add-data "C:\Users\fa\PycharmProjects\currentPy\.venv\Lib\site-packages\py_mini_racer\mini_racer.dll;." --add-data "C:\Users\fa\PycharmProjects\currentPy\.venv\Lib\site-packages\akshare\file_fold\calendar.json;akshare\file_fold\" --add-data "C:\Users\fa\PycharmProjects\currentPy\.venv\Lib\site-packages\akshare\data\ths.js;akshare\data\"
+```angular2html
+pyinstaller --collect-all tzdata  -F .\akshare_stock_realtime.py --add-data "C:\Users\fa\PycharmProjects\currentPy\venv\Lib\site-packages\py_mini_racer\mini_racer.dll;." --add-data "C:\Users\fa\PycharmProjects\currentPy\venv\Lib\site-packages\akshare\file_fold\calendar.json;akshare\file_fold\" --add-data "C:\Users\fa\PycharmProjects\currentPy\venv\Lib\site-packages\akshare\data\ths.js;akshare\data\"
+```
 
-## 3. nssm install service
+## 3. ~~nssm install service~~
+
+```angular2html
+./nssm.exe install serviceName
+./nssm.exe start serviceName
+./nssm.exe stop serviceName
+./nssm.exe restart serviceName
+./nssm.exe remove serviceName
+```
+
+## 4. winsw  install service
+```angular2html
+.\WinSW-x64.exe install xx.xml
+.\WinSW-x64.exe uninstall xx.xml
+.\WinSW-x64.exe start xx.xml
+.\WinSW-x64.exe status xx.xml
+```
