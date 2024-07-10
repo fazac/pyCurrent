@@ -1,8 +1,9 @@
 import axios from "axios";
+import moment from 'moment'
 import {showFullScreenLoading, tryHideFullScreenLoading} from "@/api/axiosLoading";
 
 // const BASE_API = "http://70.34.202.145:7001"; //frp
-  const BASE_API = "http://10.243.161.168:19093"; // zerotier
+const BASE_API = "http://10.243.161.168:19093"; // zerotier
 // const BASE_API = "http://localhost:19093";
 
 const service = axios.create({
@@ -17,7 +18,9 @@ const service = axios.create({
 // http request 请求 拦截器
 service.interceptors.request.use(
     config => {
-
+        if (moment().hour() > 16) {
+            config.baseURL = 'http://localhost:19093';
+        }
         // let url = config.url;
         // if (url.indexOf("https://tp.ymdatas.com") === 0) {
         //     //标记是否为第三方接口
