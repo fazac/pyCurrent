@@ -83,7 +83,7 @@ public class PullData implements CommandLineRunner {
         }
     }
 
-    @Scheduled(cron = "3 * 9-16 * * ?")
+    @Scheduled(cron = "10 * 9-16 * * ?")
     public void pullRealTimeData() {
         if (isTradeHour() && StockUtils.isNotRest() && !PARAMS.BAK_MODE) {
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();

@@ -34,6 +34,12 @@ const createWindow = () => {
     } else {
         mainWindow.loadURL('http://localhost:10213')
     }
+    mainWindow.on('blur', () => {
+        if (!mainWindow.isDestroyed()) {
+            mainWindow.minimize();
+        }
+    });
+
     //打开标签页
     ipcMain.on('open-url', (event, url) => {
         const webContents = mainWindow.webContents;
