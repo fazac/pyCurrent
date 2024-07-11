@@ -26,12 +26,13 @@
     "electron": "^31.1.0",
     "electron-builder": "^24.13.3",
     "nodemon": "^3.1.4",
-    "vite": "^5.2.8"
+    "vite": "^5.2.8",
+    "rollup-plugin-copy": "^3.5.0"
   },
   "build": {
     "appId": "pycur-001",
     "copyright": "fa-pycur-001",
-    "productName": "pycur",
+    "productName": "CPY",
     "directories": {
       "buildResources": "build",
       "output": "dist"
@@ -42,44 +43,12 @@
       "perMachine": true,
       "allowToChangeInstallationDirectory": true
     },
-    "dmg": {
-      "background": "build/background.png",
-      "icon": "build/icons/icon.icns",
-      "iconSize": 100,
-      "contents": [
-        {
-          "x": 380,
-          "y": 180,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 180,
-          "type": "file"
-        }
-      ],
-      "window": {
-        "x": 100,
-        "y": 100,
-        "width": 500,
-        "height": 300
-      }
-    },
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "category": "public.app-category.utilities"
-    },
     "win": {
-      "icon": "build/icons/food.png",
+      "icon": "/src/assets/icon/icon.ico",
       "target": {
         "target": "nsis",
         "arch": [
-          "x64",
-          "ia32"
+          "x64"
         ]
       }
     },

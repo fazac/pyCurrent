@@ -132,7 +132,7 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          min:3000,
+          min:2000,
           max:15000,
           splitLine: {
             lineStyle: {

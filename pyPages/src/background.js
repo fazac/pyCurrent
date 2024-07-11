@@ -1,4 +1,4 @@
-const {app, protocol, BrowserWindow, Menu, MenuItem, ipcMain, Notification} = require('electron')
+const {app, protocol, BrowserWindow, Menu, MenuItem, ipcMain, Notification, Tray, nativeImage} = require('electron')
 // 需在当前文件内开头引入 Node.js 的 'path' 模块
 const path = require('path')
 
@@ -55,10 +55,69 @@ const createWindow = () => {
             }
         }
     });
+
+    //msg切换icon
+    let count = 0;
+    let timer;
+
     //发送消息
     ipcMain.on('send-msg', (event, title, body) => {
         showNotification(title, body);
+        timer = setInterval(function () {
+            count++;
+            if (count % 2 === 0) {
+                iconTray.setImage(path.join(__dirname, '../dist/icon/icon.ico'));
+            } else {
+                iconTray.setImage(path.join(__dirname, '../dist/icon/empty.png'));
+            }
+        }, 500);
     });
+
+    //创建系统托盘
+    var iconTray = new Tray(path.join(__dirname, '../dist/icon/icon.ico'));
+
+    iconTray.setToolTip('CPY');
+
+    // 配置右键菜单
+    var trayMenu = Menu.buildFromTemplate([
+        {
+            label: '退出',
+            click: function () {
+                if (process.platform !== 'darwin') {
+                    app.quit();
+                }
+            }
+        }
+    ]);
+// 绑定右键菜单到托盘
+    iconTray.setContextMenu(trayMenu);
+
+
+    setTimeout(function () {
+        var win = BrowserWindow.getFocusedWindow();
+        // 点击关闭按钮让应用保存在托盘
+        win.on('close', (e) => {
+            if (!win.isFocused()) {
+                win = null;
+            } else {
+                // 阻止窗口的关闭事件
+                e.preventDefault();
+                win.hide();
+            }
+        });
+    })
+
+
+// 任务栏图标双击托盘打开应用
+    iconTray.on('double-click', function () {
+        mainWindow.show();
+        if (!!timer) {
+            clearInterval(timer);
+        }
+    });
+
+// 消息提示
+
 
 }
 
@@ -79,9 +138,7 @@ menu.append(new MenuItem({
     id: 'reload',
     label: 'reload',
     accelerator: 'F5',
-    click: () => {
-        BrowserWindow.getAllWindows()[0].webContents.loadURL('http://localhost:5173/')
-    },
+    role: 'reload',
 }))
 
 Menu.setApplicationMenu(menu)
