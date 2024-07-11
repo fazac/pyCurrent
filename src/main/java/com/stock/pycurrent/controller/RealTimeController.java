@@ -93,7 +93,7 @@ public class RealTimeController {
             msg = "访问频率已超限制")
     public ObjectNode findDataLineByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
-        List<DnVO> dnVOList = ArrayUtils.convertDnVO(emDNStockService.findByCodeCount(code, 30).reversed());
+        List<DnVO> dnVOList = ArrayUtils.convertDnVO(emDNStockService.findByCodeCount(code, 300).reversed());
         objectNode.putPOJO("dnData", dnVOList);
         objectNode.putPOJO("dnPriMin", findPriMin(dnVOList));
         objectNode.putPOJO("dnPriMax", findPriMax(dnVOList));

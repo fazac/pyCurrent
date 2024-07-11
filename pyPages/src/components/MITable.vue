@@ -43,11 +43,11 @@ watch(codeDisplay, () => {
     <CmColumn/>
     <PeColumn/>
     <el-table-column property="pb" sortable label="pb"/>
-    <el-table-column property="code" label="code" v-if="codeDisplay">
-      <template #default="scope">
-        <span>{{ scope.row.code.substring(0, 1).concat(scope.row.code.substring(2, 6)) }}</span>
-      </template>
-    </el-table-column>
+<!--    <el-table-column property="code" label="code" v-if="codeDisplay">-->
+<!--      <template #default="scope">-->
+<!--        <span>{{ scope.row.code.substring(0, 1).concat(scope.row.code.substring(2, 6)) }}</span>-->
+<!--      </template>-->
+<!--    </el-table-column>-->
     <el-table-column property="code" label="code" v-if="!codeDisplay"/>
     <LabelColumn v-if="!codeDisplay"/>
     <OperateButton/>

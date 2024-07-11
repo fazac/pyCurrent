@@ -10,6 +10,7 @@ const lineCode = inject('lineCode', null);
 const dnHisData = reactive([{}]);
 const dnPriMin = ref(0);
 const dnPriMax = ref(0);
+const start = ref(0);
 const dnChart = reactive({});
 
 
@@ -22,6 +23,7 @@ watch(lineCode, async () => {
 function prepareDnHisData() {
   findDataLineByCode(lineCode.value).then(res => {
     dnHisData.value = res.dnData;
+    start.value = res.dnData.length > 30 ? res.dnData.length - 30 : 0;
     dnPriMin.value = res.dnPriMin;
     dnPriMax.value = res.dnPriMax;
     createDnLine();
@@ -42,6 +44,10 @@ function createDnLine() {
         dimensions: ['di', 'cp', 'hp', 'lp', 'ap', 'h', 'vol'],
         source: dnHisData.value
       },
+      dataZoom: [{
+        show: true,
+        startValue: start.value,
+      }],
       legend: {
         type: 'plain',
         data: ['cp', 'hp', 'lp', 'ap', 'vol', 'h'],
