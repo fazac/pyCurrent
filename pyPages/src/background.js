@@ -8,6 +8,8 @@ protocol.registerSchemesAsPrivileged([
     {scheme: 'app', privileges: {secure: true, standard: true}}
 ])
 
+const msgArr = [];
+
 const createWindow = () => {
     const mainWindow = new BrowserWindow({
         minWidth: 1280,
@@ -58,12 +60,11 @@ const createWindow = () => {
 
     //msg切换icon
     let count = 0;
-    let timer;
 
     //发送消息
     ipcMain.on('send-msg', (event, title, body) => {
         showNotification(title, body);
-        timer = setInterval(function () {
+        let timer = setInterval(function () {
             count++;
             if (count % 2 === 0) {
                 iconTray.setImage(path.join(__dirname, '../dist/icon/icon.ico'));
@@ -71,6 +72,7 @@ const createWindow = () => {
                 iconTray.setImage(path.join(__dirname, '../dist/icon/empty.png'));
             }
         }, 500);
+        msgArr.push(timer);
     });
 
     //创建系统托盘
@@ -111,12 +113,13 @@ const createWindow = () => {
 // 任务栏图标双击托盘打开应用
     iconTray.on('double-click', function () {
         mainWindow.show();
-        if (!!timer) {
-            clearInterval(timer);
+        if (!!msgArr) {
+            msgArr.forEach(item => {
+                clearInterval(item);
+            })
+            msgArr.length = 0;
         }
     });
-
-// 消息提示
 
 
 }
