@@ -133,9 +133,7 @@ menu.append(new MenuItem({
     id: 'console',
     label: 'console',
     accelerator: 'F12',
-    click: () => {
-        BrowserWindow.getAllWindows()[0].webContents.openDevTools()
-    },
+    role: 'toggleDevTools',
 }))
 menu.append(new MenuItem({
     id: 'reload',
