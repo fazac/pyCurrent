@@ -50,8 +50,7 @@ function createObject(prop, sortable) {
 
 export function extraTdKey(td) {
     if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0].extraNode)) {
-        return Object.entries(td.value[0].extraNode).map(entry => createObject(entry[0], typeof entry[1] === 'number')
-        )
+        return Object.entries(td.value[0].extraNode).map(entry => createObject(entry[0], typeof entry[1] === 'number' || entry[0] === 'mark'))
     }
     return null;
 }
