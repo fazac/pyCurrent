@@ -1,10 +1,11 @@
 <script setup>
 import {inject, useSlots, watch} from 'vue';
-import {cellStyle, extraTdKey, headerCellStyle, rowStyleClass} from "@/api/util";
+import {cellStyle, extraMarkShow, extraTdKey, headerCellStyle, isEmpty, rowStyleClass} from "@/api/util";
 import LabelColumn from "@/components/TablePart/LabelColumn.vue";
 import OperateButton from "@/components/TablePart/OperateButton.vue";
 import CmColumn from "@/components/TablePart/CmColumn.vue";
 import PeColumn from "@/components/TablePart/PeColumn.vue";
+import MarkColumn from "@/components/TablePart/MarkColumn.vue";
 
 const props = defineProps(['elseColumn'])
 
@@ -32,8 +33,9 @@ watch(codeDisplay, () => {
       :header-cell-style="headerCellStyle"
   >
     <slot name="columnSlot"/>
+    <MarkColumn v-if="extraMarkShow(myTableData)"/>
     <el-table-column :sortable="item.sortable"
-                     v-if="!slotColumn"
+                     v-if="!slotColumn && !isEmpty(myTableData)"
                      v-for="item in extraTdKey(myTableData)"
                      :key="item.fullProp"
                      :label="item.prop"
@@ -43,11 +45,11 @@ watch(codeDisplay, () => {
     <CmColumn/>
     <PeColumn/>
     <el-table-column property="pb" sortable label="pb"/>
-<!--    <el-table-column property="code" label="code" v-if="codeDisplay">-->
-<!--      <template #default="scope">-->
-<!--        <span>{{ scope.row.code.substring(0, 1).concat(scope.row.code.substring(2, 6)) }}</span>-->
-<!--      </template>-->
-<!--    </el-table-column>-->
+    <!--    <el-table-column property="code" label="code" v-if="codeDisplay">-->
+    <!--      <template #default="scope">-->
+    <!--        <span>{{ scope.row.code.substring(0, 1).concat(scope.row.code.substring(2, 6)) }}</span>-->
+    <!--      </template>-->
+    <!--    </el-table-column>-->
     <el-table-column property="code" label="code" v-if="!codeDisplay"/>
     <LabelColumn v-if="!codeDisplay"/>
     <OperateButton/>

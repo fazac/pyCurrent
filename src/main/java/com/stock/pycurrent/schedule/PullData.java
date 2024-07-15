@@ -248,7 +248,7 @@ public class PullData implements CommandLineRunner {
                 CurConcernCode curConcernCode = new CurConcernCode();
                 curConcernCode.setTsCode(tsCode);
                 if (limitCodeMap.containsKey(tsCode)) {
-                    curConcernCode.setMark((limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : "") + " A");
+                    curConcernCode.setMark("A " + (limitCodeMap.containsKey(tsCode) ? limitCodeMap.get(tsCode).getCount() : ""));
                 } else {
                     curConcernCode.setMark("C");
                 }
@@ -331,7 +331,23 @@ public class PullData implements CommandLineRunner {
                     curConcernCode.setTableShow(true);
                 }
                 curConcernCode.setTsCode(tsCode);
-                curConcernCode.setMark(tmpType + " " + getPeekDesc(rt) + " " + type);
+                if (!"R".equals(type)) {
+                    if (!tmpType.trim().isBlank()) {
+                        if ("R".equals(tmpType)) {
+                            curConcernCode.setMark(type + " " + getPeekDesc(rt) + " " + tmpType);
+                        } else {
+                            curConcernCode.setMark(type + " " + tmpType + " " + getPeekDesc(rt));
+                        }
+                    } else {
+                        curConcernCode.setMark(type + " " + getPeekDesc(rt));
+                    }
+                } else {
+                    if (!tmpType.trim().isBlank()) {
+                        curConcernCode.setMark(tmpType + " " + getPeekDesc(rt));
+                    } else {
+                        curConcernCode.setMark(getPeekDesc(rt));
+                    }
+                }
                 curConcernCode.setRt(rt.getPctChg());
                 curConcernCode.setH(rt.getChangeHand());
                 curConcernCode.setCp(rt.getCurrentPri());
