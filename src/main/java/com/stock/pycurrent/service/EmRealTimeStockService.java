@@ -90,11 +90,15 @@ public class EmRealTimeStockService {
 
     private EmRealTimeStock findLastOneByCode(String tsCode) {
         try {
-            String tableName = "em_real_time_stock_" + DateUtils.now();
-            String sql = "select * from " + tableName + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") order by trade_date desc limit 1";
-            return (EmRealTimeStock) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
-                    .setParameter("tsCode", tsCode)
-                    .getSingleResult();
+            EmRealTimeStock res = PrepareData.findRTCode(tsCode);
+            if (res == null) {
+                String tableName = "em_real_time_stock_" + DateUtils.now();
+                String sql = "select * from " + tableName + " t where t.ts_code = :tsCode and  t.trade_date = (select max(trade_date) from " + tableName + ") order by trade_date desc limit 1";
+                res = (EmRealTimeStock) entityManager.createNativeQuery(sql, EmRealTimeStock.class)
+                        .setParameter("tsCode", tsCode)
+                        .getSingleResult();
+            }
+            return res;
         } catch (Exception e) {
             return null;
         }

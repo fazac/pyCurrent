@@ -1,6 +1,6 @@
 <script setup>
 import {inject, useSlots, watch} from 'vue';
-import {cellStyle, extraMarkShow, extraTdKey, headerCellStyle, isEmpty, rowStyleClass} from "@/api/util";
+import {cellStyle, extraMarkShow, extraPchShow, extraTdKey, headerCellStyle, isEmpty, rowStyleClass} from "@/api/util";
 import LabelColumn from "@/components/TablePart/LabelColumn.vue";
 import OperateButton from "@/components/TablePart/OperateButton.vue";
 import CmColumn from "@/components/TablePart/CmColumn.vue";
@@ -41,6 +41,7 @@ watch(codeDisplay, () => {
                      :label="item.prop"
                      :prop="item.fullProp">
     </el-table-column>
+    <el-table-column property="pch" v-if="!extraPchShow(myTableData)" sortable label="pch"/>
     <el-table-column property="currentPri" sortable label="cp"/>
     <CmColumn/>
     <PeColumn/>

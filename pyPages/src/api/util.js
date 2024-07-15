@@ -62,6 +62,13 @@ export function extraMarkShow(td) {
     return false;
 }
 
+export function extraPchShow(td) {
+    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0].extraNode)) {
+        return Object.keys(td.value[0].extraNode).includes('rt') || Object.keys(td.value[0].extraNode).includes('pch')
+    }
+    return false;
+}
+
 export function nfc(title, message, type) {
     ElNotification({
         title: title,

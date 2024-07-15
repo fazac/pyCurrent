@@ -1,6 +1,7 @@
 package com.stock.pycurrent.schedule;
 
 import com.stock.pycurrent.entity.CodeLabel;
+import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.service.CodeLabelService;
 import com.stock.pycurrent.service.LastHandPriService;
 import com.stock.pycurrent.service.StockService;
@@ -16,6 +17,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author fzc
@@ -32,6 +35,7 @@ public class PrepareData implements CommandLineRunner {
     @Resource
     private LastHandPriService lastHandPriService;
     private static final Map<String, List<String>> labelMap = new ConcurrentHashMap<>();
+    private static final Map<String, EmRealTimeStock> emRealTimeStockMap = new ConcurrentHashMap<>();
 
     @Override
     public void run(String... args) {
@@ -84,6 +88,17 @@ public class PrepareData implements CommandLineRunner {
 
     public static String findLabelStr(String code) {
         return String.join(",", labelMap.getOrDefault(code, Collections.emptyList()));
+    }
+
+    public static void refreshRTMap(List<EmRealTimeStock> emRealTimeStockList) {
+        emRealTimeStockMap.clear();
+        emRealTimeStockList.forEach(x -> {
+            emRealTimeStockMap.put(x.getTsCode(), x);
+        });
+    }
+
+    public static EmRealTimeStock findRTCode(String code) {
+        return emRealTimeStockMap.getOrDefault(code, null);
     }
 
 }

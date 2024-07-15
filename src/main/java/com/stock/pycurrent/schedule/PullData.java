@@ -87,6 +87,7 @@ public class PullData implements CommandLineRunner {
     public void pullRealTimeData() {
         if (isTradeHour() && StockUtils.isNotRest() && !PARAMS.BAK_MODE) {
             List<EmRealTimeStock> stockList = emRealTimeStockService.findEmCurrent();
+            PrepareData.refreshRTMap(stockList);
             List<EmConstant> emConstants = emConstantService.findAll();
             String[] codes = prepareConstantsCodes(emConstants);
             Map<String, Map<String, EmConstantValue>> stockMap = prepareConstantsMap(emConstants);
