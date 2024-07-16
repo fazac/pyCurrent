@@ -13,7 +13,7 @@ import {BellFilled, Compass, DataBoard, Film, HomeFilled, Link, TopRight, Aim, P
     <PageButton :icon='Link' url='all' badgeValue="a"/>
     <PageButton :icon='TopRight' url='continuous' badgeValue="u"/>
     <PageButton :icon='Aim' url='cptr' badgeValue="m"/>
-    <PageButton :icon='Promotion' url='ccs' badgeValue="s"/>
+
   </el-aside>
 </template>
 

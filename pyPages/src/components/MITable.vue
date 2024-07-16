@@ -1,5 +1,5 @@
 <script setup>
-import {inject, reactive, ref, useSlots, watch, onMounted} from 'vue';
+import {inject, reactive, ref, useSlots, watch} from 'vue';
 import {
   cellStyle,
   extraMarkShow,
@@ -10,11 +10,8 @@ import {
   joinArr,
   rowStyleClass
 } from "@/api/util";
-import LabelColumn from "@/components/TablePart/LabelColumn.vue";
 import OperateButton from "@/components/TablePart/OperateButton.vue";
 import CmColumn from "@/components/TablePart/CmColumn.vue";
-import PeColumn from "@/components/TablePart/PeColumn.vue";
-import MarkColumn from "@/components/TablePart/MarkColumn.vue";
 import {default as vElTableInfiniteScroll} from "el-table-infinite-scroll";
 
 const props = defineProps(['elseColumn'])
@@ -32,7 +29,6 @@ const handleData = ref([]);
 
 const loadMore = () => {
   if (!isEmpty(handleData.value)) {
-    console.log(handleData.value.length)
     if (pageIndex.value < handleData.value.length) {
       pageIndex.value += 10;
       displayData.value = handleData.value.slice(0, handleData.value.length <= pageIndex.value ? handleData.value.length : pageIndex.value)
@@ -161,7 +157,7 @@ const handleFilterChange = (filters) => {
     })
   }
   pageIndex.value = 0;
-  loadMore(handleData);
+  loadMore();
 };
 
 function handleSortChange(column) {
@@ -195,13 +191,9 @@ function reloadData() {
     if (!isEmpty(myTableData) && !isEmpty(myTableData.value)) {
       handleData.value = myTableData.value;
     }
-    loadMore();
+    handleFilterChange();
   })
 }
-
-onMounted(() => {
-  reloadData();
-})
 
 watch(myTableData, () => {
   reloadData();
@@ -227,7 +219,15 @@ watch(myTableData, () => {
       @sort-change="handleSortChange"
   >
     <slot name="columnSlot"/>
-    <MarkColumn v-if="extraMarkShow(myTableData)"/>
+    <el-table-column prop="extraNode.mark" label="mark"
+                     v-if="extraMarkShow(myTableData)"
+                     :filter-multiple="false" :filters="[
+        { text: 'F', value: 'F' },
+        { text: '!R', value: '!R' },
+        { text: 'L', value: 'L' },
+        { text: 'R', value: 'R' },
+        { text: 'A', value: 'A' },
+      ]" filter-placement="bottom-end" column-key="extraNode.mark"/>
     <el-table-column :sortable="item.sortable"
                      v-if="!slotColumn && !isEmpty(myTableData)"
                      v-for="item in extraTdKey(myTableData)"
@@ -238,15 +238,19 @@ watch(myTableData, () => {
     <el-table-column property="pch" v-if="!extraPchShow(myTableData)" sortable label="pch"/>
     <el-table-column property="currentPri" sortable label="cp"/>
     <CmColumn/>
-    <PeColumn/>
+    <el-table-column prop="pe" label="pe" :filter-multiple="false" sortable :filters="[
+        { text: '正', value: '1' },
+        { text: '负', value: '-1' },
+      ]" filter-placement="bottom-end" column-key="pe"/>
     <el-table-column property="pb" sortable label="pb"/>
-    <!--    <el-table-column property="code" label="code" v-if="codeDisplay">-->
-    <!--      <template #default="scope">-->
-    <!--        <span>{{ scope.row.code.substring(0, 1).concat(scope.row.code.substring(2, 6)) }}</span>-->
-    <!--      </template>-->
-    <!--    </el-table-column>-->
-    <el-table-column property="code" label="code" v-if="!codeDisplay"/>
-    <LabelColumn v-if="!codeDisplay"/>
+    <el-table-column property="code" sortable label="code" v-if="!codeDisplay"/>
+    <el-table-column property="labels" v-if="!codeDisplay" min-width="110px" show-overflow-tooltip label="label"
+                     :filters="[
+                      { text: '预盈', value: '1' },
+                      { text: '无', value: '0' },
+                      { text: '预亏', value: '-1' },
+                    ]"
+                     filter-placement="bottom-end" column-key="labels"/>
     <OperateButton/>
   </el-table>
 </template>
