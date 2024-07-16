@@ -43,7 +43,7 @@ function createDnLine() {
       pointArr.push(params.data.cp);
       console.log(pointArr)
       if (pointArr.length > 1) {
-        nfc('ratio', calRatio(pointArr[pointArr.length - 2], pointArr[pointArr.length - 1]));
+        nfc('ratio', "start: " + pointArr[pointArr.length - 2] + " end: " + pointArr[pointArr.length - 1] + " ratio: " + calRatio(pointArr[pointArr.length - 2], pointArr[pointArr.length - 1]));
       }
     });
     let option = {
