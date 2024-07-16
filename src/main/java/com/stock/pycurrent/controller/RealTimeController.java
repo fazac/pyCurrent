@@ -174,7 +174,7 @@ public class RealTimeController {
 
     @GetMapping("findLast")
     public List<CodeDataVO> findLast() {
-        return convertCodeDataVO(emRealTimeStockService.findLastHundred());
+        return convertCodeDataVO(emRealTimeStockService.findLast());
     }
 
     @GetMapping("findCptr")
