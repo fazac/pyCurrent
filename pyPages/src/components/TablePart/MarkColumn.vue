@@ -27,7 +27,7 @@ const filterHandler = (
         { text: 'L', value: 'L' },
         { text: 'R', value: 'R' },
         { text: 'A', value: 'A' },
-      ]" :filter-method="filterHandler" filter-placement="bottom-end"/>
+      ]" :filter-method="filterHandler" filter-placement="bottom-end" column-key="extraNode.mark"/>
 </template>
 
 <style scoped>

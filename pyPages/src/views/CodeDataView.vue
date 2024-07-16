@@ -1,10 +1,9 @@
 <script setup>
-import {onMounted, provide, reactive} from 'vue'
-import {baseUrl} from "@/api/util";
+import {onMounted} from 'vue'
+import {baseUrl, tableData} from "@/api/util";
 import ModelPage from "@/components/ModelPage.vue";
 
-const codeDateList = reactive([{}]);
-provide("myTableData", codeDateList);
+const codeDateList = tableData();
 
 onMounted(() => {
   if (!!window.EventSource) {

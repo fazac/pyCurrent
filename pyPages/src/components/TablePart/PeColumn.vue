@@ -15,7 +15,7 @@ const filterHandler = (
   <el-table-column prop="pe" label="pe" :filter-multiple="false" sortable :filters="[
         { text: '正', value: '1' },
         { text: '负', value: '-1' },
-      ]" :filter-method="filterHandler" filter-placement="bottom-end"/>
+      ]" :filter-method="filterHandler" filter-placement="bottom-end" column-key="pe"/>
 </template>
 
 <style scoped>

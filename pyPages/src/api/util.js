@@ -49,24 +49,30 @@ function createObject(prop, sortable) {
 }
 
 export function extraTdKey(td) {
-    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0].extraNode)) {
+    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0]) && !isEmpty(td.value[0].extraNode)) {
         return Object.entries(td.value[0].extraNode).filter(i => i[0] !== 'mark').map(entry => createObject(entry[0], typeof entry[1] === 'number'))
     }
     return null;
 }
 
 export function extraMarkShow(td) {
-    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0].extraNode)) {
+    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0]) && !isEmpty(td.value[0].extraNode)) {
         return Object.keys(td.value[0].extraNode).includes('mark')
     }
     return false;
 }
 
 export function extraPchShow(td) {
-    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0].extraNode)) {
+    if (!isEmpty(td) && !isEmpty(td.value) && !isEmpty(td.value[0]) && !isEmpty(td.value[0].extraNode)) {
         return Object.keys(td.value[0].extraNode).includes('rt') || Object.keys(td.value[0].extraNode).includes('pch')
     }
     return false;
+}
+
+export function joinArr(a, b) {
+    return a.filter(function (v) {
+        return b.indexOf(v) > -1
+    });
 }
 
 export function nfc(title, message, type) {

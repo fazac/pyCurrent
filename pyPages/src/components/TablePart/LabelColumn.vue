@@ -21,7 +21,7 @@ const filterHandler = (
                       { text: '无', value: '0' },
                       { text: '预亏', value: '-1' },
                     ]"
-                   :filter-method="filterHandler" filter-placement="bottom-end"/>
+                   :filter-method="filterHandler" filter-placement="bottom-end" column-key="labels"/>
 </template>
 
 <style scoped>
