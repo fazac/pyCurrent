@@ -1,8 +1,10 @@
 <script setup>
-import {reactive, ref, inject} from 'vue'
+import {inject, reactive, ref} from 'vue'
 import {Search,} from '@element-plus/icons-vue'
 import {cellStyle, isEmpty, nfc, nullArr} from "@/api/util";
 import {searchSome} from "@/api/backend";
+import {List} from '@element-plus/icons-vue'
+
 
 const detailCode = inject('detailCode', null);
 const searchVisible = ref(false);
@@ -28,6 +30,10 @@ const sOpenVOTableData = reactive({});
 const sLimitVOVisible = ref(false);
 const sLimitVOType = ref('');
 const sLimitVOTableData = reactive({});
+
+function showDetailDial(tsCode) {
+  detailCode.value = tsCode;
+}
 
 function showSearchDial() {
   searchVisible.value = true;
@@ -181,10 +187,11 @@ function onSearchSubmit() {
       <el-table-column property="current_pri" label="cp"/>
       <el-table-column property="avg_pri" label="ap"/>
       <el-table-column property="pri_pre" label="pp"/>
+      <el-table-column property="labels" label="label" min-width="110px" show-overflow-tooltip/>
       <el-table-column label="详情">
         <template #default="scope">
           <el-button type="info"
-                     @click="handleColumnClick(scope.row.ts_code)" :icon="List"></el-button>
+                     @click="showDetailDial(scope.row.ts_code)" :icon="List"></el-button>
         </template>
       </el-table-column>
     </el-table>
