@@ -16,11 +16,9 @@ import {HomeFilled, Promotion} from '@element-plus/icons-vue'
     <ToggleDark/>
     <ToggleLineType/>
     <ToggleCodeDisplay/>
-<!--    <ReloadPage/>-->
     <UpdateConstants/>
     <CurCount/>
-    <PageButton :icon='Promotion' url='ccs' badgeValue="s"/>
-    <!--    <OtherConcern/>-->
+    <PageButton :icon='Promotion' url='ccs' badgeValue="s" badgePosition="right"/>
     <Search/>
     <BackendMessage/>
   </el-aside>
