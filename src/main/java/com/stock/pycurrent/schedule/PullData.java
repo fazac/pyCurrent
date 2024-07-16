@@ -381,25 +381,6 @@ public class PullData implements CommandLineRunner {
             || nowHour == 15 && nowMinute == 1) {
             CurCount curCount = statisticsCurCount(stockList);
             if (nowHour == 15 && nowMinute == 1) {
-                BigDecimal totalAmount = BigDecimal.ZERO;
-                BigDecimal zeroAmount = BigDecimal.ZERO;
-                BigDecimal threeAmount = BigDecimal.ZERO;
-                BigDecimal sixAmount = BigDecimal.ZERO;
-                for (EmRealTimeStock stock : stockList) {
-                    BigDecimal amount = Objects.requireNonNullElse(stock.getAmount(), BigDecimal.ZERO);
-                    totalAmount = totalAmount.add(amount);
-                    if (stock.getTsCode().charAt(0) == '0') {
-                        zeroAmount = zeroAmount.add(amount);
-                    } else if (stock.getTsCode().charAt(0) == '3') {
-                        threeAmount = threeAmount.add(amount);
-                    } else if (stock.getTsCode().charAt(0) == '6') {
-                        sixAmount = sixAmount.add(amount);
-                    }
-                }
-                curCount.setTotalAmount(totalAmount);
-                curCount.setZeroAmount(zeroAmount);
-                curCount.setThreeAmount(threeAmount);
-                curCount.setSixAmount(sixAmount);
                 curCount.setSummary(true);
             } else {
                 curCount.setSummary(false);
@@ -443,10 +424,17 @@ public class PullData implements CommandLineRunner {
     }
 
     private CurCount statisticsCurCount(List<EmRealTimeStock> stockList) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal zeroAmount = BigDecimal.ZERO;
+        BigDecimal threeAmount = BigDecimal.ZERO;
+        BigDecimal sixAmount = BigDecimal.ZERO;
         Integer[] countArray = Stream.generate(() -> 0).limit(30).toArray(Integer[]::new);
         for (EmRealTimeStock em : stockList) {
             if (em.getPctChg() != null) {
+                BigDecimal amount = Objects.requireNonNullElse(em.getAmount(), BigDecimal.ZERO);
+                totalAmount = totalAmount.add(amount);
                 if (em.getTsCode().startsWith("0")) {
+                    zeroAmount = zeroAmount.add(amount);
                     countArray[0]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[1]++;
@@ -469,6 +457,7 @@ public class PullData implements CommandLineRunner {
                         countArray[3]++;
                     }
                 } else if (em.getTsCode().startsWith("3")) {
+                    threeAmount = threeAmount.add(amount);
                     countArray[10]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[11]++;
@@ -491,6 +480,7 @@ public class PullData implements CommandLineRunner {
                         countArray[13]++;
                     }
                 } else if (em.getTsCode().startsWith("6")) {
+                    sixAmount = sixAmount.add(amount);
                     countArray[20]++;
                     if (em.getPctChg().compareTo(BigDecimal.ZERO) >= 0) {
                         countArray[21]++;
@@ -515,7 +505,12 @@ public class PullData implements CommandLineRunner {
                 }
             }
         }
-        return new CurCount(stockList.getFirst().getTradeDate(), countArray);
+        CurCount curCount = new CurCount(stockList.getFirst().getTradeDate(), countArray);
+        curCount.setTotalAmount(totalAmount);
+        curCount.setZeroAmount(zeroAmount);
+        curCount.setThreeAmount(threeAmount);
+        curCount.setSixAmount(sixAmount);
+        return curCount;
     }
 
     private int convertTimeCount(String nowClock) {

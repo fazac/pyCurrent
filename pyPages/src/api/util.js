@@ -6,7 +6,7 @@ import moment from 'moment'
 export const baseUrl = 'http://localhost:19093';
 
 export function amountFix(amount) {
-    return parseFloat((amount / 100000000).toFixed(2));
+    return isEmpty(amount) ? '' : parseFloat((amount / 100000000).toFixed(2));
 }
 
 export function tradeDateDecorate(date) {

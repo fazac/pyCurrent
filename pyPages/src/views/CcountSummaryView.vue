@@ -52,12 +52,12 @@ onMounted(() => {
         <el-table-column prop="c3013d" label="13d"/>
         <el-table-column prop="c3037d" label="37d"/>
         <el-table-column prop="c307d" label="7d"/>
-        <el-table-column prop="threeAmount" label="amount">
+        <el-table-column prop="threeAmount" label="pm">
           <template #default="scope">
             <span>{{ amountFix(scope.row.threeAmount) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="zeroAmount" label="amount">
+        <el-table-column prop="totalAmount" label="am">
           <template #default="scope">
             <span>{{ amountFix(scope.row.totalAmount) }}</span>
           </template>
@@ -80,12 +80,12 @@ onMounted(() => {
         <el-table-column prop="c6013d" label="13d"/>
         <el-table-column prop="c6037d" label="37d"/>
         <el-table-column prop="c607d" label="7d"/>
-        <el-table-column prop="sixAmount" label="amount">
+        <el-table-column prop="sixAmount" label="pm">
           <template #default="scope">
             <span>{{ amountFix(scope.row.sixAmount) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="zeroAmount" label="amount">
+        <el-table-column prop="totalAmount" label="am">
           <template #default="scope">
             <span>{{ amountFix(scope.row.totalAmount) }}</span>
           </template>
@@ -107,12 +107,12 @@ onMounted(() => {
         <el-table-column prop="c0013d" label="13d"/>
         <el-table-column prop="c0037d" label="37d"/>
         <el-table-column prop="c007d" label="7d"/>
-        <el-table-column prop="zeroAmount" label="amount">
+        <el-table-column prop="zeroAmount" label="pm">
           <template #default="scope">
             <span>{{ amountFix(scope.row.zeroAmount) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="zeroAmount" label="amount">
+        <el-table-column prop="totalAmount" label="am">
           <template #default="scope">
             <span>{{ amountFix(scope.row.totalAmount) }}</span>
           </template>
