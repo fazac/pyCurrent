@@ -81,6 +81,15 @@ button i.el-icon {
     margin: 0 1rem;
 }
 
+.el-aside .el-button--large{
+    padding: 8px 15px;
+}
+
+.fixed-width-badge .el-badge__content {
+    width: 10px; /* 设置固定宽度 */
+    text-align: center; /* 文字水平居中 */
+}
+
 .el-popper.el-table-filter {
     z-index: 10000 !important;
 }

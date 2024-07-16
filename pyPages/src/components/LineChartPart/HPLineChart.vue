@@ -29,7 +29,7 @@ function updateTextColor() {
 
 
 function createLineChart() {
-  if (isEmpty(lineCode)) {
+  if (isEmpty(lineCode) || isEmpty(lineCode.value)) {
     return
   }
   findLHPByCode(lineCode.value).then(res => {

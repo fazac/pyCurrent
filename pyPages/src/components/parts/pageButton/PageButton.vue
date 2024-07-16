@@ -16,8 +16,8 @@ function openPage(path) {
 </script>
 
 <template>
-  <el-badge :value="badgeValue" v-if="badgeValue" type="info" :offset="isEmpty(props.badgePosition)?[-10,2]:[-50,0]"
-            class="item">
+  <el-badge :value="badgeValue" v-if="badgeValue" type="info" :offset="isEmpty(props.badgePosition)?[-14,2]:[-43,0]"
+            class="item fixed-width-badge">
     <el-button type="info" size="large" class="big-btn"
                @click="openPage(props.url)"
                :icon="props.icon">

@@ -14,7 +14,7 @@ function changeLineType() {
 </script>
 
 <template>
-  <el-badge :value="lineType" v-if="lineType" type="info" :offset="[-50,0]" class="item">
+  <el-badge :value="lineType" v-if="lineType" type="info" :offset="[-43,0]" class="item fixed-width-badge">
     <el-button type="info" @click="changeLineType" size="large"
                :icon="TrendCharts"></el-button>
   </el-badge>
