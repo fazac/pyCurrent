@@ -2,7 +2,7 @@
 import echarts from '@/echarts';
 import {reactive, ref, shallowRef, watch, inject} from 'vue';
 import {findDataLineByCode} from '@/api/backend.js'
-import {isEmpty} from "@/api/util";
+import {calRatio, isEmpty, nfc} from "@/api/util";
 
 
 const lineCode = inject('lineCode', null);
@@ -12,7 +12,7 @@ const dnPriMin = ref(0);
 const dnPriMax = ref(0);
 const start = ref(0);
 const dnChart = reactive({});
-
+const pointArr = [];
 
 watch(lineCode, async () => {
   if (!isEmpty(lineCode) && !isEmpty(lineCode.value)) {
@@ -35,10 +35,17 @@ function createDnLine() {
     if (dnChart.value) {
       echarts.dispose(dnChart.value);
     }
-    dnChart.value = shallowRef(echarts.init(document.getElementById('mainld')));
+    dnChart.value = shallowRef(echarts.init(document.getElementById('mainld'), {useCoarsePointer: true}));
     window.addEventListener("resize", () => {
       dnChart.value.resize();
     })
+    dnChart.value.on('click', function (params) {
+      pointArr.push(params.data.cp);
+      console.log(pointArr)
+      if (pointArr.length > 1) {
+        nfc('ratio', calRatio(pointArr[pointArr.length - 2], pointArr[pointArr.length - 1]));
+      }
+    });
     let option = {
       dataset: {
         dimensions: ['di', 'cp', 'hp', 'lp', 'ap', 'h', 'vol'],
@@ -277,6 +284,7 @@ function createDnLine() {
     dnChart.value.setOption(option);
   }, 0)
 }
+
 
 </script>
 

@@ -1,6 +1,6 @@
 import {ElNotification} from 'element-plus'
-import {reactive, provide} from 'vue'
-import moment from 'moment'
+import {provide, reactive} from 'vue'
+//import moment from 'moment'
 
 // export const baseUrl = moment().hour() > 16 ? 'http://localhost:19093' : 'http://10.243.161.168:19093';
 export const baseUrl = 'http://localhost:19093';
@@ -81,6 +81,10 @@ export function nfc(title, message, type) {
         message: message,
         type: isEmpty(type) ? 'success' : type,
     })
+}
+
+export function calRatio(v1, v2) {
+    return ((v2 - v1) * 100 / v1).toFixed(2);
 }
 
 export function nullArr(length) {
