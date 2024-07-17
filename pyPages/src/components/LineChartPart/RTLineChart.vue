@@ -1,7 +1,7 @@
 <script setup>
 import echarts from '@/echarts';
 import {inject, onUnmounted, reactive, shallowRef, watch} from 'vue';
-import {isEmpty, baseUrl} from "@/api/util";
+import {isEmpty, baseUrl, verticalValueChart} from "@/api/util";
 
 const lineCode = inject('lineCode', null);
 
@@ -203,7 +203,15 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           symbol: "circle",
           symbolSize: 3,
           emphasis: {
-            disabled: true,
+            focus: 'self',
+            label: {
+              color: 'red',
+              show: true,
+              opacity: 1,
+              position: 'bottom',
+              offset: [0, 10],
+              formatter: verticalValueChart,
+            },
           },
           markLine: {
             precision: 2,
@@ -348,7 +356,14 @@ function createRTLine(xArr, xArrFinal, maxHand) {
           },
           emphasis: {
             focus: 'self',
-            disabled: false,
+            label: {
+              color: 'red',
+              show: true,
+              opacity: 1,
+              position: 'top',
+              offset: [10,8],
+              rotate:90,
+            },
           },
           itemStyle: {
             color: '#ff6666',

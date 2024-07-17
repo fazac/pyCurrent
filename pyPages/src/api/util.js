@@ -75,6 +75,10 @@ export function joinArr(a, b) {
     });
 }
 
+export function verticalValueChart(value) {
+    return value.data[value.dimensionNames[value.seriesIndex + 1]].toString().replace('.', '·').split('').join('\n')
+}
+
 export function nfc(title, message, type) {
     ElNotification({
         title: title,

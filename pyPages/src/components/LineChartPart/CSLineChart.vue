@@ -1,7 +1,7 @@
 <script setup>
 import echarts from "@/echarts";
 import {inject, ref, reactive, shallowRef, watch, computed} from 'vue';
-import {isEmpty, tradeDateDecorate, amountFix} from "@/api/util";
+import {isEmpty, tradeDateDecorate, amountFix, verticalValueChart} from "@/api/util";
 import {useStore} from 'vuex'
 
 const store = useStore();
@@ -132,8 +132,8 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          min:2000,
-          max:15000,
+          min: 2000,
+          max: 15000,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -145,7 +145,7 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          min:1000,
+          min: 1000,
           max: 7000,
           splitLine: {
             lineStyle: {
@@ -158,7 +158,7 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          min:1000,
+          min: 1000,
           max: 7000,
           splitLine: {
             lineStyle: {
@@ -171,7 +171,7 @@ function createLine() {
           position: 'right',
           show: false,
           scale: true,
-          min:1000,
+          min: 1000,
           max: 7000,
           splitLine: {
             lineStyle: {
@@ -256,9 +256,7 @@ function createLine() {
             // 确保标签在纵向上正确对齐
             // verticalAlign: 'middle',
             // align: 'left',
-            formatter: function (value) {
-              return value.data[value.dimensionNames[value.seriesIndex + 1]].toString().replace('.', '·').split('').join('\n')
-            },
+            formatter: verticalValueChart,
           },
           yAxisIndex: 3,
           emphasis: {
