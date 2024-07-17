@@ -8,12 +8,14 @@ import com.stock.pycurrent.entity.vo.CodeDataVO;
 import com.stock.pycurrent.entity.vo.LimitCodeVO;
 import com.stock.pycurrent.repo.EmDNStockRepo;
 import com.stock.pycurrent.schedule.PrepareData;
+import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.JSONUtils;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -28,8 +30,8 @@ public class EmDNStockService {
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
 
-    public List<EmDNStock> findByCodeCount(String code, int count) {
-        return emDNStockRepo.findByCodeCount(code, count);
+    public List<EmDNStock> findByCodeCount(String code) {
+        return emDNStockRepo.findByCodeCount(code, DateUtils.getDateAtOffset(DateUtils.now(), -1, ChronoUnit.YEARS));
     }
 
     public List<CodeDataVO> findOPHC(Integer count, BigDecimal hand, BigDecimal pch) {

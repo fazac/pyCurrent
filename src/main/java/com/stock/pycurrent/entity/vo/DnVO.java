@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class DnVO {
     private int di;
+    private String tradeDate;
     private BigDecimal cp;
     private BigDecimal hp;
     private BigDecimal lp;

@@ -1,6 +1,6 @@
 <script setup>
 import echarts from '@/echarts';
-import {reactive, ref, shallowRef, watch, inject} from 'vue';
+import {inject, reactive, ref, shallowRef, watch} from 'vue';
 import {findDataLineByCode} from '@/api/backend.js'
 import {calRatio, isEmpty, nfc} from "@/api/util";
 
@@ -23,7 +23,7 @@ watch(lineCode, async () => {
 function prepareDnHisData() {
   findDataLineByCode(lineCode.value).then(res => {
     dnHisData.value = res.dnData;
-    start.value = res.dnData.length > 30 ? res.dnData.length - 30 : 0;
+    start.value = res.dnData.length > 30 ? res.dnData[res.dnData.length - 30].tradeDate : res.dnData[0].tradeDate;
     dnPriMin.value = res.dnPriMin;
     dnPriMax.value = res.dnPriMax;
     createDnLine();
@@ -48,7 +48,7 @@ function createDnLine() {
     });
     let option = {
       dataset: {
-        dimensions: ['di', 'cp', 'hp', 'lp', 'ap', 'h', 'vol'],
+        dimensions: ['tradeDate', 'cp', 'hp', 'lp', 'ap', 'h', 'vol'],
         source: dnHisData.value
       },
       dataZoom: [{
@@ -72,7 +72,14 @@ function createDnLine() {
       },
       xAxis: {
         type: 'category',
-        show: false
+        show: true,
+        rotate: 30,
+        axisTick: {
+          alignWithLabel: true,
+        },
+        axisLabel: {
+          interval: 0,
+        }
       },
       yAxis: [
         {

@@ -93,6 +93,9 @@ function createLine(res, arrProps) {
       }],
       xAxis: {
         type: 'category',
+        axisTick: {
+          alignWithLabel: true,
+        },
       },
       yAxis: [
         {

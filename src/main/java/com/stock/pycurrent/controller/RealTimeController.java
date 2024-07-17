@@ -1,7 +1,6 @@
 package com.stock.pycurrent.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.stock.pycurrent.entity.CurConcernCode;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.LimitCode;
 import com.stock.pycurrent.entity.annotation.RequestLimit;
@@ -16,7 +15,6 @@ import com.stock.pycurrent.service.*;
 import com.stock.pycurrent.util.ArrayUtils;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.JSONUtils;
-import com.stock.pycurrent.util.StockUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.repository.query.Param;
@@ -79,7 +77,7 @@ public class RealTimeController {
         }
         objectNode.putPOJO("label", PrepareData.findLabelList(code));
         objectNode.putPOJO("open", openVOList);
-        objectNode.putPOJO("dnDetail", emDNStockService.findByCodeCount(code, 30));
+        objectNode.putPOJO("dnDetail", emDNStockService.findByCodeCount(code));
         objectNode.putPOJO("roc", rocModelService.findRocByCode(code));
         objectNode.putPOJO("current", ArrayUtils.convertRealTimeVO(
                 emRealTimeStockService.findRBarStockByCode(code), realBarService.findIntradayBar(code)).reversed());
@@ -93,7 +91,7 @@ public class RealTimeController {
             msg = "访问频率已超限制")
     public ObjectNode findDataLineByCode(@Param("code") String code) {
         ObjectNode objectNode = JSONUtils.getNode();
-        List<DnVO> dnVOList = ArrayUtils.convertDnVO(emDNStockService.findByCodeCount(code, 300).reversed());
+        List<DnVO> dnVOList = ArrayUtils.convertDnVO(emDNStockService.findByCodeCount(code).reversed());
         objectNode.putPOJO("dnData", dnVOList);
         objectNode.putPOJO("dnPriMin", findPriMin(dnVOList));
         objectNode.putPOJO("dnPriMax", findPriMax(dnVOList));

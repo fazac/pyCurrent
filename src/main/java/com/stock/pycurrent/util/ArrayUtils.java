@@ -74,19 +74,25 @@ public class ArrayUtils {
             EmDNStock current;
             for (int i = 0; i < sources.size(); i++) {
                 current = sources.get(i);
-                DnVO dnVO = new DnVO();
-                dnVO.setDi(i);
-                dnVO.setLp(current.getPriLow());
-                dnVO.setHp(current.getPriHigh());
-                dnVO.setVol(current.getVol());
-                dnVO.setAp(current.getAmount().divide(BigDecimal.valueOf(current.getVol()).multiply(Constants.HUNDRED), 2, RoundingMode.HALF_UP));
-                dnVO.setCp(current.getPriClose());
-                dnVO.setH(current.getChangeHand());
+                DnVO dnVO = generateDnVO(i, current);
                 res.add(dnVO);
             }
             return res;
         }
         return Collections.emptyList();
+    }
+
+    private static DnVO generateDnVO(int i, EmDNStock current) {
+        DnVO dnVO = new DnVO();
+        dnVO.setDi(i);
+        dnVO.setTradeDate(current.getTradeDate().substring(4, 8));
+        dnVO.setLp(current.getPriLow());
+        dnVO.setHp(current.getPriHigh());
+        dnVO.setVol(current.getVol());
+        dnVO.setAp(current.getAmount().divide(BigDecimal.valueOf(current.getVol()).multiply(Constants.HUNDRED), 2, RoundingMode.HALF_UP));
+        dnVO.setCp(current.getPriClose());
+        dnVO.setH(current.getChangeHand());
+        return dnVO;
     }
 
     public static List<OpenVO> convertOpenVO(List<EmRealTimeStock> emRealTimeStocks) {
