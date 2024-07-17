@@ -153,6 +153,45 @@ const handleFilterChange = (filters) => {
           }
           handleData.value = joinArr(handleData.value, handleDataFirst);
         }
+      } else if (entry[0] === 'code') {
+        if (entry[1].length > 0) {
+          let handleDataFirst = [];
+          if (entry[1][0] === '3') {
+            handleDataFirst = myTableData.value.filter(row => {
+              return row.code.startsWith('3');
+            });
+          } else if (entry[1][0] === '6') {
+            handleDataFirst = myTableData.value.filter(row => {
+              return row.code.startsWith('6');
+            });
+          } else {
+            handleDataFirst = myTableData.value.filter(row => {
+              return row.code.startsWith('0');
+            });
+          }
+          if (entry[1].length > 1) {
+            let handleDataElse = [];
+            if (entry[1][1] === '3') {
+              handleDataElse = myTableData.value.filter(row => {
+                return row.code.startsWith('3');
+              });
+            } else if (entry[1][1]=== '6') {
+              handleDataElse = myTableData.value.filter(row => {
+                return  row.code.startsWith('6');
+              });
+            } else {
+              handleDataElse = myTableData.value.filter(row => {
+                return row.code.startsWith('0');
+              });
+            }
+            if (!isEmpty(handleDataElse)) {
+              handleDataFirst = handleDataFirst.concat(handleDataElse);
+              let newArr = new Set(handleDataFirst);
+              handleDataFirst = Array.from(newArr);
+            }
+          }
+          handleData.value = joinArr(handleData.value, handleDataFirst);
+        }
       }
     })
   }
@@ -243,7 +282,12 @@ watch(myTableData, () => {
         { text: '负', value: '-1' },
       ]" filter-placement="bottom-end" column-key="pe"/>
     <el-table-column property="pb" sortable label="pb"/>
-    <el-table-column property="code" sortable label="code" v-if="!codeDisplay"/>
+    <el-table-column property="code" :filters="[
+                      { text: '3', value: '3' },
+                      { text: '6', value: '6' },
+                      { text: '0', value: '0' },
+                    ]"
+                     filter-placement="bottom-end" column-key="code" sortable label="code" v-if="!codeDisplay"/>
     <el-table-column property="labels" v-if="!codeDisplay" min-width="110px" show-overflow-tooltip label="label"
                      :filters="[
                       { text: '预盈', value: '1' },
