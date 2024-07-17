@@ -181,9 +181,9 @@ function onSearchSubmit() {
               :header-cell-style="cellStyle">
       <el-table-column property="pct_chg" label="pch"/>
       <el-table-column property="change_hand" label="hand"/>
-      <el-table-column property="pe" label="pe"/>
+      <el-table-column property="pe" sortable label="pe"/>
       <el-table-column property="pb" label="pb"/>
-      <el-table-column property="cap" label="cap"/>
+      <el-table-column property="cap" sortable label="cap"/>
       <el-table-column property="current_pri" label="cp"/>
       <el-table-column property="avg_pri" label="ap"/>
       <el-table-column property="pri_pre" label="pp"/>
