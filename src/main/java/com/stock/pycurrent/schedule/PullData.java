@@ -291,7 +291,7 @@ public class PullData implements CommandLineRunner {
                 && tsCode.startsWith("3")
                 && rt.getPctChg() != null
                 && (highLimit || concerned || holds || rangeOverLimit || yesterdayHigh || onboard)) {
-                type = (concerned ? "C" : holds ? "H" : highLimit ? "F" : !yesterdayHigh ? "R" : "L");
+                type = (concerned ? "C" : holds ? "H" : yesterdayHigh ? "L" : highLimit ? "F" : "R");
                 CurConcernCode curConcernCode = new CurConcernCode();
                 if ((holds || concerned) && rt.getCurrentPri() != null && (stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) || stockMap.containsKey("CONCERN_CODES") && stockMap.get("CONCERN_CODES").containsKey(tsCode))) {
                     EmConstantValue emConstantValue = stockMap.containsKey("HOLD_CODES") && stockMap.get("HOLD_CODES").containsKey(tsCode) ? stockMap.get("HOLD_CODES").get(tsCode) : stockMap.get("CONCERN_CODES").get(tsCode);
