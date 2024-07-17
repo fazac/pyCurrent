@@ -119,6 +119,7 @@ const createWindow = () => {
             })
             msgArr.length = 0;
         }
+        iconTray.setImage(path.join(__dirname, '../dist/icon/icon.ico'));
     });
 
 
