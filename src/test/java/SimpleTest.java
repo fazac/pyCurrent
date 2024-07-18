@@ -19,4 +19,10 @@ public class SimpleTest {
         objectNode.put("period", "daily");
         log.info(JSONUtils.toDoubleJson(objectNode));
     }
+
+    @Test
+    public void test2() {
+        String time = "2024-07-17 09:15:00";
+        log.info(time.substring(11, 19));
+    }
 }

@@ -14,4 +14,14 @@ public interface CurCountRepo extends JpaRepository<CurCount, String> {
 
     @Query(value = "select * from cur_count where  is_summary = '1' order by trade_date desc", nativeQuery = true)
     List<CurCount> findSummaryList();
+
+    @Query(value = """
+            select *
+            from cur_count
+            where trade_date > (select left(max(trade_date), 10)
+                                from cur_count
+                                where trade_date < (select left(max(trade_date), 10) from cur_count))
+              and trade_date < (select left(max(trade_date), 10) from cur_count);
+            """, nativeQuery = true)
+    List<CurCount> findYesterdayAll();
 }

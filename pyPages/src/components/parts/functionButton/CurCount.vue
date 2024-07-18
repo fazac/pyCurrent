@@ -50,9 +50,19 @@ function showCurccDial() {
           <span>{{ amountFix(scope.row.threeAmount) }}</span>
         </template>
       </el-table-column>
+      <el-table-column prop="preThree" label="rp">
+        <template #default="scope">
+          <span>{{ amountFix(scope.row.preThree) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="totalAmount" label="am">
         <template #default="scope">
           <span>{{ amountFix(scope.row.totalAmount) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="preTotal" label="ra">
+        <template #default="scope">
+          <span>{{ amountFix(scope.row.preTotal) }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -76,9 +86,19 @@ function showCurccDial() {
           <span>{{ amountFix(scope.row.sixAmount) }}</span>
         </template>
       </el-table-column>
+      <el-table-column prop="preSix" label="rp">
+        <template #default="scope">
+          <span>{{ amountFix(scope.row.preSix) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="totalAmount" label="am">
         <template #default="scope">
           <span>{{ amountFix(scope.row.totalAmount) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="preTotal" label="ra">
+        <template #default="scope">
+          <span>{{ amountFix(scope.row.preTotal) }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -102,12 +122,21 @@ function showCurccDial() {
           <span>{{ amountFix(scope.row.zeroAmount) }}</span>
         </template>
       </el-table-column>
+      <el-table-column prop="preZero" label="rp">
+        <template #default="scope">
+          <span>{{ amountFix(scope.row.preZero) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="totalAmount" label="am">
         <template #default="scope">
           <span>{{ amountFix(scope.row.totalAmount) }}</span>
         </template>
       </el-table-column>
-
+      <el-table-column prop="preTotal" label="ra">
+        <template #default="scope">
+          <span>{{ amountFix(scope.row.preTotal) }}</span>
+        </template>
+      </el-table-column>
     </el-table>
   </el-dialog>
 </template>

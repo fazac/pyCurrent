@@ -1,9 +1,6 @@
 package com.stock.pycurrent.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -96,6 +93,14 @@ public class CurCount {
     private BigDecimal threeAmount;
     @Column(name = "six_amount")
     private BigDecimal sixAmount;
+    @Transient
+    private BigDecimal preTotal;
+    @Transient
+    private BigDecimal preZero;
+    @Transient
+    private BigDecimal preThree;
+    @Transient
+    private BigDecimal preSix;
 
 
     public CurCount(String tradeDate, Integer... ca) {
