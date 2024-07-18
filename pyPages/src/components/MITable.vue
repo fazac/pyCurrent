@@ -12,7 +12,7 @@ import {
 } from "@/api/util";
 import CmColumn from "@/components/TablePart/CmColumn.vue";
 import {default as vElTableInfiniteScroll} from "el-table-infinite-scroll";
-import {List, TrendCharts, ArrowUpBold} from '@element-plus/icons-vue'
+import {List, TrendCharts, Cherry} from '@element-plus/icons-vue'
 
 const props = defineProps(['elseColumn'])
 
@@ -325,9 +325,9 @@ function addPeFilter() {
                      filter-placement="bottom-end" column-key="labels"/>
     <el-table-column label="详情" width="130">
       <template #header>
-        <el-button type="info" size="default" class="big-btn"
+        <el-button type="info" size="small"
                    @click="addPeFilter()"
-                   :icon="ArrowUpBold">
+                   :icon="Cherry">
         </el-button>
       </template>
       <template #default="scope">
