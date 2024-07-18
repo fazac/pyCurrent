@@ -24,7 +24,7 @@ function showCurccDial() {
              @click="showCurccDial" :icon="Histogram"></el-button>
 
   <el-dialog v-model="curCountVisible" title="CUR-COUNT"
-             :show-close="false" center draggable destroy-on-close width="1000">
+             :show-close="false" center draggable destroy-on-close width="1200">
     <el-radio-group class="radio-group" v-model="curType" size="large">
       <el-radio-button label="3" value="3"/>
       <el-radio-button label="6" value="6"/>

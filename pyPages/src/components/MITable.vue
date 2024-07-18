@@ -10,9 +10,9 @@ import {
   joinArr,
   rowStyleClass
 } from "@/api/util";
-import OperateButton from "@/components/TablePart/OperateButton.vue";
 import CmColumn from "@/components/TablePart/CmColumn.vue";
 import {default as vElTableInfiniteScroll} from "el-table-infinite-scroll";
+import {List, TrendCharts, ArrowUpBold} from '@element-plus/icons-vue'
 
 const props = defineProps(['elseColumn'])
 
@@ -175,9 +175,9 @@ const handleFilterChange = (filters) => {
               handleDataElse = myTableData.value.filter(row => {
                 return row.code.startsWith('3');
               });
-            } else if (entry[1][1]=== '6') {
+            } else if (entry[1][1] === '6') {
               handleDataElse = myTableData.value.filter(row => {
-                return  row.code.startsWith('6');
+                return row.code.startsWith('6');
               });
             } else {
               handleDataElse = myTableData.value.filter(row => {
@@ -200,6 +200,7 @@ const handleFilterChange = (filters) => {
 };
 
 function handleSortChange(column) {
+  console.log(column);
   let sp = column.prop;
   let spa = [];
   if (sp.includes('.')) {
@@ -237,6 +238,33 @@ function reloadData() {
 watch(myTableData, () => {
   reloadData();
 })
+
+
+const lineCode = inject('lineCode', null);
+const detailCode = inject('detailCode', null);
+const peFilterFlag = ref(false);
+
+function showDetailDial(tsCode) {
+  detailCode.value = tsCode;
+}
+
+function showChartLine(tsCode) {
+  lineCode.value = tsCode;
+}
+
+function addPeFilter() {
+  peFilterFlag.value = !peFilterFlag.value;
+  if (peFilterFlag.value) {
+    if (isEmpty(filterColumns.value)) {
+      filterColumns.value = {};
+    }
+    filterColumns.value['pe'] = ['1'];
+    myTableData.value = myTableData.value.sort(function (a, b) {
+      return a['pe'] - b['pe'];
+    })
+    handleFilterChange();
+  }
+}
 
 </script>
 
@@ -295,7 +323,22 @@ watch(myTableData, () => {
                       { text: '预亏', value: '-1' },
                     ]"
                      filter-placement="bottom-end" column-key="labels"/>
-    <OperateButton/>
+    <el-table-column label="详情" width="130">
+      <template #header>
+        <el-button type="info" size="default" class="big-btn"
+                   @click="addPeFilter()"
+                   :icon="ArrowUpBold">
+        </el-button>
+      </template>
+      <template #default="scope">
+        <el-button type="info" round
+                   @click="showDetailDial(scope.row.code)"
+                   :icon="List"></el-button>
+        <el-button type="info" round
+                   @click="showChartLine(scope.row.code)"
+                   :icon="TrendCharts"></el-button>
+      </template>
+    </el-table-column>
   </el-table>
 </template>
 
