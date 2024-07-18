@@ -263,6 +263,8 @@ function addPeFilter() {
       return a['pe'] - b['pe'];
     })
     handleFilterChange();
+  } else {
+    window.location.reload();
   }
 }
 
