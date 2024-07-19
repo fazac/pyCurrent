@@ -252,13 +252,14 @@ function showChartLine(tsCode) {
   lineCode.value = tsCode;
 }
 
-function addPeFilter() {
+function addSpFilter() {
   peFilterFlag.value = !peFilterFlag.value;
   if (peFilterFlag.value) {
     if (isEmpty(filterColumns.value)) {
       filterColumns.value = {};
     }
     filterColumns.value['pe'] = ['1'];
+    filterColumns.value['labels'] = ['1', '0'];
     myTableData.value = myTableData.value.sort(function (a, b) {
       return a['pe'] - b['pe'];
     })
@@ -328,7 +329,7 @@ function addPeFilter() {
     <el-table-column label="详情" width="130">
       <template #header>
         <el-button type="info" size="small"
-                   @click="addPeFilter()"
+                   @click="addSpFilter()"
                    :icon="Cherry">
         </el-button>
       </template>
