@@ -317,7 +317,7 @@ function addSpFilter() {
                       { text: '3', value: '3' },
                       { text: '6', value: '6' },
                       { text: '0', value: '0' },
-                    ]"
+                    ]" min-width="110px"
                      filter-placement="bottom-end" column-key="code" sortable label="code" v-if="!codeDisplay"/>
     <el-table-column property="labels" v-if="!codeDisplay" min-width="110px" show-overflow-tooltip label="label"
                      :filters="[

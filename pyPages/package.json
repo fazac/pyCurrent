@@ -7,6 +7,7 @@
   "description": "pycurwin",
   "scripts": {
     "dev": "vite",
+    "clean:build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"  && vite build",
     "build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"  && vite build && electron-builder",
     "preview": "vite preview",
     "start": "vite | nodemon --exec electron . --watch ./ --ext .js,.html,.css,.vue",
