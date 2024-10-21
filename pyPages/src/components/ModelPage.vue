@@ -10,7 +10,7 @@ import MITable from "@/components/MITable.vue";
 const lineCode = ref('');
 const lineType = ref('dn');
 const detailCode = ref('');
-const codeDisplay = ref(true);
+const codeDisplay = ref(false);
 
 provide('lineCode', lineCode);
 provide('lineType', lineType);
