@@ -51,6 +51,8 @@ public class RealTimeController {
     private RealBarService realBarService;
     @Resource
     private LimitCodeService limitCodeService;
+    @Resource
+    private CodeLabelService codeLabelService;
 
     public RealTimeController() {
     }
@@ -58,6 +60,12 @@ public class RealTimeController {
     @GetMapping("hi")
     public String hello() {
         return "hello world";
+    }
+
+    @GetMapping("label")
+    public String label() {
+        codeLabelService.createLabels();
+        return "label";
     }
 
     @GetMapping("findDataByCode")

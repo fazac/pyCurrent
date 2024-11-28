@@ -11,7 +11,7 @@ export function amountFix(amount) {
 
 export function tradeDateDecorate(date) {
     if (date.indexOf('-') > 0) {
-        return date.substring(6, 10).replaceAll('-', '');
+        return date.substring(5, 10).replaceAll('-', '');
     } else {
         return date.substring(5, 10).replaceAll('-', '');
     }

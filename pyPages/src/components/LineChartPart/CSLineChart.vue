@@ -31,7 +31,8 @@ function createLineChart() {
     console.log('no data')
     return;
   }
-  lhdata.value = JSON.stringify(JSON.toString(ldata.value));
+  // lhdata.value = JSON.stringify(JSON.toString(ldata.value));
+  lhdata.value = ldata.value;
   let tmpArr = ldata.value.map(obj => {
     return {
       ...obj,
@@ -132,7 +133,20 @@ function createLine() {
           position: 'right',
           scale: true,
           show: false,
-          min: 2000,
+          min: 3000,
+          max: 30000,
+          splitLine: {
+            lineStyle: {
+              opacity: 0.1,
+            }
+          }
+        },
+        {
+          type: 'value',
+          position: 'right',
+          scale: true,
+          show: false,
+          min: 1000,
           max: 15000,
           splitLine: {
             lineStyle: {
@@ -146,20 +160,7 @@ function createLine() {
           scale: true,
           show: false,
           min: 1000,
-          max: 7000,
-          splitLine: {
-            lineStyle: {
-              opacity: 0.1,
-            }
-          }
-        },
-        {
-          type: 'value',
-          position: 'right',
-          scale: true,
-          show: false,
-          min: 1000,
-          max: 7000,
+          max: 15000,
           splitLine: {
             lineStyle: {
               opacity: 0.1,
@@ -172,7 +173,7 @@ function createLine() {
           show: false,
           scale: true,
           min: 1000,
-          max: 7000,
+          max: 15000,
           splitLine: {
             lineStyle: {
               opacity: 0.1,

@@ -514,3 +514,5 @@ create table `last_hand_pri`
 
 -- 20240709
 alter table last_hand_pri drop column `current_pri`;
+
+
