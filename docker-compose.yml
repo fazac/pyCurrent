@@ -1,0 +1,68 @@
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      myaonet:
+        ipv4_address: 192.168.0.11
+  mysql:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: stockrealtime
+      MYSQL_USER: fa
+      MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: 123456
+      TZ: Asia/ShangHai
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      myaonet:
+        ipv4_address: 192.168.0.12
+  frpcpy:
+    image: pycpy:latest
+    restart: always
+    volumes:
+      - py-data:/home
+    working_dir: /home/
+    depends_on:
+      - mysql
+    networks:
+      myaonet:
+        ipv4_address: 192.168.0.13
+  java:
+    image: pycur:latest
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "19093:19093"
+    volumes:
+      - jar-data:/home
+    working_dir: /home/
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      myaonet:
+        ipv4_address: 192.168.0.16
+volumes:
+  db-data:
+  redis-data:
+  jar-data:
+  py-data:
+
+networks:
+  myaonet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+          gateway: 192.168.0.1
+
+
+

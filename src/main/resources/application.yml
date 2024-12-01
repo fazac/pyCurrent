@@ -2,7 +2,7 @@ server:
   port: 19093
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:3306/stockrealtime?useUnicode=true&characterEncoding=utf-8"
+    url: "jdbc:mysql://192.168.0.12:3306/stockrealtime?useUnicode=true&characterEncoding=utf-8"
     username: "root"
     #    username: "fa"
     password: "123456"
@@ -25,6 +25,11 @@ spring:
     log-startup-info: false
   jpa:
     open-in-view: true
+  data:
+    redis:
+      host: 192.168.0.11
+      port: 6379
+      timeout: 20s
 #    generate-ddl: true
 #    hibernate:
 #      ddl-auto: create
@@ -39,6 +44,6 @@ logging:
   file:
     path: ./log/current
   logback:
-    rollingpolicy:
+    rolling policy:
       max-history: 30
 

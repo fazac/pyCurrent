@@ -4,6 +4,7 @@ import json
 import math
 import threading
 import warnings
+import time
 
 from sqlalchemy import create_engine
 from operator import methodcaller
@@ -14,7 +15,7 @@ from dbutils.pooled_db import PooledDB
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 db_config = {
-    'host': 'localhost',
+    'host': '192.168.0.12',
     'port': 3306,
     'user': 'root',
     'passwd': '123456',
@@ -24,7 +25,7 @@ db_config = {
 
 pool = PooledDB(creator=pymysql,
                 maxcached=40,
-                host='localhost',
+                host='192.168.0.12',
                 port=3306,
                 user='root',
                 passwd='123456',
@@ -51,7 +52,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
     else:
         em_params = json.loads(params)
 
-    engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")
+    engine = create_engine("mysql+pymysql://root:123456@192.168.0.12:3306/stockrealtime?charset=utf8")
 
     # symbol_df = ak.stock_zh_a_spot_em()
     symbol_df = methodcaller(em_symbol_func)(ak)
@@ -132,7 +133,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
 # 单线程获取数据
 def fetch_data(em_table, em_func):
     em_table_tmp = em_table + "_tmp"
-    engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")
+    engine = create_engine("mysql+pymysql://root:123456@192.168.0.12:3306/stockrealtime?charset=utf8")
     db = pymysql.connect(**db_config)
     sql1 = "drop table if exists " + em_table_tmp
     cursor = db.cursor()
@@ -155,6 +156,14 @@ def fetch_data(em_table, em_func):
 
     db.commit()
     db.close()
+
+
+def print_hello_log():
+    print('hello ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    filename = "output.txt"
+    file = open(filename, "a")
+    file.write('hello ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '\n')
+    file.close()
 
 
 def create_rt_table():
@@ -297,6 +306,8 @@ if __name__ == '__main__':
     task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
     task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
 
+    # task.add_job(print_hello_log, 'interval', id='5s_job', seconds=5)
     task.start()
 
-    input("按回车键继续...")
+    while True:
+        time.sleep(60)
