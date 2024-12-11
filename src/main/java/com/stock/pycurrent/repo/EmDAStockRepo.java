@@ -2,7 +2,9 @@ package com.stock.pycurrent.repo;
 
 
 import com.stock.pycurrent.entity.EmDAStock;
+import com.stock.pycurrent.entity.EmDNStock;
 import com.stock.pycurrent.entity.pk.BasicStockPK;
+import org.checkerframework.checker.units.qual.N;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,10 +27,16 @@ public interface EmDAStockRepo extends JpaRepository<EmDAStock, BasicStockPK> {
     @Query(value = "delete from em_d_a_stock where trade_date = :tradeDate", nativeQuery = true)
     void deleteByDate(@Param("tradeDate") String tradeDate);
 
+    @Query(value = "from EmDAStock where tradeDate = ?1 order by tsCode")
+    List<EmDAStock> findByTradeDate(String tradeDate);
+
     @Query("from EmDAStock where tsCode =?1 order by tradeDate")
     List<EmDAStock> findByCode(String code);
 
     @Query(value = "select distinct c.ts_code from em_d_a_stock c order by c.ts_code ", nativeQuery = true)
     List<String> findCodes();
+
+    @Query(value = "select * from em_d_a_stock where trade_date=:tradeDate", nativeQuery = true)
+    List<EmDAStock> findCurrent(@Param("tradeDate") String tradeDate);
 
 }

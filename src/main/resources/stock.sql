@@ -513,7 +513,8 @@ create table `last_hand_pri`
   ROW_FORMAT = DYNAMIC;
 
 -- 20240709
-alter table last_hand_pri drop column `current_pri`;
+alter table last_hand_pri
+    drop column `current_pri`;
 
 -- 20241202
 drop table if exists `em_real_time_etf`;
@@ -617,7 +618,7 @@ create table `stock_cal_model`
     trade_date varchar(8),
     price      decimal(18, 3),
     level      int,
-    type       int,
+    type       int comment '1 da, 2 lhp 10 ,3 30 ,4 50 ,5 100',
     KEY `idx_sdl_code` (`ts_code`) USING BTREE,
     KEY `idx_sdl_date` (`trade_date`) USING BTREE,
     INDEX r_idx (`ts_code`, `type`, `trade_date`) USING BTREE,

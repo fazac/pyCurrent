@@ -17,8 +17,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author fzc
@@ -41,8 +39,8 @@ public class PrepareData implements CommandLineRunner {
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
-//        pullAll();
-//        prepareLabelMap();
+        pullAll();
+        prepareLabelMap();
     }
 
     @SneakyThrows
@@ -73,11 +71,15 @@ public class PrepareData implements CommandLineRunner {
             stockService.createLimitCode();
             log.warn("createLimitCode-OVER");
             log.warn("ROC-ENTER");
-            stockService.initRocModel();
+//            stockService.initRocModel();
+            stockService.initRocModelRecursion();
             log.warn("ROC-OVER");
             log.warn("LHP-ENTER");
             lastHandPriService.createIntradayLHP();
             log.warn("LHP-OVER");
+            log.warn("LHP-ROC-ENTER");
+            stockService.initLHPRocModelRecursion();
+            log.warn("LHP-ROC-OVER");
             log.warn("PULL-ALL-OVER");
         }
     }

@@ -1,7 +1,9 @@
 package com.stock.pycurrent.service;
 
+import com.stock.pycurrent.entity.EmDAStock;
 import com.stock.pycurrent.entity.EmDNStock;
 import com.stock.pycurrent.entity.LastHandPri;
+import com.stock.pycurrent.repo.EmDAStockRepo;
 import com.stock.pycurrent.repo.EmDNStockRepo;
 import com.stock.pycurrent.repo.LastHandPriRepo;
 import com.stock.pycurrent.util.DateUtils;
@@ -28,6 +30,7 @@ public class LastHandPriService {
     private LastHandPriRepo lastHandPriRepo;
     @Resource
     private EmDNStockRepo emDNStockRepo;
+    private EmDAStockRepo emDAStockRepo;
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
 

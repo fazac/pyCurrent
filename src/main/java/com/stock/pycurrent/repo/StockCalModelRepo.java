@@ -15,6 +15,6 @@ import java.util.List;
 @Repository
 public interface StockCalModelRepo extends JpaRepository<StockCalModel, BasicStockPK> {
 //    @QueryHints(value = @QueryHint(name = "jakarta.persistence.cache.storeMode", value = "REFRESH"))
-    @Query(value = "select * from stock_cal_model s where s.ts_code = :code and s.level = (select max(level) from stock_cal_model where ts_code = :code)", nativeQuery = true)
-    List<StockCalModel> findLastByCode(@Param("code") String code);
+    @Query(value = "select * from stock_cal_model s where s.ts_code = :code and s.level = (select max(level) from stock_cal_model where ts_code = :code) and type=:type", nativeQuery = true)
+    List<StockCalModel> findLastByCode(@Param("code") String code, @Param("type") Integer type);
 }

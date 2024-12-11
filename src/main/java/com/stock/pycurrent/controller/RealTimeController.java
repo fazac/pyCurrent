@@ -72,7 +72,7 @@ public class RealTimeController {
 
     @GetMapping("testG")
     public String testGenerateModel() {
-        stockService.generateModel();
+        stockService.generateModelTest();
         return "ok";
     }
 

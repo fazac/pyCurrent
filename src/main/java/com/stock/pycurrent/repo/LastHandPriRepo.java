@@ -21,4 +21,12 @@ public interface LastHandPriRepo extends JpaRepository<LastHandPri, BasicStockPK
 
     @Query(value = "select * from last_hand_pri where ts_code = :code order by trade_date desc limit 100", nativeQuery = true)
     List<LastHandPri> findLHPByCode(@Param("code") String code);
+
+    @Query(value = "select * from last_hand_pri where ts_code = :code order by trade_date", nativeQuery = true)
+    List<LastHandPri> findByCode(@Param("code") String code);
+
+    @Query(value = "select * from last_hand_pri where trade_date = :tradeDate order by ts_code", nativeQuery = true)
+    List<LastHandPri> findByTradeDate(@Param("tradeDate") String tradeDate);
+
+
 }

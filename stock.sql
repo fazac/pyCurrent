@@ -509,7 +509,7 @@ create table if not exists `stock_cal_model`
     trade_date varchar(8),
     price      decimal(18, 3),
     level      int,
-    type       int,
+    type       int comment '1 da, 2 lhp 10 ,3 30 ,4 50 ,5 100',
     KEY `idx_sdl_code` (`ts_code`) USING BTREE,
     KEY `idx_sdl_date` (`trade_date`) USING BTREE,
     INDEX r_idx (`ts_code`, `type`, `trade_date`) USING BTREE,
