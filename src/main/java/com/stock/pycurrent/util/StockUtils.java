@@ -6,6 +6,7 @@ import com.stock.pycurrent.entity.RocModel;
 import com.stock.pycurrent.entity.emum.EMSymbolEnum;
 import com.stock.pycurrent.entity.emum.PyFuncEnum;
 import com.stock.pycurrent.entity.model.Constants;
+import com.stock.pycurrent.entity.StockCalModel;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -110,7 +111,7 @@ public class StockUtils {
             }
         }
         if (points.size() == oldSize) {
-            String code = ts.get(0).getTsCode();
+            String code = ts.getFirst().getTsCode();
             for (int i = 0; i < points.size() - 1; i++) {
                 RocModel roc = new RocModel();
                 roc.setTsCode(code);
@@ -138,7 +139,7 @@ public class StockUtils {
         int minIndex = 0;
         int maxIndex = 0;
         BigDecimal curClosePri;
-        doorPri = ts.get(0).getPriClose();
+        doorPri = ts.getFirst().getPriClose();
         for (int i = 1; i < ts.size(); i++) {
             curClosePri = ts.get(i).getPriClose();
             if (curClosePri.compareTo(min) < 0 && curClosePri.compareTo(doorPri) < 0) {
@@ -162,4 +163,67 @@ public class StockUtils {
         return p2.subtract(p1).multiply(h.subtract(h1)).divide(h2.subtract(h1), 3, RoundingMode.HALF_UP).add(p1);
     }
 
+    public static List<StockCalModel> generateCalModel(StockCalModel current, List<StockCalModel> lastKeys) {
+        if (lastKeys.isEmpty()) {
+            current.setLevel(1);
+        } else {
+            current.setLevel(lastKeys.getLast().getLevel() + 1);
+            boolean updateFlag = false;
+            if (lastKeys.size() > 1) {
+                int i = lastKeys.size() - 1;
+                if (current.getPrice().compareTo(lastKeys.get(i).getPrice()) > 0) {
+                    for (int j = i; j >= 0; j--) {
+                        if (lastKeys.get(j).getPrice().compareTo(current.getPrice()) >= 0) {
+                            for (int z = j; z >= 0; z--) {
+                                lastKeys.get(z).setLevel(current.getLevel());
+                            }
+                            lastKeys.get(j + 1).setLevel(current.getLevel());
+                            updateFlag = true;
+                            break;
+                        }
+                    }
+                    if (!updateFlag) {
+                        BigDecimal minPrice = lastKeys.stream().map(StockCalModel::getPrice).reduce(BigDecimal::min).get();
+                        for (int n = lastKeys.size() - 1; n >= 0; n--) {
+                            if (lastKeys.get(n).getPrice().compareTo(minPrice) == 0) {
+                                for (int z = n; z >= 0; z--) {
+                                    lastKeys.get(z).setLevel(current.getLevel());
+                                }
+                                break;
+                            }
+                        }
+                    }
+                } else if (current.getPrice().compareTo(lastKeys.get(i).getPrice()) == 0) {
+                    for (int j = i - 1; j >= 0; j--) {
+                        lastKeys.get(j).setLevel(current.getLevel());
+                    }
+                } else {
+                    for (int j = i; j >= 0; j--) {
+                        if (lastKeys.get(j).getPrice().compareTo(current.getPrice()) <= 0) {
+                            for (int z = j; z >= 0; z--) {
+                                lastKeys.get(z).setLevel(current.getLevel());
+                            }
+                            lastKeys.get(j + 1).setLevel(current.getLevel());
+                            updateFlag = true;
+                            break;
+                        }
+                    }
+                    if (!updateFlag) {
+                        BigDecimal maxPrice = lastKeys.stream().map(StockCalModel::getPrice).reduce(BigDecimal::max).get();
+                        for (int n = lastKeys.size() - 1; n >= 0; n--) {
+                            if (lastKeys.get(n).getPrice().compareTo(maxPrice) == 0) {
+                                for (int z = n; z >= 0; z--) {
+                                    lastKeys.get(z).setLevel(current.getLevel());
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            lastKeys.getFirst().setLevel(current.getLevel());
+        }
+        lastKeys.add(current);
+        return lastKeys;
+    }
 }

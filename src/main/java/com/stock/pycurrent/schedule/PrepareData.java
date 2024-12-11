@@ -41,8 +41,8 @@ public class PrepareData implements CommandLineRunner {
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
-        pullAll();
-        prepareLabelMap();
+//        pullAll();
+//        prepareLabelMap();
     }
 
     @SneakyThrows

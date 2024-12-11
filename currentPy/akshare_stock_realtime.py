@@ -8,7 +8,7 @@ import time
 
 from sqlalchemy import create_engine
 from operator import methodcaller
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from dbutils.pooled_db import PooledDB
 
@@ -160,7 +160,7 @@ def fetch_data(em_table, em_func):
 
 def print_hello_log():
     print('hello ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    filename = "output.txt"
+    filename = "fw.txt"
     file = open(filename, "a")
     file.write('hello ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '\n')
     file.close()
@@ -207,9 +207,70 @@ def create_rt_table():
     db.close()
 
 
+def create_etf_table():
+    db = pymysql.connect(**db_config)
+    cursor = db.cursor()
+    em_table = "em_real_time_etf" + "_" + datetime.now().strftime('%Y%m%d')
+    sql = ' CREATE TABLE IF NOT EXISTS' + '`' + em_table + '`' + """
+        (
+            trade_date             varchar(32)    null comment '交易日期',
+            ts_code                varchar(10)    null comment '股票代码',
+            name                   varchar(8)     null comment '名称',
+            current_pri            decimal(18, 3) null comment '最新价',
+            ipvo                   decimal(18, 3) null comment 'IOPV实时估值',
+            discount_ratio         decimal(18, 3) null comment '折价率',
+            am_chg                 decimal(18, 3) null comment '涨跌额',
+            pct_chg                decimal(18, 3) null comment '涨跌幅',
+            vol                    int            null comment '成交量（手）',
+            amount                 decimal(18, 3) null comment '成交额（千元）',
+            pri_open               decimal(18, 3) null comment '开盘价',
+            pri_high               decimal(18, 3) null comment '最高价',
+            pri_low                decimal(18, 3) null comment '最低价',
+            pri_close_pre          decimal(18, 3) null comment '昨收价',
+            vibration              decimal(18, 3) null comment '振幅',
+            change_hand            decimal(18, 3) null comment '换手率',
+            vol_ratio              decimal(18, 3) null comment '量比',
+            commission_ratio       decimal(18, 3) null comment '委比',
+            outer_disc             decimal(18, 3) null comment '外盘',
+            inner_disc             decimal(18, 3) null comment '内盘',
+            main_fund              decimal(18, 3) null comment '主力净流入-净额',
+            main_fund_per          decimal(18, 3) null comment '主力净流入-净占比',
+            larger_order           decimal(18, 3) null comment '超大单-净额',
+            larger_order_per       decimal(18, 3) null comment '超大单-净占比',
+            large_order            decimal(18, 3) null comment '大单-净额',
+            large_order_per        decimal(18, 3) null comment '大单-净占比',
+            medium_order           decimal(18, 3) null comment '中单-净额',
+            medium_order_per       decimal(18, 3) null comment '中单-净占比',
+            small_order            decimal(18, 3) null comment '小单-净额',
+            small_order_per        decimal(18, 3) null comment '小单-净占比',
+            cur_hand               decimal(18, 3) null comment '现手',
+            buy_first              decimal(18, 3) null comment '买一',
+            sell_first             decimal(18, 3) null comment '卖一',
+            latest_share           decimal(18, 3) null comment '最新份额',
+            circulation_market_cap decimal(18, 3) null comment '流通市值',
+            market_cap             decimal(18, 3) null comment '总市值',
+            data_date              varchar(16)    null comment '数据日期',
+            cur_date               varchar(32)    null comment '更新时间',
+            KEY `idx_etf_code` (`ts_code`) USING BTREE,
+            KEY `idx_etf_date` (`trade_date`) USING BTREE
+        ) ENGINE = InnoDB
+          DEFAULT CHARSET = utf8mb4
+          COLLATE = utf8mb4_general_ci
+          ROW_FORMAT = DYNAMIC;
+    """
+    cursor.execute(sql)
+    db.commit()
+    db.close()
+
+
 def fetch_rt_data():
     em_table = "em_real_time_stock" + "_" + datetime.now().strftime('%Y%m%d')
     fetch_data(em_table, "stock_zh_a_spot_em")
+
+
+def fetch_etf_data():
+    em_table = "em_real_time_etf" + "_" + datetime.now().strftime('%Y%m%d')
+    fetch_data(em_table, "fund_etf_spot_em")
 
 
 def fetch_dn_data():
@@ -286,28 +347,72 @@ def fetch_continues_data():
     fetch_data("continuous_up", "stock_rank_lxsz_ths")
 
 
+def fetch_test_data():
+    em_table = 'em_d_a_stock'
+    em_table_tmp = em_table + "_tmp"
+    engine = create_engine("mysql+pymysql://root:123456@192.168.0.12:3306/stockrealtime?charset=utf8")
+    db = pymysql.connect(**db_config)
+    sql1 = "drop table if exists " + em_table_tmp
+    cursor = db.cursor()
+    cursor.execute(sql1)
+    now = datetime.now()
+    df = ak.stock_zh_a_hist(
+        symbol="300171",
+        period="daily",
+        start_date="20050301",
+        end_date="20241212",
+        adjust="hfq",
+    )
+    df.insert(loc=0, column='序号', value='300171')
+    # 日期栏去除'-'
+    df['日期'] = df['日期'].astype(str).str.replace("-", "")
+    df = df.drop('股票代码', axis=1)
+    df.to_sql(name=em_table_tmp, con=engine, if_exists='append', index=False)
+
+    sql2 = "insert into " + em_table + " select * from " + em_table_tmp
+    cursor.execute(sql2)
+    cursor.execute(sql1)
+
+    db.commit()
+    db.close()
+
+
 if __name__ == '__main__':
     print('start frpcpy')
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     create_rt_table()
+    create_etf_table()
     print('table created')
-    task = BackgroundScheduler()
+    fetch_test_data()
+    print('test finish')
+    # task = BackgroundScheduler()
 
-    task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
-    task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
-    task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
-    task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
-    task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
-    task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
+    #
+    # task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
+    # task.add_job(create_etf_table, 'cron', day_of_week='0-4', hour='9')
+
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
+    #
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
+
+    # task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
+    # task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
+    # task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
+    # task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
+    # task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
 
     # task.add_job(print_hello_log, 'interval', id='5s_job', seconds=5)
-    task.start()
+    # task.start()
 
     while True:
         time.sleep(60)

@@ -18,6 +18,9 @@ public class DateUtils {
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
     private static final DateTimeFormatter COMMON_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(COMMON_DATE_FORMAT);
 
+    public static Date nowDate() {
+        return Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
+    }
 
     public static Date toDate(LocalDateTime localDateTime) {
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());

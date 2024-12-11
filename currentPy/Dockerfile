@@ -1,10 +1,12 @@
-FROM python:3.13-slim
+#FROM python:3.13-slim
+FROM pybase:latest
 
 # 设置工作目录
 WORKDIR /frpcpy
 
 # 复制项目文件到容器中
-COPY . /frpcpy
+COPY akshare_stock_realtime.py /frpcpy
+#COPY requirements.txt /frpcpy
 
 # 如果你的镜像中没有 tzdata，则需要安装它
 # 注意：python:3.6 官方镜像可能已包含 tzdata
@@ -14,7 +16,7 @@ COPY . /frpcpy
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' > /etc/timezone
 
 # 安装依赖
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+#RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # 暴露端口
 EXPOSE 7010

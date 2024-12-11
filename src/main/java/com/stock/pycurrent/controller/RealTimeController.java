@@ -53,6 +53,8 @@ public class RealTimeController {
     private LimitCodeService limitCodeService;
     @Resource
     private CodeLabelService codeLabelService;
+    @Resource
+    private StockService stockService;
 
     public RealTimeController() {
     }
@@ -66,6 +68,12 @@ public class RealTimeController {
     public String label() {
         codeLabelService.createLabels();
         return "label";
+    }
+
+    @GetMapping("testG")
+    public String testGenerateModel() {
+        stockService.generateModel();
+        return "ok";
     }
 
     @GetMapping("findDataByCode")

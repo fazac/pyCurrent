@@ -37,4 +37,20 @@ public class Constants {
 
     public static BigDecimal PE_LIMIT = BigDecimal.valueOf(25);
 
+    public static int MIN_SALT_LENGTH = 10;
+    public static int MAX_SALT_LENGTH = 13;
+    public static String TOKEN_KEY_NAME = "token";
+    public static int CACHE_EXPIRE_DAY = 3;
+    public static int PAGE_SIZE = 10;
+    public static int FONT_PAGE_SIZE = 5;
+    public static int KEY_IMG_SIZE = 500;
+    public static String JWT_ISSUER = "fazac.top";
+    public static String LINE_SEPERATOR = "|";
+    public static String TWO_LINE_SEPERATOR = "||";
+    public static String ADMIN_PATH = "/admin/";
+    public static String KEY_DIR = "totp";
+    public static String KEY_NAME = ".png";
+    public static String UPLOAD_URL = "/static/upload_file/";
+    public static String KEY_URL = "/static/totp/";
+
 }

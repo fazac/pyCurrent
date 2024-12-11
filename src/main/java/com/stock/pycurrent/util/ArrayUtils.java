@@ -1,8 +1,10 @@
 package com.stock.pycurrent.util;
 
+import com.stock.pycurrent.entity.BasicStock;
 import com.stock.pycurrent.entity.EmDNStock;
 import com.stock.pycurrent.entity.EmRealTimeStock;
 import com.stock.pycurrent.entity.model.Constants;
+import com.stock.pycurrent.entity.StockCalModel;
 import com.stock.pycurrent.entity.vo.DnVO;
 import com.stock.pycurrent.entity.vo.OpenVO;
 import com.stock.pycurrent.entity.vo.RealTimeVO;
@@ -81,6 +83,22 @@ public class ArrayUtils {
         }
         return Collections.emptyList();
     }
+
+    public static List<StockCalModel> convertCalModels(List<? extends BasicStock> sources) {
+        if (sources != null && !sources.isEmpty()) {
+            List<StockCalModel> res = new ArrayList<>();
+            for (BasicStock source : sources) {
+                StockCalModel stockCalModel = new StockCalModel();
+                stockCalModel.setPrice(source.getPriClose());
+                stockCalModel.setTsCode(source.getTsCode());
+                stockCalModel.setTradeDate(source.getTradeDate());
+                res.add(stockCalModel);
+            }
+            return res;
+        }
+        return Collections.emptyList();
+    }
+
 
     private static DnVO generateDnVO(int i, EmDNStock current) {
         DnVO dnVO = new DnVO();

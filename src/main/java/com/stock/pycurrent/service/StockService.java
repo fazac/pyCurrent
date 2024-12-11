@@ -1,16 +1,10 @@
 package com.stock.pycurrent.service;
 
-import com.stock.pycurrent.entity.EmDAStock;
-import com.stock.pycurrent.entity.EmDNStock;
-import com.stock.pycurrent.entity.LimitCode;
-import com.stock.pycurrent.entity.RocModel;
+import com.stock.pycurrent.entity.*;
 import com.stock.pycurrent.entity.emum.PyFuncEnum;
 import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
-import com.stock.pycurrent.repo.EmDAStockRepo;
-import com.stock.pycurrent.repo.EmDNStockRepo;
-import com.stock.pycurrent.repo.LimitCodeRepo;
-import com.stock.pycurrent.repo.RocModelRepo;
+import com.stock.pycurrent.repo.*;
 import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.ExecutorUtils;
@@ -41,7 +35,8 @@ public class StockService {
     private RocModelRepo rocModelRepo;
     @Resource
     private LimitCodeRepo limitCodeRepo;
-
+    @Resource
+    private StockCalModelRepo stockCalModelRepo;
 
     public void initEMDailyData() {
         // 每日更新日行情
@@ -197,4 +192,27 @@ public class StockService {
         return i;
     }
 
+    public void generateModel() {
+        String code = "300171";
+        List<EmDAStock> emDAStocks = emDAStockRepo.findByCode(code);
+        emDAStocks.forEach(x -> {
+            List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(code);
+            if (stockCalModels == null || stockCalModels.isEmpty()) {
+                StockCalModel stockCalModel = convertDA2Model(x);
+                stockCalModel.setLevel(1);
+                stockCalModelRepo.saveAndFlush(stockCalModel);
+            } else {
+                stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(x), stockCalModels));
+            }
+        });
+    }
+
+    private StockCalModel convertDA2Model(EmDAStock emDAStock) {
+        StockCalModel stockCalModel = new StockCalModel();
+        stockCalModel.setTsCode(emDAStock.getTsCode());
+        stockCalModel.setTradeDate(emDAStock.getTradeDate());
+        stockCalModel.setType(1);
+        stockCalModel.setPrice(emDAStock.getPriClose());
+        return stockCalModel;
+    }
 }

@@ -1,0 +1,7 @@
+pyinstaller
+akshare
+pymysql
+sqlalchemy
+apscheduler
+dbutils
+cryptography

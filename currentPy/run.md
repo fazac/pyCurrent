@@ -31,3 +31,9 @@ in admin powerShell
 .\WinSW-x64.exe restart xx.xml
 .\WinSW-x64.exe status xx.xml
 ```
+
+## 5. docker 
+```angular2html
+docker build -t pybase .
+docker build -t pycpy .
+```
