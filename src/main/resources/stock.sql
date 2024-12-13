@@ -180,6 +180,7 @@ create table roc_model
     `sn`              int primary key auto_increment,
     `create_time`     datetime,
     `count`           int,
+    `s_count`         int comment '特定时间间隔,去除停牌',
     `ratio`           decimal(18, 2),
     `cur_close_pri`   decimal(18, 2),
     `door_pri`        decimal(18, 2),
@@ -505,8 +506,12 @@ create table `last_hand_pri`
     `last_thirty_pri`  decimal(18, 2),
     `last_fifty_pri`   decimal(18, 2),
     `last_hundred_pri` decimal(18, 2),
+    `type`             int comment '1 dn , 2 da',
     KEY `idx_lhp_code` (`ts_code`) USING BTREE,
-    KEY `idx_lhp_date` (`trade_date`) USING BTREE
+    KEY `idx_lhp_date` (`trade_date`) USING BTREE,
+    KEY `idx_lhp_type` (`type`) using BTREE,
+    index `idx_code_type`(`ts_code`,`type`) using BTREE,
+    index `idx_date_type`(`trade_date`,`type`) using BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci
@@ -522,7 +527,7 @@ create table em_real_time_etf
 (
     trade_date             varchar(32)    null comment '交易日期',
     ts_code                varchar(10)    null comment '股票代码',
-    name                   varchar(8)     null comment '名称',
+    name                   varchar(32)     null comment '名称',
     current_pri            decimal(18, 3) null comment '最新价',
     ipvo                   decimal(18, 3) null comment 'IOPV实时估值',
     discount_ratio         decimal(18, 3) null comment '折价率',
@@ -557,7 +562,7 @@ create table em_real_time_etf
     latest_share           decimal(18, 3) null comment '最新份额',
     circulation_market_cap decimal(18, 3) null comment '流通市值',
     market_cap             decimal(18, 3) null comment '总市值',
-    data_date              varchar(16)    null comment '数据日期',
+    data_date              varchar(32)    null comment '数据日期',
     cur_date               varchar(32)    null comment '更新时间',
     KEY `idx_etf_code` (`ts_code`) USING BTREE,
     KEY `idx_etf_date` (`trade_date`) USING BTREE

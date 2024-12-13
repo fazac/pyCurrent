@@ -1,12 +1,11 @@
 package com.stock.pycurrent.entity;
 
-import com.stock.pycurrent.entity.pk.BasicStockPK;
+import com.stock.pycurrent.entity.pk.StockCalModelPK;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.proxy.HibernateProxy;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -14,7 +13,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "last_hand_pri")
-@IdClass(BasicStockPK.class)
+@IdClass(StockCalModelPK.class)
 @Getter
 @Setter
 @ToString
@@ -46,21 +45,19 @@ public class LastHandPri {
     @Column(name = "last_hundred_pri", precision = 18, scale = 2)
     private BigDecimal lastHundredPri;
 
+    @Column(name = "type")
+    @Id
+    private int type;
 
     @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
         LastHandPri that = (LastHandPri) o;
-        return getTradeDate() != null && Objects.equals(getTradeDate(), that.getTradeDate())
-                && getTsCode() != null && Objects.equals(getTsCode(), that.getTsCode());
+        return type == that.type && Objects.equals(tradeDate, that.tradeDate) && Objects.equals(tsCode, that.tsCode) && Objects.equals(lastFivePri, that.lastFivePri) && Objects.equals(lastTenPri, that.lastTenPri) && Objects.equals(lastTwentyPri, that.lastTwentyPri) && Objects.equals(lastThirtyPri, that.lastThirtyPri) && Objects.equals(lastFiftyPri, that.lastFiftyPri) && Objects.equals(lastHundredPri, that.lastHundredPri);
     }
 
     @Override
-    public final int hashCode() {
-        return Objects.hash(tradeDate, tsCode);
+    public int hashCode() {
+        return Objects.hash(tradeDate, tsCode, lastFivePri, lastTenPri, lastTwentyPri, lastThirtyPri, lastFiftyPri, lastHundredPri, type);
     }
 }

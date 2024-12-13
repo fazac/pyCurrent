@@ -16,22 +16,31 @@ services:
       MYSQL_USER: fa
       MYSQL_PASSWORD: 123456
       MYSQL_ROOT_PASSWORD: 123456
+#      MYSQL_MODE: STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
       TZ: Asia/ShangHai
     ports:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
       - ./stock.sql:/docker-entrypoint-initdb.d/stock.sql
+      - ./custom.cnf:/etc/mysql/conf.d/custom.cnf
+    privileged: true
     networks:
       myaonet:
         ipv4_address: 192.168.0.12
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+
   frpcpy:
     image: pycpy:latest
-    restart: always
-    volumes:
-      - py-data:/home
+#    volumes:
+#      - py-data:/home
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       myaonet:
         ipv4_address: 192.168.0.13
@@ -54,7 +63,7 @@ volumes:
   db-data:
 #  redis-data:
 #  jar-data:
-  py-data:
+#  py-data:
 
 networks:
   myaonet:

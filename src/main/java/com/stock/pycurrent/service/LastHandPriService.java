@@ -30,19 +30,46 @@ public class LastHandPriService {
     private LastHandPriRepo lastHandPriRepo;
     @Resource
     private EmDNStockRepo emDNStockRepo;
+    @Resource
     private EmDAStockRepo emDAStockRepo;
     @Resource
     private EmRealTimeStockService emRealTimeStockService;
 
     public void createIntradayLHP() {
         String now = DateUtils.now();
-        String maxDate = lastHandPriRepo.findMaxDate();
+        String maxDate = lastHandPriRepo.findMaxDate(1);
         if (now.equals(maxDate) || !StockUtils.afterPullHour()) {
             return;
         }
-        List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(DateUtils.now());
+        List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(now);
         createLHP(now, emDNStockList);
     }
+
+    public void createDAIntradayLHP() {
+        String now = DateUtils.now();
+        String maxDate = lastHandPriRepo.findMaxDate(2);
+        if (now.equals(maxDate) || !StockUtils.afterPullHour()) {
+            return;
+        }
+        List<EmDAStock> emDAStockList = emDAStockRepo.findCurrent(now);
+        createDALHP(now, emDAStockList);
+    }
+
+    private void createDALHP(String now, List<EmDAStock> emDAStockList) {
+        if (emDAStockList != null && !emDAStockList.isEmpty()) {
+            List<LastHandPri> lastHandPris = new ArrayList<>();
+            emDAStockList.stream().filter(x -> x.getVol() != null && x.getVol() > 0).forEach(x ->
+            {
+//                log.warn(DateUtils.commonNow() + " ,lastHandPris:" + lastHandPris.size() + " ,code:" + x.getTsCode());
+                LastHandPri lastHandPri = convertLastHandPri(emDAStockRepo.findLastHandPri(x.getTsCode(), now), 1);
+                if (lastHandPri != null) {
+                    lastHandPris.add(lastHandPri);
+                }
+            });
+            lastHandPriRepo.saveAllAndFlush(lastHandPris);
+        }
+    }
+
 
     public void createPastRecord() {
         List<String> tradeDates = emDNStockRepo.findIntraYearDate();
@@ -52,13 +79,23 @@ public class LastHandPriService {
         }
     }
 
+    public void createPastAllRecord() {
+        List<String> tradeDates = emDNStockRepo.findAllDate();
+        for (String now : tradeDates) {
+            List<EmDNStock> emDNStockList = emDNStockRepo.findCurrent(now);
+            createLHP(now, emDNStockList);
+            List<EmDAStock> emDAStockList = emDAStockRepo.findCurrent(now);
+            createDALHP(now, emDAStockList);
+        }
+    }
+
     private void createLHP(String now, List<EmDNStock> emDNStockList) {
         if (emDNStockList != null && !emDNStockList.isEmpty()) {
             List<LastHandPri> lastHandPris = new ArrayList<>();
             emDNStockList.stream().filter(x -> x.getVol() != null && x.getVol() > 0).forEach(x ->
             {
-                log.warn(DateUtils.commonNow() + " ,lastHandPris:" + lastHandPris.size() + " ,code:" + x.getTsCode());
-                LastHandPri lastHandPri = convertLastHandPri(emDNStockRepo.findLastHandPri(x.getTsCode(), now));
+//                log.warn(DateUtils.commonNow() + " ,lastHandPris:" + lastHandPris.size() + " ,code:" + x.getTsCode());
+                LastHandPri lastHandPri = convertLastHandPri(emDNStockRepo.findLastHandPri(x.getTsCode(), now), 0);
                 if (lastHandPri != null) {
                     lastHandPris.add(lastHandPri);
                 }
@@ -67,7 +104,7 @@ public class LastHandPriService {
         }
     }
 
-    private LastHandPri convertLastHandPri(List<Object[]> queryResList) {
+    private LastHandPri convertLastHandPri(List<Object[]> queryResList, int type) {
         Object[] queryRes = queryResList.getFirst();
         if (queryRes[0] == null) {
             return null;
@@ -81,11 +118,12 @@ public class LastHandPriService {
         lastHandPri.setLastThirtyPri(new BigDecimal(queryRes[6].toString()));
         lastHandPri.setLastFiftyPri(new BigDecimal(queryRes[7].toString()));
         lastHandPri.setLastHundredPri(new BigDecimal(queryRes[8].toString()));
+        lastHandPri.setType(type);
         return lastHandPri;
     }
 
-    public List<LastHandPri> findLHPByCode(String code) {
-        return lastHandPriRepo.findLHPByCode(code);
+    public List<LastHandPri> findLHPByCode(String code, int type) {
+        return lastHandPriRepo.findLHPByCode(code, 1);
     }
 
 

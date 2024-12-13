@@ -18,10 +18,7 @@ import com.stock.pycurrent.util.JSONUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -56,6 +53,9 @@ public class RealTimeController {
     @Resource
     private StockService stockService;
 
+    @Resource
+    private LastHandPriService lastHandPriService;
+
     public RealTimeController() {
     }
 
@@ -68,6 +68,29 @@ public class RealTimeController {
     public String label() {
         codeLabelService.createLabels();
         return "label";
+    }
+
+
+    @PostMapping("createPastRecord")
+    public void createPastRecord() {
+//        lastHandPriService.createRecode();
+//        lastHandPriService.createPastRecord();
+        log.info("step1");
+        lastHandPriService.createPastAllRecord();
+        log.info("step2");
+        stockService.initRocModelRecursion();
+        log.info("step3");
+        stockService.initLHPRocModelRecursion();
+        log.info("step6");
+    }
+
+    @PostMapping("createROC")
+    public void createROC() {
+//        lastHandPriService.createRecode();
+//        lastHandPriService.createPastRecord();
+        log.info("step1");
+        stockService.createROCByCalModel();
+        log.info("step2");
     }
 
     @GetMapping("testG")

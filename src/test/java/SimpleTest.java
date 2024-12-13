@@ -42,32 +42,4 @@ public class SimpleTest {
         log.info(JSONUtils.toJson(res));
     }
 
-    @Test
-    public void test4() {
-        List<Integer> res = Arrays.asList("53,4,99,36,20,67,86,47,32,90".split(",")).stream().map(Integer::parseInt).toList();
-        int min = res.getFirst();
-        int max = res.getFirst();
-        int minIndex = 0;
-        int maxIndex = 0;
-        for (int i = 0; i < res.size(); i++) {
-            if (min > res.get(i)) {
-                min = res.get(i);
-                minIndex = i;
-            }
-            if (max < res.get(i)) {
-                max = res.get(i);
-                maxIndex = i;
-            }
-        }
-        if (minIndex != 0 && maxIndex != 0) {
-            if (minIndex < maxIndex) {
-                calR(0, minIndex);
-            }
-        }
-
-    }
-
-    private void calR(int start, int end) {
-
-    }
 }

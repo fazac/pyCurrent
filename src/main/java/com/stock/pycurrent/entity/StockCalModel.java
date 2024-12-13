@@ -1,6 +1,7 @@
 package com.stock.pycurrent.entity;
 
 import com.stock.pycurrent.entity.pk.BasicStockPK;
+import com.stock.pycurrent.entity.pk.StockCalModelPK;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "stock_cal_model")
-@IdClass(BasicStockPK.class)
+@IdClass(StockCalModelPK.class)
 @Getter
 @Setter
 @ToString
@@ -26,6 +27,7 @@ public class StockCalModel {
     private BigDecimal price;
     @Column(name = "level")
     private int level;
+    @Id
     @Column(name = "type")
     private int type;
 

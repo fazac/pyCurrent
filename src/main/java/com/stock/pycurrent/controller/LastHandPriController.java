@@ -4,6 +4,7 @@ import com.stock.pycurrent.entity.LastHandPri;
 import com.stock.pycurrent.service.LastHandPriService;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +22,8 @@ public class LastHandPriController {
     private LastHandPriService lastHandPriService;
 
     @GetMapping("findLHPByCode")
-    public List<LastHandPri> findLHPByCode(@RequestParam(value = "code") String code) {
-        return lastHandPriService.findLHPByCode(code);
+    public List<LastHandPri> findLHPByCode(@RequestParam(value = "code") String code, @RequestParam(value = "type") @DefaultValue("1") int type) {
+        return lastHandPriService.findLHPByCode(code, type);
     }
 
-    @PostMapping("createPastRecord")
-    public void createPastRecord() {
-        lastHandPriService.createRecode();
-    }
 }

@@ -8,7 +8,7 @@ import time
 
 from sqlalchemy import create_engine
 from operator import methodcaller
-# from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from dbutils.pooled_db import PooledDB
 
@@ -16,6 +16,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 db_config = {
     'host': '192.168.0.12',
+    # 'host': 'localhost',
     'port': 3306,
     'user': 'root',
     'passwd': '123456',
@@ -26,6 +27,7 @@ db_config = {
 pool = PooledDB(creator=pymysql,
                 maxcached=40,
                 host='192.168.0.12',
+                # host='localhost',
                 port=3306,
                 user='root',
                 passwd='123456',
@@ -53,6 +55,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
         em_params = json.loads(params)
 
     engine = create_engine("mysql+pymysql://root:123456@192.168.0.12:3306/stockrealtime?charset=utf8")
+    # engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")
 
     # symbol_df = ak.stock_zh_a_spot_em()
     symbol_df = methodcaller(em_symbol_func)(ak)
@@ -71,6 +74,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
             conn = pool.connection()
             cursor = conn.cursor()
             try:
+                print(self.symbol)
                 em_params["symbol"] = self.symbol
                 df = methodcaller(em_func, **em_params)(ak)
                 cursor.execute(sql1 + "_" + self.s_count)
@@ -134,6 +138,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
 def fetch_data(em_table, em_func):
     em_table_tmp = em_table + "_tmp"
     engine = create_engine("mysql+pymysql://root:123456@192.168.0.12:3306/stockrealtime?charset=utf8")
+    # engine = create_engine("mysql+pymysql://root:123456@localhost:3306/stockrealtime?charset=utf8")
     db = pymysql.connect(**db_config)
     sql1 = "drop table if exists " + em_table_tmp
     cursor = db.cursor()
@@ -215,7 +220,7 @@ def create_etf_table():
         (
             trade_date             varchar(32)    null comment '交易日期',
             ts_code                varchar(10)    null comment '股票代码',
-            name                   varchar(8)     null comment '名称',
+            name                   varchar(32)     null comment '名称',
             current_pri            decimal(18, 3) null comment '最新价',
             ipvo                   decimal(18, 3) null comment 'IOPV实时估值',
             discount_ratio         decimal(18, 3) null comment '折价率',
@@ -249,7 +254,7 @@ def create_etf_table():
             latest_share           decimal(18, 3) null comment '最新份额',
             circulation_market_cap decimal(18, 3) null comment '流通市值',
             market_cap             decimal(18, 3) null comment '总市值',
-            data_date              varchar(16)    null comment '数据日期',
+            data_date              varchar(32)    null comment '数据日期',
             cur_date               varchar(32)    null comment '更新时间',
             KEY `idx_etf_code` (`ts_code`) USING BTREE,
             KEY `idx_etf_date` (`trade_date`) USING BTREE
@@ -281,6 +286,8 @@ def fetch_dn_data():
     max_trade_date = cursor.fetchall()[0][0]
     next_trade_date = add_one_day(max_trade_date)
     now_trade_date = datetime.now().strftime('%Y%m%d')
+    # next_trade_date = '19900101'
+    # now_trade_date = '20241231'
     if max_trade_date != now_trade_date:
         fetch_thread_data("stock_zh_a_hist",
                           'em_d_n_stock',
@@ -300,6 +307,8 @@ def fetch_da_data():
     max_trade_date = cursor.fetchall()[0][0]
     next_trade_date = add_one_day(max_trade_date)
     now_trade_date = datetime.now().strftime('%Y%m%d')
+    # next_trade_date = '19900101'
+    # now_trade_date = '20241231'
     if max_trade_date != now_trade_date:
         fetch_thread_data("stock_zh_a_hist",
                           'em_d_a_stock',
@@ -348,7 +357,7 @@ def fetch_continues_data():
 
 
 def fetch_test_data():
-    em_table = 'em_d_a_stock'
+    em_table = 'em_d_n_stock'
     em_table_tmp = em_table + "_tmp"
     engine = create_engine("mysql+pymysql://root:123456@192.168.0.12:3306/stockrealtime?charset=utf8")
     db = pymysql.connect(**db_config)
@@ -357,13 +366,13 @@ def fetch_test_data():
     cursor.execute(sql1)
     now = datetime.now()
     df = ak.stock_zh_a_hist(
-        symbol="300171",
+        symbol="600861",
         period="daily",
-        start_date="20050301",
-        end_date="20241212",
-        adjust="hfq",
+        start_date="19900101",
+        end_date="20241231",
+        adjust="",
     )
-    df.insert(loc=0, column='序号', value='300171')
+    df.insert(loc=0, column='序号', value='600861')
     # 日期栏去除'-'
     df['日期'] = df['日期'].astype(str).str.replace("-", "")
     df = df.drop('股票代码', axis=1)
@@ -383,36 +392,52 @@ if __name__ == '__main__':
     create_rt_table()
     create_etf_table()
     print('table created')
-    fetch_test_data()
-    print('test finish')
-    # task = BackgroundScheduler()
+    # fetch_concept_data()
+    # print('fetch_concept_data finished')
+    # fetch_industry_data()
+    # print('fetch_industry_data finished')
+    # fetch_continues_data()
+    # print('fetch_continues_data finished')
+    # fetch_rt_data()
+    # print('fetch_rt_data finished')
+    # fetch_etf_data()
+    # print('fetch_etf_data finished')
+    # fetch_dn_data()
+    # print('fetch_dn_data finished')
+    # fetch_da_data()
+    # print('fetch_da_data finished')
+    # print('all finish')
 
-    #
-    # task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
-    # task.add_job(create_etf_table, 'cron', day_of_week='0-4', hour='9')
+    # fetch_test_data()
+    # print('test finish')
+    task = BackgroundScheduler()
 
-    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
-    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
-    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
-    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
-    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
-    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
-    #
-    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
-    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
-    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
-    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
-    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
-    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
 
-    # task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
-    # task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
-    # task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
-    # task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
-    # task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
+    task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
+    task.add_job(create_etf_table, 'cron', day_of_week='0-4', hour='9')
 
-    # task.add_job(print_hello_log, 'interval', id='5s_job', seconds=5)
-    # task.start()
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
+
+    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
+
+    task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
+    task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
+    task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
+    task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
+    task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
+
+    task.add_job(print_hello_log, 'interval', id='5s_job', seconds=5)
+    task.start()
 
     while True:
         time.sleep(60)

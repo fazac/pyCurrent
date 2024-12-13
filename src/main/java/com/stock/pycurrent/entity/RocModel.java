@@ -26,6 +26,9 @@ public class RocModel {
     @Column(name = "count")
     private Integer count;
 
+    @Column(name = "s_count")
+    private Integer sCount;
+
     @Column(name = "ratio", precision = 18, scale = 2)
     private BigDecimal ratio;
 
@@ -58,14 +61,13 @@ public class RocModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RocModel rocModel = (RocModel) o;
-        return Objects.equals(getId(), rocModel.getId()) && Objects.equals(getCreateTime(), rocModel.getCreateTime()) && Objects.equals(getCount(), rocModel.getCount()) && Objects.equals(getRatio(), rocModel.getRatio()) && Objects.equals(getCurClosePri(), rocModel.getCurClosePri()) && Objects.equals(getDoorPri(), rocModel.getDoorPri()) && Objects.equals(getStartDate(), rocModel.getStartDate()) && Objects.equals(getEndDate(), rocModel.getEndDate()) && Objects.equals(getTsCode(), rocModel.getTsCode()) && Objects.equals(getConceptSymbol(), rocModel.getConceptSymbol()) && Objects.equals(getIndustrySymbol(), rocModel.getIndustrySymbol()) && Objects.equals(getCapInfo(), rocModel.getCapInfo()) && Objects.equals(getParams(), rocModel.getParams());
+        return Objects.equals(id, rocModel.id) && Objects.equals(createTime, rocModel.createTime) && Objects.equals(count, rocModel.count) && Objects.equals(sCount, rocModel.sCount) && Objects.equals(ratio, rocModel.ratio) && Objects.equals(curClosePri, rocModel.curClosePri) && Objects.equals(doorPri, rocModel.doorPri) && Objects.equals(startDate, rocModel.startDate) && Objects.equals(endDate, rocModel.endDate) && Objects.equals(tsCode, rocModel.tsCode) && Objects.equals(conceptSymbol, rocModel.conceptSymbol) && Objects.equals(industrySymbol, rocModel.industrySymbol) && Objects.equals(capInfo, rocModel.capInfo) && Objects.equals(params, rocModel.params);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCreateTime(), getCount(), getRatio(), getCurClosePri(), getDoorPri(), getStartDate(), getEndDate(), getTsCode(), getConceptSymbol(), getIndustrySymbol(), getCapInfo(), getParams());
+        return Objects.hash(id, createTime, count, sCount, ratio, curClosePri, doorPri, startDate, endDate, tsCode, conceptSymbol, industrySymbol, capInfo, params);
     }
 }

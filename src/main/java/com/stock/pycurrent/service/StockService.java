@@ -5,6 +5,7 @@ import com.stock.pycurrent.entity.emum.PyFuncEnum;
 import com.stock.pycurrent.entity.jsonvalue.LimitCodeValue;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.repo.*;
+import com.stock.pycurrent.schedule.PrepareData;
 import com.stock.pycurrent.util.CalculateUtils;
 import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.ExecutorUtils;
@@ -139,7 +140,7 @@ public class StockService {
     public void createLimitCode() {
         String nowDay = DateUtils.now();
         String lastDate = limitCodeRepo.findMaxDate();
-        if (nowDay.equals(lastDate)) {
+        if (nowDay.equals(lastDate) || !StockUtils.afterPullHour()) {
             return;
         }
         List<EmDNStock> emDNStockList = null;
@@ -222,7 +223,7 @@ public class StockService {
 
 
     public void initLHPRocModelRecursion() {
-        List<LastHandPri> lastHandPris = lastHandPriRepo.findByTradeDate(DateUtils.now());
+        List<LastHandPri> lastHandPris = lastHandPriRepo.findByTradeDate(DateUtils.now(), 1);
         lastHandPris.forEach(x -> {
             ExecutorUtils.addGuavaComplexTask(() -> generateLHPModel(x, "10"));
         });
@@ -255,7 +256,7 @@ public class StockService {
         }
         List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(lastHandPri.getTsCode(), iType);
         if (stockCalModels == null || stockCalModels.isEmpty()) {
-            List<LastHandPri> lastHandPris = lastHandPriRepo.findByCode(lastHandPri.getTsCode());
+            List<LastHandPri> lastHandPris = lastHandPriRepo.findByCode(lastHandPri.getTsCode(), 1);
             int finalIType = iType;
             lastHandPris.forEach(x -> {
                 List<StockCalModel> tmpModels = stockCalModelRepo.findLastByCode(lastHandPri.getTsCode(), finalIType);
@@ -286,6 +287,45 @@ public class StockService {
                 stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(x), stockCalModels));
             }
         });
+    }
+
+    public void createROCByCalModel() {
+        List<String> codes = emDAStockRepo.findLastCodes();
+        Date now = new Date();
+        if (!codes.isEmpty()) {
+            codes.forEach(x -> {
+                List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(x, 1);
+                List<RocModel> rocModels = convertRocModel(stockCalModels, now);
+                if (!rocModels.isEmpty()) {
+                    rocModelRepo.saveAll(rocModels);
+                }
+            });
+
+        }
+    }
+
+    private List<RocModel> convertRocModel(List<StockCalModel> stockCalModels, Date now) {
+        List<RocModel> rocModels = new ArrayList<>();
+        String params = stockCalModels.getLast().getTradeDate();
+        if (stockCalModels.size() > 1) {
+            for (int i = 1; i < stockCalModels.size(); i++) {
+                StockCalModel current = stockCalModels.get(i);
+                StockCalModel lastOne = stockCalModels.get(i - 1);
+                RocModel rocModel = new RocModel();
+                rocModel.setCreateTime(now);
+                rocModel.setCount(PrepareData.calDistance(lastOne.getTradeDate(), current.getTradeDate()));
+                rocModel.setSCount(PrepareData.calDistance(lastOne.getTradeDate(), current.getTradeDate(), current.getTsCode()));
+                rocModel.setRatio(StockUtils.calRatio(current.getPrice(), lastOne.getPrice()));
+                rocModel.setCurClosePri(current.getPrice());
+                rocModel.setDoorPri(lastOne.getPrice());
+                rocModel.setStartDate(lastOne.getTradeDate());
+                rocModel.setEndDate(current.getTradeDate());
+                rocModel.setTsCode(current.getTsCode());
+                rocModel.setParams(params);
+                rocModels.add(rocModel);
+            }
+        }
+        return rocModels;
     }
 
     private StockCalModel convertDA2Model(EmDAStock emDAStock) {

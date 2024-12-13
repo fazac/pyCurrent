@@ -2,12 +2,10 @@ package com.stock.pycurrent.repo;
 
 
 import com.stock.pycurrent.entity.EmDNStock;
-import com.stock.pycurrent.entity.LastHandPri;
 import com.stock.pycurrent.entity.pk.BasicStockPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,7 +116,7 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
                                 2), round(case when t1.sn = 1 then t1.sa end, 2)) as p100
             from st t1
                      join st t2 on t1.sn = t2.sn - 1;
-                        """, nativeQuery = true)
+            """, nativeQuery = true)
     List<Object[]> findLastHandPri(@Param("code") String code, @Param("tradeDate") String tradeDate);
 
 
@@ -136,4 +134,7 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
                     where t.sh > 100;
             """, nativeQuery = true)
     String findMinTradeDate(@Param("code") String code);
+
+    @Query(value = "select distinct trade_date from em_d_n_stock  order by  trade_date  ", nativeQuery = true)
+    List<String> findAllDate();
 }

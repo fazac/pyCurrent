@@ -63,8 +63,8 @@ export function searchSome(type, code, name, searchDate, hand, pch, count, r2Low
     });
 }
 
-export function findLHPByCode(code) {
-    return axios.get('/lhp/findLHPByCode', {params: {code: code}});
+export function findLHPByCode(code, type) {
+    return axios.get('/lhp/findLHPByCode', {params: {code: code, type: type}});
 }
 
 

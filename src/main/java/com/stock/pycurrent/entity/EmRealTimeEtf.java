@@ -125,7 +125,7 @@ public class EmRealTimeEtf {
     @Column(name = "market_cap", precision = 18, scale = 3)
     private BigDecimal marketCap;
 
-    @Column(name = "data_date", length = 16)
+    @Column(name = "data_date", length = 32)
     private String dataDate;
 
     @Column(name = "cur_date", length = 32)
