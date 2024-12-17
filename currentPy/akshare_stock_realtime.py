@@ -59,7 +59,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
 
     # symbol_df = ak.stock_zh_a_spot_em()
     symbol_df = methodcaller(em_symbol_func)(ak)
-    print(symbol_df)
+    print_log(symbol_df)
     sql1 = "drop table if exists " + em_table_tmp
 
     now = datetime.now()
@@ -74,7 +74,7 @@ def fetch_thread_data(em_func, em_table, em_symbol_func, em_symbol_name, em_add_
             conn = pool.connection()
             cursor = conn.cursor()
             try:
-                print(self.symbol)
+                print_log(self.symbol)
                 em_params["symbol"] = self.symbol
                 df = methodcaller(em_func, **em_params)(ak)
                 cursor.execute(sql1 + "_" + self.s_count)
@@ -146,7 +146,7 @@ def fetch_data(em_table, em_func):
     now = datetime.now()
 
     df = methodcaller(em_func)(ak)
-    print(df)
+    print_log(df)
     idx = df.columns
     if '序号' not in idx:
         df.insert(loc=0, column='序号', value=1)
@@ -168,6 +168,13 @@ def print_hello_log():
     filename = "fw.txt"
     file = open(filename, "a")
     file.write('hello ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '\n')
+    file.close()
+
+
+def print_log(log_str):
+    filename = "fw.txt"
+    file = open(filename, "a")
+    file.write(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' ' + str(log_str) + '\n')
     file.close()
 
 
@@ -305,10 +312,10 @@ def fetch_da_data():
     sql = 'select max(c.trade_date) from em_d_a_stock c'
     cursor.execute(sql)
     max_trade_date = cursor.fetchall()[0][0]
-    next_trade_date = add_one_day(max_trade_date)
-    now_trade_date = datetime.now().strftime('%Y%m%d')
-    # next_trade_date = '19900101'
-    # now_trade_date = '20241231'
+    # next_trade_date = add_one_day(max_trade_date)
+    # now_trade_date = datetime.now().strftime('%Y%m%d')
+    next_trade_date = '19900101'
+    now_trade_date = '20241231'
     if max_trade_date != now_trade_date:
         fetch_thread_data("stock_zh_a_hist",
                           'em_d_a_stock',
@@ -387,11 +394,11 @@ def fetch_test_data():
 
 
 if __name__ == '__main__':
-    print('start frpcpy')
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    print_log('start frpcpy')
+    print_log(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     create_rt_table()
     create_etf_table()
-    print('table created')
+    print_log('table created')
     # fetch_concept_data()
     # print('fetch_concept_data finished')
     # fetch_industry_data()
@@ -404,40 +411,40 @@ if __name__ == '__main__':
     # print('fetch_etf_data finished')
     # fetch_dn_data()
     # print('fetch_dn_data finished')
-    # fetch_da_data()
-    # print('fetch_da_data finished')
+    fetch_da_data()
+    print_log('fetch_da_data finished')
     # print('all finish')
 
     # fetch_test_data()
     # print('test finish')
-    task = BackgroundScheduler()
-
-
-    task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
-    task.add_job(create_etf_table, 'cron', day_of_week='0-4', hour='9')
-
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
-    task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
-
-    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
-    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
-    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
-    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
-    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
-    task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
-
-    task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
-    task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
-    task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
-    task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
-    task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
-
-    task.add_job(print_hello_log, 'interval', id='5s_job', seconds=5)
-    task.start()
+    # task = BackgroundScheduler()
+    #
+    #
+    # task.add_job(create_rt_table, 'cron', day_of_week='0-4', hour='9')
+    # task.add_job(create_etf_table, 'cron', day_of_week='0-4', hour='9')
+    #
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    # task.add_job(fetch_rt_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
+    #
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='9', minute='14-59/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='10', minute='*/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='11', minute='0-32/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='13', minute='*/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='14', minute='*/1')
+    # task.add_job(fetch_etf_data, 'cron', day_of_week='0-4', hour='15', minute='0-2/1')
+    #
+    # task.add_job(fetch_dn_data, 'cron', day_of_week='0-4', hour='16', minute='0')
+    # task.add_job(fetch_da_data, 'cron', day_of_week='0-4', hour='16', minute='10')
+    # task.add_job(fetch_concept_data, 'cron', day_of_week='0-4', hour='16', minute='20')
+    # task.add_job(fetch_industry_data, 'cron', day_of_week='0-4', hour='16', minute='25')
+    # task.add_job(fetch_continues_data, 'cron', day_of_week='0-4', hour='16', minute='30')
+    #
+    # task.add_job(print_hello_log, 'interval', id='5s_job', seconds=5)
+    # task.start()
 
     while True:
         time.sleep(60)
