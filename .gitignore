@@ -191,3 +191,5 @@ build/
 /currentPy/dist/nssm.exe
 /currentPy/dist/nssm.pdb
 /currentPy/akshare_stock_realtime.spec
+/currentPy/fw.txt
+
