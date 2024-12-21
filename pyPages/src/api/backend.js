@@ -67,4 +67,7 @@ export function findLHPByCode(code, type) {
     return axios.get('/lhp/findLHPByCode', {params: {code: code, type: type}});
 }
 
+export function findRocByTypeDate(code, type, sdate, edate) {
+    return axios.get('/rt/findRocByTypeDate', {params: {code: code, type: type, startDate: sdate, endDate: edate}});
+}
 

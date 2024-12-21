@@ -8,7 +8,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 
 def open_proxy():
-    with open('./proxy.txt', 'r') as f:
+    with open('proxy.txt', 'r') as f:
         # 一行一行读取
         ip = [line.strip() for line in f]
     return ip

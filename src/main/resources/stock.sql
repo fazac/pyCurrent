@@ -627,7 +627,8 @@ create table `stock_cal_model`
     KEY `idx_sdl_code` (`ts_code`) USING BTREE,
     KEY `idx_sdl_date` (`trade_date`) USING BTREE,
     INDEX r_idx (`ts_code`, `type`, `trade_date`) USING BTREE,
-    INDEX r_idx_level (`ts_code`, `type`, `level`) USING BTREE
+    INDEX r_idx_level (`ts_code`, `type`, `level`) USING BTREE,
+    INDEX r_idx_type_date (`type`, trade_date) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci

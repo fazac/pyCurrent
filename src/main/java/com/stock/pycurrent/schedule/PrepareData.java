@@ -11,7 +11,6 @@ import com.stock.pycurrent.util.PARAMS;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,24 +33,25 @@ public class PrepareData implements CommandLineRunner {
     private CodeLabelService codeLabelService;
     @Resource
     private LastHandPriService lastHandPriService;
+    @Resource
+    private EmDAStockRepo emDAStockRepo;
+
     private static final Map<String, List<String>> labelMap = new ConcurrentHashMap<>();
     private static final Map<String, EmRealTimeStock> emRealTimeStockMap = new ConcurrentHashMap<>();
     private static final Map<String, List<String>> codeDateMap = new ConcurrentHashMap<>();
     private static List<String> dateList = new ArrayList<>();
-    @Autowired
-    private EmDAStockRepo emDAStockRepo;
 
     @Override
     public void run(String... args) {
         LocalDateTime n = LocalDateTime.now();
         log.warn("START " + DateUtils.getH_M(n));
-//        pullAll();
-//        prepareLabelMap();
+        pullAll();
+        prepareLabelMap();
         prepareCodeDateMap();
     }
 
     @SneakyThrows
-//    @Scheduled(cron = " 0 5 9 * * ? ")
+    @Scheduled(cron = " 0 5 9 * * ? ")
     public void prepareLabelMap() {
         log.warn("LABEL-PREPARE-ENTER");
         labelMap.clear();
@@ -68,7 +68,7 @@ public class PrepareData implements CommandLineRunner {
     }
 
     @SneakyThrows
-//    @Scheduled(cron = " 0 0 9 * * ? ")
+    @Scheduled(cron = " 0 0 9 * * ? ")
     public void prepareCodeDateMap() {
         log.warn("CODE_DATE-PREPARE-ENTER");
         dateList.clear();
@@ -84,7 +84,7 @@ public class PrepareData implements CommandLineRunner {
     }
 
     @SneakyThrows
-//    @Scheduled(cron = " 0 35 16 * * ? ")
+    @Scheduled(cron = " 0 35 16 * * ? ")
     public void pullAll() {
         if (!PARAMS.BAK_MODE) {
             log.warn("LABEL-ENTER");
@@ -96,6 +96,7 @@ public class PrepareData implements CommandLineRunner {
             log.warn("ROC-ENTER");
 //            stockService.initRocModel();
             stockService.initRocModelRecursion();
+            stockService.createROCByCalModel();
             log.warn("ROC-OVER");
             log.warn("LHP-DN-ENTER");
             lastHandPriService.createIntradayLHP();

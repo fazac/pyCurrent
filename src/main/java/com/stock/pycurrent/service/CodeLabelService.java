@@ -51,7 +51,7 @@ public class CodeLabelService {
     public void createLabels() {
         String now = DateUtils.now();
         String lastDate = codeLabelRepo.findMaxDate();
-        if (now.equals(lastDate) || !StockUtils.afterPullHour()) {
+        if (now.equals(lastDate) || !StockUtils.isNotRest() || !StockUtils.afterPullHour()) {
             return;
         }
         List<EmRealTimeStock> emRealTimeStockList = emRealTimeStockService.findLast();

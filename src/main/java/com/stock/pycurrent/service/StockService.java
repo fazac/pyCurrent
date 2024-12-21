@@ -195,48 +195,107 @@ public class StockService {
         return i;
     }
 
+    @SneakyThrows
     public void initRocModelRecursion() {
         List<EmDAStock> emDAStocks = emDAStockRepo.findByTradeDate(DateUtils.now());
+//        List<EmDAStock> emDAStocks = emDAStockRepo.findByTradeDate("20241213");
         emDAStocks.forEach(x -> {
-            ExecutorUtils.addGuavaComplexTask(() -> generateModel(x));
+            ExecutorUtils.addCsComplexTask(() -> {
+                generateModel(x.getTsCode());
+                return null;
+            });
         });
+        for (int i = 0; i < emDAStocks.size(); i++) {
+            ExecutorUtils.COMPLETION_SERVICE.take().get();
+        }
+        log.info("ALL ROC OVER");
     }
 
-    public void generateModel(EmDAStock emDAStock) {
-        List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(emDAStock.getTsCode(), 1);
+    public void generateModel(String tsCode) {
+        List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(tsCode, 1);
         if (stockCalModels == null || stockCalModels.isEmpty()) {
-            List<EmDAStock> emDAStocks = emDAStockRepo.findByCode(emDAStock.getTsCode());
-            emDAStocks.forEach(x -> {
-                List<StockCalModel> tmpModels = stockCalModelRepo.findLastByCode(emDAStock.getTsCode(), 1);
-                if (tmpModels == null || tmpModels.isEmpty()) {
-                    StockCalModel stockCalModel = convertDA2Model(x);
-                    stockCalModel.setLevel(1);
-                    stockCalModelRepo.saveAndFlush(stockCalModel);
-                } else {
-                    stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(x), tmpModels));
-                }
-            });
+            generateFirstModel(tsCode);
         } else {
-            stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(emDAStock), stockCalModels));
+            String maxDate = stockCalModels.getLast().getTradeDate();
+            List<EmDAStock> emDAStocks = emDAStockRepo.findByCodeDate(tsCode, maxDate); // 此处有开始时间右侧遍历
+            if (emDAStocks != null && !emDAStocks.isEmpty()) {
+                for (EmDAStock x : emDAStocks) {
+                    stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(x), stockCalModels));
+                    stockCalModels = stockCalModelRepo.findLastByCode(tsCode, 1);
+                }
+            }
         }
     }
 
+    private void generateFirstModel(String tsCode) {
+        List<EmDAStock> emDAStocks = emDAStockRepo.findByCode(tsCode);
+        emDAStocks.forEach(x -> {
+            List<StockCalModel> tmpModels = stockCalModelRepo.findLastByCode(tsCode, 1);
+            if (tmpModels == null || tmpModels.isEmpty()) {
+                StockCalModel stockCalModel = convertDA2Model(x);
+                stockCalModel.setLevel(1);
+                stockCalModelRepo.saveAndFlush(stockCalModel);
+            } else {
+                stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(x), tmpModels));
+            }
+        });
+    }
 
+    @SneakyThrows
+    public void initLHPRocModelRecursionInner(String date) {
+        List<LastHandPri> lastHandPris = lastHandPriRepo.findByTradeDate(date, 2);
+
+        int size = lastHandPris.size();
+        lastHandPris.forEach(x -> {
+            ExecutorUtils.addCsComplexTask(() -> {
+                generateLHPModel(x, "10");
+                return null;
+            });
+        });
+        for (int i = 0; i < size; i++) {
+            ExecutorUtils.COMPLETION_SERVICE.take().get();
+        }
+        log.info("ALL 10 OVER");
+        lastHandPris.forEach(x -> {
+            ExecutorUtils.addCsComplexTask(() -> {
+                generateLHPModel(x, "30");
+                return null;
+            });
+        });
+        for (int i = 0; i < size; i++) {
+            ExecutorUtils.COMPLETION_SERVICE.take().get();
+        }
+        log.info("ALL 30 OVER");
+        lastHandPris.forEach(x -> {
+            ExecutorUtils.addCsComplexTask(() -> {
+                generateLHPModel(x, "50");
+                return null;
+            });
+        });
+        for (int i = 0; i < size; i++) {
+            ExecutorUtils.COMPLETION_SERVICE.take().get();
+        }
+        log.info("ALL 50 OVER");
+        lastHandPris.forEach(x -> {
+            ExecutorUtils.addCsComplexTask(() -> {
+                generateLHPModel(x, "100");
+                return null;
+            });
+        });
+        for (int i = 0; i < size; i++) {
+            ExecutorUtils.COMPLETION_SERVICE.take().get();
+        }
+        log.info("ALL 100 OVER");
+        log.info("ALL ROC OVER");
+    }
+
+    @SneakyThrows
     public void initLHPRocModelRecursion() {
-        List<LastHandPri> lastHandPris = lastHandPriRepo.findByTradeDate(DateUtils.now(), 1);
-        lastHandPris.forEach(x -> {
-            ExecutorUtils.addGuavaComplexTask(() -> generateLHPModel(x, "10"));
-        });
-        lastHandPris.forEach(x -> {
-            ExecutorUtils.addGuavaComplexTask(() -> generateLHPModel(x, "30"));
-        });
-        lastHandPris.forEach(x -> {
-            ExecutorUtils.addGuavaComplexTask(() -> generateLHPModel(x, "50"));
-        });
-        lastHandPris.forEach(x -> {
-            ExecutorUtils.addGuavaComplexTask(() -> generateLHPModel(x, "100"));
-        });
-
+        String maxDate = stockCalModelRepo.findMaxDate(2);
+        List<String> handleDates = emDAStockRepo.findByDateInterval(maxDate, DateUtils.now());
+        if (handleDates != null && !handleDates.isEmpty()) {
+            handleDates.forEach(this::initLHPRocModelRecursionInner);
+        }
     }
 
     public void generateLHPModel(LastHandPri lastHandPri, String type) {
@@ -256,77 +315,70 @@ public class StockService {
         }
         List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(lastHandPri.getTsCode(), iType);
         if (stockCalModels == null || stockCalModels.isEmpty()) {
-            List<LastHandPri> lastHandPris = lastHandPriRepo.findByCode(lastHandPri.getTsCode(), 1);
-            int finalIType = iType;
-            lastHandPris.forEach(x -> {
-                List<StockCalModel> tmpModels = stockCalModelRepo.findLastByCode(lastHandPri.getTsCode(), finalIType);
-                if (tmpModels == null || tmpModels.isEmpty()) {
-                    StockCalModel stockCalModel = convertLHP2Model(x, type);
-                    stockCalModel.setLevel(1);
-                    stockCalModelRepo.saveAndFlush(stockCalModel);
-                } else {
-                    stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertLHP2Model(x, type), tmpModels));
+            List<StockCalModel> lastList = new ArrayList<>();
+            List<LastHandPri> lastHandPris = lastHandPriRepo.findByCode(lastHandPri.getTsCode(), 2);
+            int startIndex = 0;
+            for (int j = 0; j < lastHandPris.size(); j++) {
+                StockCalModel stockCalModel = convertLHP2Model(lastHandPris.get(j), type);
+                if (stockCalModel.getPrice() == null) {
+                    continue;
                 }
-            });
+                stockCalModel.setLevel(1);
+                lastList.add(stockCalModel);
+                startIndex = j;
+                break;
+            }
+            for (int z = startIndex + 1; z < lastHandPris.size(); z++) {
+                int maxLevel = lastList.getFirst().getLevel();
+                lastList = new ArrayList<>(lastList.stream().filter(x -> x.getLevel() == maxLevel).toList());
+                StockUtils.generateCalModel(convertLHP2Model(lastHandPris.get(z), type), lastList);
+            }
+            stockCalModelRepo.saveAll(lastList);
+//            for (LastHandPri x : lastHandPris) {
+//                List<StockCalModel> tmpModels = stockCalModelRepo.findLastByCode(lastHandPri.getTsCode(), iType);
+//                if (tmpModels == null || tmpModels.isEmpty()) {
+//                    if (lastList.isEmpty()) {
+//                        StockCalModel stockCalModel = convertLHP2Model(x, type);
+//                        if (stockCalModel.getPrice() == null) {
+//                            continue;
+//                        }
+//                        stockCalModel.setLevel(1);
+//                        stockCalModelRepo.save(stockCalModel);
+//                    } else {
+//                        stockCalModelRepo.saveAll(StockUtils.generateCalModel(convertLHP2Model(x, type), tmpModels));
+//                    }
+//                }
+//            }
         } else {
-            stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertLHP2Model(lastHandPri, type), stockCalModels));
+            stockCalModelRepo.saveAll(StockUtils.generateCalModel(convertLHP2Model(lastHandPri, type), stockCalModels));
         }
     }
 
 
     public void generateModelTest() {
         String code = "300171";
-        List<EmDAStock> emDAStocks = emDAStockRepo.findByCode(code);
-        emDAStocks.forEach(x -> {
-            List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(code, 1);
-            if (stockCalModels == null || stockCalModels.isEmpty()) {
-                StockCalModel stockCalModel = convertDA2Model(x);
-                stockCalModel.setLevel(1);
-                stockCalModelRepo.saveAndFlush(stockCalModel);
-            } else {
-                stockCalModelRepo.saveAllAndFlush(StockUtils.generateCalModel(convertDA2Model(x), stockCalModels));
-            }
-        });
+        generateFirstModel(code);
     }
 
+    @SneakyThrows
     public void createROCByCalModel() {
         List<String> codes = emDAStockRepo.findLastCodes();
         Date now = new Date();
         if (!codes.isEmpty()) {
-            codes.forEach(x -> {
+            codes.forEach(x -> ExecutorUtils.addCsComplexTask(() -> {
                 List<StockCalModel> stockCalModels = stockCalModelRepo.findLastByCode(x, 1);
-                List<RocModel> rocModels = convertRocModel(stockCalModels, now);
+                List<RocModel> rocModels = StockUtils.convertRocModel(stockCalModels, now);
                 if (!rocModels.isEmpty()) {
                     rocModelRepo.saveAll(rocModels);
                 }
-            });
-
-        }
-    }
-
-    private List<RocModel> convertRocModel(List<StockCalModel> stockCalModels, Date now) {
-        List<RocModel> rocModels = new ArrayList<>();
-        String params = stockCalModels.getLast().getTradeDate();
-        if (stockCalModels.size() > 1) {
-            for (int i = 1; i < stockCalModels.size(); i++) {
-                StockCalModel current = stockCalModels.get(i);
-                StockCalModel lastOne = stockCalModels.get(i - 1);
-                RocModel rocModel = new RocModel();
-                rocModel.setCreateTime(now);
-                rocModel.setCount(PrepareData.calDistance(lastOne.getTradeDate(), current.getTradeDate()));
-                rocModel.setSCount(PrepareData.calDistance(lastOne.getTradeDate(), current.getTradeDate(), current.getTsCode()));
-                rocModel.setRatio(StockUtils.calRatio(current.getPrice(), lastOne.getPrice()));
-                rocModel.setCurClosePri(current.getPrice());
-                rocModel.setDoorPri(lastOne.getPrice());
-                rocModel.setStartDate(lastOne.getTradeDate());
-                rocModel.setEndDate(current.getTradeDate());
-                rocModel.setTsCode(current.getTsCode());
-                rocModel.setParams(params);
-                rocModels.add(rocModel);
+                return null;
+            }));
+            for (int i = 0; i < codes.size(); i++) {
+                ExecutorUtils.COMPLETION_SERVICE.take().get();
             }
         }
-        return rocModels;
     }
+
 
     private StockCalModel convertDA2Model(EmDAStock emDAStock) {
         StockCalModel stockCalModel = new StockCalModel();

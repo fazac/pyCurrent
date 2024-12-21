@@ -25,6 +25,10 @@ public class Constants {
     public static BigDecimal PRICE_MIN = BigDecimal.valueOf(-1);
 
     public static BigDecimal FIVE = BigDecimal.valueOf(5);
+    public static BigDecimal TEN = BigDecimal.valueOf(10);
+    public static BigDecimal TWENTY = BigDecimal.valueOf(20);
+    public static BigDecimal THIRTY = BigDecimal.valueOf(30);
+    public static BigDecimal FIFTY = BigDecimal.valueOf(50);
     public static BigDecimal THREE = BigDecimal.valueOf(3);
     public static BigDecimal N_ONE = BigDecimal.valueOf(-1);
 

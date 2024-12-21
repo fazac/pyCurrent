@@ -1,11 +1,12 @@
 <script setup>
-import {findDataByCode} from "@/api/backend";
+import {findDataByCode, findRocByTypeDate} from "@/api/backend";
 import {inject, reactive, ref, watch} from 'vue'
 import {cellStyle, headerCellStyle, isEmpty} from "@/api/util";
 
 const dialogTableVisible = ref(false);
 const codeTableData = reactive({});
 const dialogType = ref('');
+const rocType = ref('');
 
 const detailCode = inject('detailCode', null);
 
@@ -24,6 +25,18 @@ watch(detailCode, async () => {
   }
 });
 
+watch(rocType, async () => {
+  if (!isEmpty(rocType) && !isEmpty(detailCode)) {
+    findRocByTypeDate(detailCode.value, rocType.value, '', '').then(res => {
+      codeTableData.value.roc = res;
+    })
+  }
+})
+
+function clickRocRow() {
+
+}
+
 </script>
 
 <template>
@@ -35,6 +48,14 @@ watch(detailCode, async () => {
       <el-radio-button label="label" value="label"/>
       <el-radio-button label="roc" value="roc"/>
       <el-radio-button label="current" value="current"/>
+    </el-radio-group>
+
+    <el-radio-group class="radio-group" v-if="dialogType==='roc'" v-model="rocType" size="default">
+      <el-radio-button label="da" value="1"/>
+      <el-radio-button label="ten" value="2"/>
+      <el-radio-button label="thirty" value="3"/>
+      <el-radio-button label="fifty" value="4"/>
+      <el-radio-button label="hundred" value="5"/>
     </el-radio-group>
 
     <el-table :data="codeTableData.value.open" class="mt-2" v-if="dialogType==='open'"

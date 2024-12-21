@@ -17,11 +17,13 @@ import com.stock.pycurrent.util.DateUtils;
 import com.stock.pycurrent.util.JSONUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.apachecommons.CommonsLog;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,12 +57,20 @@ public class RealTimeController {
 
     @Resource
     private LastHandPriService lastHandPriService;
+    @Resource
+    private StockCalModelService stockCalModelService;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
 
     public RealTimeController() {
     }
 
     @GetMapping("hi")
     public String hello() {
+        redisTemplate.delete("hello");
+//        redisTemplate.opsForList().rightPushAll("hello", "world1", "world2", "world3");
+        log.info(redisTemplate.opsForList().rightPop("hello"));
         return "hello world";
     }
 
@@ -76,12 +86,32 @@ public class RealTimeController {
 //        lastHandPriService.createRecode();
 //        lastHandPriService.createPastRecord();
         log.info("step1");
-        lastHandPriService.createPastAllRecord();
+//        lastHandPriService.createPastAllRecord();
+        lastHandPriService.createPastAllRecordWithRedis();
+//        log.info("step2");
+//        stockService.initRocModelRecursion();
+//        log.info("step3");
+//        stockService.initLHPRocModelRecursion();
+//        log.info("step6");
+    }
+
+    @PostMapping("createPastRecord2")
+    public void createPastRecord2() {
+//        lastHandPriService.createRecode();
+//        lastHandPriService.createPastRecord();
         log.info("step2");
         stockService.initRocModelRecursion();
+    }
+
+    @PostMapping("createPastRecord3")
+    public void createPastRecord3() {
+//        lastHandPriService.createRecode();
+//        lastHandPriService.createPastRecord();
         log.info("step3");
+        log.info(LocalDateTime.now());
         stockService.initLHPRocModelRecursion();
         log.info("step6");
+        log.info(LocalDateTime.now());
     }
 
     @PostMapping("createROC")
@@ -291,6 +321,19 @@ public class RealTimeController {
             max = max.max(dnVO.getHp());
         }
         return max.setScale(0, RoundingMode.CEILING);
+    }
+
+    @GetMapping("findRocByTypeDate")
+    public ObjectNode findRocByType(@RequestParam("code") String code,
+                                    @RequestParam("type") int type,
+                                    @RequestParam("startDate") String startDate,
+                                    @RequestParam("endDate") String endDate) {
+        ObjectNode objectNode = JSONUtils.getNode();
+        if (code == null || code.isEmpty()) {
+            return objectNode;
+        }
+        objectNode.putPOJO("roc", stockCalModelService.findStockCalModels(code, type, startDate, endDate));
+        return objectNode;
     }
 
 }

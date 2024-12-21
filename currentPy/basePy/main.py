@@ -6,18 +6,20 @@ import datetime
 
 
 def random_proxy():
-    func_inland = [get_free_list, get_proxy_list]
-    func_outland = [get_66_ip, get_kx_ip, get_ihuan_ip, get_zdy_ip]
+    func_inland = [get_proxy_list]
+    func_outland = [get_ihuan_ip, get_zdy_ip]
     # 从代理池中随机获取一个代理
-    D = int(datetime.datetime.now().strftime('%d'))
-    if D % 2 == 0:
-        ip = get_zdy_ip
-    else:
-        ip = []
-        pass
-    ip_i = random.choice(func_inland)() + ip
-    ip_o = random.choice(func_outland)() + ip
-    return ip_i + ip_o
+    # D = int(datetime.datetime.now().strftime('%d'))
+    # if D % 2 == 0:
+    #     ip = get_zdy_ip()
+    # else:
+    #     ip = []
+    #     pass
+    # ip_i = random.choice(func_inland)() + ip
+    # ip_o = random.choice(func_outland)() + ip
+    ip_i = random.choice(func_inland)()
+    # ip_o = random.choice(func_outland)()
+    return ip_i
 
 
 def save_proxy(ip):
@@ -33,7 +35,7 @@ def save_proxy(ip):
 
 
 def open_proxy():
-    with open('./proxy.txt', 'r') as f:
+    with open('proxy.txt', 'r') as f:
         # 一行一行读取
         ip = [line.strip() for line in f]
     return ip

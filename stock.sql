@@ -384,7 +384,7 @@ create table IF NOT EXISTS em_real_time_etf
 (
     trade_date             varchar(32)    null comment '交易日期',
     ts_code                varchar(10)    null comment '股票代码',
-    name                   varchar(32)     null comment '名称',
+    name                   varchar(32)    null comment '名称',
     current_pri            decimal(18, 3) null comment '最新价',
     ipvo                   decimal(18, 3) null comment 'IOPV实时估值',
     discount_ratio         decimal(18, 3) null comment '折价率',
@@ -518,7 +518,8 @@ create table if not exists `stock_cal_model`
     KEY `idx_sdl_code` (`ts_code`) USING BTREE,
     KEY `idx_sdl_date` (`trade_date`) USING BTREE,
     INDEX r_idx (`ts_code`, `type`, `trade_date`) USING BTREE,
-    INDEX r_idx_level (`ts_code`, `type`, `level`) USING BTREE
+    INDEX r_idx_level (`ts_code`, `type`, `level`) USING BTREE,
+    INDEX r_idx_type_date (`type`, trade_date) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_general_ci

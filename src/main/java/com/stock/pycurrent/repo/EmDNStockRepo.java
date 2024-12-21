@@ -137,4 +137,13 @@ public interface EmDNStockRepo extends JpaRepository<EmDNStock, BasicStockPK> {
 
     @Query(value = "select distinct trade_date from em_d_n_stock  order by  trade_date  ", nativeQuery = true)
     List<String> findAllDate();
+
+    @Query(value = "select distinct ts_code from em_d_n_stock  order by  ts_code  ", nativeQuery = true)
+    List<String> findAllCode();
+
+    @Query(value = "select * from em_d_n_stock where ts_code = :code order by trade_date desc ", nativeQuery = true)
+    List<EmDNStock> findByCode(@Param("code") String code);
+
+    @Query(value = "select distinct trade_date from em_d_n_stock where trade_date > :startDate and trade_date <=:endDate", nativeQuery = true)
+    List<String> findByDateInterval(@Param("startDate") String startDate, @Param("endDate") String endDate);
 }

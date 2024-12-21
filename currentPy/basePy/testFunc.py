@@ -11,7 +11,7 @@ import aklocal as ak
 # df = ak.stock_board_concept_cons_em()
 # df = ak.stock_board_industry_name_em()
 # df = ak.stock_board_industry_cons_em('BK1036')
-df = ak.fund_etf_spot_em()
+df = ak.get_thx_cookie()
 # df = ak.stock_rank_lxsz_ths()
 print(df)
 # symbol = '800300'

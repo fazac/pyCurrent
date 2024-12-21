@@ -29,5 +29,12 @@ public interface LastHandPriRepo extends JpaRepository<LastHandPri, StockCalMode
     @Query(value = "select * from last_hand_pri where trade_date = :tradeDate and type=:type  order by ts_code", nativeQuery = true)
     List<LastHandPri> findByTradeDate(@Param("tradeDate") String tradeDate, @Param("type") int type);
 
+    @Query(value = "select * from last_hand_pri where trade_date = :tradeDate and type=:type and ts_code=:code ", nativeQuery = true)
+    List<LastHandPri> findByTradeDate(@Param("tradeDate") String tradeDate, @Param("type") int type, @Param("code") String code);
+
+    @Query(value = "select * from last_hand_pri where type=:type ", nativeQuery = true)
+    List<LastHandPri> findAllByType(@Param("type") int type);
+
+
 
 }

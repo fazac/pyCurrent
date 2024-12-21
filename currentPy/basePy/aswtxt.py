@@ -1,9 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib3.exceptions import InsecureRequestWarning
 
 
 def get_text(url):
-    r = requests.get(url, timeout=15, params={})
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    r = requests.get(url, timeout=15, params={}, verify=False)
     soup = BeautifulSoup(r.text, 'html.parser')
     t_head = soup.find('h3', {'class': 'j_chapterName'})
     t_content = soup.find('div', {'class': 'j_readContent'})
@@ -20,7 +22,7 @@ def get_text(url):
 
 
 if __name__ == '__main__':
-    url = "https://alicesw.org/book/32995/bcb1c6ad47308.html"
+    url = "https://alicesw.org/book/33227/e40169b7c2a79.html"
     next_url = get_text(url)
     url_head = "https://alicesw.org"
     while (next_url.startswith('/book')):

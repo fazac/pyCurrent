@@ -1,7 +1,10 @@
-pyinstaller
-akshare
 pymysql
 sqlalchemy
 apscheduler
 dbutils
-cryptography
+fake_useragent
+pandas
+requests
+bs4
+py_mini_racer
+lxml

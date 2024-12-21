@@ -7,6 +7,7 @@ import com.stock.pycurrent.entity.emum.EMSymbolEnum;
 import com.stock.pycurrent.entity.emum.PyFuncEnum;
 import com.stock.pycurrent.entity.model.Constants;
 import com.stock.pycurrent.entity.StockCalModel;
+import com.stock.pycurrent.schedule.PrepareData;
 import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -226,4 +227,31 @@ public class StockUtils {
         lastKeys.add(current);
         return lastKeys;
     }
+
+    public static List<RocModel> convertRocModel(List<StockCalModel> stockCalModels, Date now) {
+        List<RocModel> rocModels = new ArrayList<>();
+        String params = stockCalModels.getLast().getTradeDate();
+        if (stockCalModels.size() > 1) {
+            for (int i = 1; i < stockCalModels.size(); i++) {
+                StockCalModel current = stockCalModels.get(i);
+                StockCalModel lastOne = stockCalModels.get(i - 1);
+                RocModel rocModel = new RocModel();
+                rocModel.setCreateTime(now);
+                rocModel.setCount(PrepareData.calDistance(lastOne.getTradeDate(), current.getTradeDate()));
+                rocModel.setSCount(PrepareData.calDistance(lastOne.getTradeDate(), current.getTradeDate(), current.getTsCode()));
+                if (lastOne.getPrice().compareTo(BigDecimal.ZERO) != 0) {
+                    rocModel.setRatio(StockUtils.calRatio(current.getPrice(), lastOne.getPrice()));
+                }
+                rocModel.setCurClosePri(current.getPrice());
+                rocModel.setDoorPri(lastOne.getPrice());
+                rocModel.setStartDate(lastOne.getTradeDate());
+                rocModel.setEndDate(current.getTradeDate());
+                rocModel.setTsCode(current.getTsCode());
+                rocModel.setParams(params);
+                rocModels.add(rocModel);
+            }
+        }
+        return rocModels;
+    }
+
 }
